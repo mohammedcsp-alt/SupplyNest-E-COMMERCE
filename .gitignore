@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+.env
+.env.*
+!.env.example
+storage/
+coverage/
+playwright-report/
+test-results/
+*.log
+next-env.d.ts
+*.tsbuildinfo
+tests/e2e/.auth/
+.next*/

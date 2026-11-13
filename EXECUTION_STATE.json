@@ -1,0 +1,33 @@
+{
+  "project": "B2B-STORE V1",
+  "location": "C:UsersHPDocumentsClude project filesSupplyNest E-COMMERCEB2B-STORE",
+  "spec": "../B2B_Store_Claude_Execution_Plan_V3_2.docx (extract via unzip word/document.xml to scratch dir)",
+  "currentPhase": "PHASE_4_7_UI_AND_ADMIN (backend services complete and tested)",
+  "currentTask": "Build UI pages (storefront, customer, admin, fulfillment, accounting) on top of /api/v1; then reports export, backup/restore, Playwright E2E, docs",
+  "lastVerifiedCheckpoint": {
+    "task": "Full backend: Phases 1-6 services + routes; unit+integration suite",
+    "verification": "npx vitest run => 11 files, 100 tests passed (unit + integration against b2b_store_test). npx tsc --noEmit clean.",
+    "timestamp": "2026-11-13"
+  },
+  "migrations": [
+    "init",
+    "db_constraints",
+    "order_sequence",
+    "prep_sequence"
+  ],
+  "infrastructure": {
+    "postgres": "docker container b2b-store-postgres 127.0.0.1:5440; dbs b2b_store_dev (dev, seeded), b2b_store_test (tests)",
+    "appPort": 3200,
+    "devServerNote": "next dev -p 3200 -H 127.0.0.1 (started once; re-run npm run dev)",
+    "forbiddenResources": [
+      "WMS containers wms-platform-* (5432, 5433, 8333)",
+      "port 3100"
+    ]
+  },
+  "safetyNotes": [
+    "prisma migrate reset is blocked for AI agents by Prisma guard; do not bypass. Test setup uses migrate deploy + idempotent seed only.",
+    "Tests create unique fixtures; DB persists between runs; rate-limit buckets are per-run random IP ranges."
+  ],
+  "nextAction": "Create shared UI kit (client-api, forms, ui components, page guards) and sample pages; then parallel agents for storefront/admin/fulfillment+accounting pages",
+  "blocked": []
+}
