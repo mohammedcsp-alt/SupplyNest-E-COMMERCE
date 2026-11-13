@@ -45,3 +45,14 @@ Read this before relying on the build. Items are grouped by impact.
 ## E. Decisions awaiting the owner
 
 See `IMPLEMENTATION_DECISIONS.md` section B. The most important commercial decisions are: shipping fee values, courier identities and agreements, the cancellation and merge rules after preparation, backup retention, and the SMS provider.
+
+## F. Gaps reported during the final pass (agent reports, verified where noted)
+
+1. **Checker can see the picker's shortage reason text** (fulfillment job lines). It does not reveal a count, but it may hint at one. Candidate fix: hide `discrepancyReason` from the checker until after the blind count.
+2. **No product-model creation API.** The SKU form lists existing models only.
+3. **No banner update or deactivate API, and no CMS page delete.** Banners can be created only.
+4. **Shipping amounts are hidden from users without `price.view`** (judgement call by the admin agent). Order operators can manage rules but not see amounts.
+5. **Publish-denied path not exercised** with a real account, because the seeded content editor holds `content.publish`.
+6. **Development database residue:** 3 orders, 3 fulfillment jobs, 2 courier shipments, their immutable financial rows, and 1 live reservation from workflow tests. Removal would require disabling immutability triggers, which was not done.
+7. **Admin and fulfillment forms** (import panel, image upload, reservation actions, lock-for-preparation, approve/reject cancellation from the admin side, stale override) were verified through the API only, not in a browser.
+8. **Backup restore** was reported PASSED by the admin agent against the real container; it was not re-run in the final pass.

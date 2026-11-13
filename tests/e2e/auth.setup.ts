@@ -8,8 +8,13 @@ setup('sign in approved customer', async ({ page }) => {
   await page.goto('/login?next=/account');
   await page.getByLabel(/رقم الهاتف|Phone number/).fill(CUSTOMER_A.phone);
   await page.getByLabel(/كلمة المرور|Password/).fill(CUSTOMER_A.password);
+  const loginResponse = page.waitForResponse((r) => r.url().includes('/api/v1/auth/login'));
   await page.getByRole('button', { name: /^(دخول|Sign in)$/ }).click();
-  await page.waitForURL('**/account', { timeout: 30000 });
-  await expect(page.getByRole('navigation').first()).toBeVisible();
+  const res = await loginResponse;
+  console.log('LOGIN_STATUS', res.status(), 'URL_BEFORE_WAIT', page.url());
+  await page.waitForURL((u) => u.pathname === '/account', { timeout: 30000 });
+  const cookies = await page.context().cookies();
+  console.log('COOKIES', cookies.map((c) => `${c.name}@${c.domain}`).join(','));
+  expect(cookies.some((c) => c.name === 'b2b_session')).toBe(true);
   await page.context().storageState({ path: CUSTOMER_STATE });
 });

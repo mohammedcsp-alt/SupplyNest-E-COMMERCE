@@ -17,8 +17,8 @@ test.describe('order cancellation', () => {
     const reasonLabel = lang === 'ar' ? 'السبب' : 'Reason';
     await page.getByLabel(new RegExp(reasonLabel)).fill('Ordered by mistake in the browser test');
     await page.getByRole('button', { name: lang === 'ar' ? 'إرسال طلب الإلغاء' : 'Send cancellation request' }).click();
-    await expect(page.getByText(lang === 'ar' ? 'تم إرسال طلب الإلغاء.' : 'Cancellation request sent.')).toBeVisible();
-    await page.reload();
+    // the form reloads the page on success, so assert the resulting state rather than the transient message
+    await page.waitForLoadState('load');
     await expect(page.getByText(lang === 'ar' ? 'طلب الإلغاء' : 'Cancellation', { exact: false }).first()).toBeVisible();
     await expect(page.getByRole('button', { name: lang === 'ar' ? 'إرسال طلب الإلغاء' : 'Send cancellation request' })).toHaveCount(0);
 
