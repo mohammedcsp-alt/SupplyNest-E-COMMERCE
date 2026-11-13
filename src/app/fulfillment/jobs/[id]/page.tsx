@@ -1,3 +1,4 @@
+import { discrepancyReasonVisible } from '@/modules/fulfillment/visibility';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ActionButton, ApiForm } from '@/components/forms';
@@ -41,6 +42,8 @@ export default async function FulfillmentJobPage({ params }: { params: Promise<{
   const has = (p: string) => user.permissions.has(p);
   const isPicker = job.assignedPickerId === user.id;
   const isChecker = job.assignedCheckerId === user.id;
+  // Independent count: the checker must not see the picker's shortage reason before submitting their own count.
+  const reasonVisible = discrepancyReasonVisible({ viewerId: user.id, assignedCheckerId: job.assignedCheckerId, status: job.status, viewerCanResolve: has(PERMISSIONS.FULFILLMENT_DISCREPANCY_RESOLVE) });
 
   // Blind counting: a picker sees only their own picked counts; a checker never sees the picker's counts.
   const pickedVisible = canSeeExpected || isPicker;
@@ -182,7 +185,7 @@ export default async function FulfillmentJobPage({ params }: { params: Promise<{
                   {pickedVisible && <td className="num">{l.pickedQty ?? '—'}</td>}
                   {checkedVisible && <td className="num">{l.checkedQty ?? '—'}</td>}
                   <td className="num">{l.resolvedQty ?? '—'}</td>
-                  <td>{l.discrepancyReason ?? '—'}</td>
+                  <td>{reasonVisible ? (l.discrepancyReason ?? '—') : '—'}</td>
                 </tr>
               ))}
             </tbody>

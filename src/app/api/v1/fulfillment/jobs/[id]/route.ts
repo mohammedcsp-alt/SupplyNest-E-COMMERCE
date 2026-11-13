@@ -1,3 +1,4 @@
+import { discrepancyReasonVisible } from '@/modules/fulfillment/visibility';
 import { apiRoute, ok, type RouteContext } from '@/lib/api';
 import { getCurrentUser, requireUser } from '@/lib/session';
 import { FULFILLMENT_LABELS, getJobForActor } from '@/modules/fulfillment/service';
@@ -13,6 +14,8 @@ export const GET = apiRoute<{ id: string }>(async (_req, ctx: RouteContext<{ id:
   const { id } = await ctx.params;
   const { job, canSeeExpected } = await getJobForActor(actor, id);
   const isChecker = job.assignedCheckerId === actor.id;
+  // Independent count: hide the picker's shortage reason from the checker until they submit their own count.
+  const reasonVisible = discrepancyReasonVisible({ viewerId: actor.id, assignedCheckerId: job.assignedCheckerId, status: job.status, viewerCanResolve: actor.permissions.has('fulfillment.discrepancy.resolve') });
   return ok(requestId, {
     id: job.id,
     prepDocumentNo: job.prepDocumentNo,
@@ -34,7 +37,7 @@ export const GET = apiRoute<{ id: string }>(async (_req, ctx: RouteContext<{ id:
       pickedQty: canSeeExpected || (!isChecker && actor.id === job.assignedPickerId) ? l.pickedQty : undefined,
       checkedQty: canSeeExpected || (isChecker && job.status !== 'CHECKING') ? l.checkedQty : undefined,
       resolvedQty: l.resolvedQty,
-      discrepancyReason: l.discrepancyReason,
+      discrepancyReason: reasonVisible ? l.discrepancyReason : undefined,
       unitPrice: canSeeExpected ? l.orderItem.unitPrice.toFixed(0) : undefined,
     })),
     packages: job.packages.map((p) => ({ id: p.id, packageNo: p.packageNo, label: p.label, trackingCode: p.trackingCode, weightGrams: p.weightGrams })),

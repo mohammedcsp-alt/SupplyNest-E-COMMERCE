@@ -94,6 +94,21 @@ export default async function AdminCatalog({ searchParams }: { searchParams: Pro
       <Pagination page={page} pageSize={PAGE_SIZE} total={total} basePath="/admin/catalog" params={{ q, published }} labels={{ prev: L('السابق', 'Previous'), next: L('التالي', 'Next'), of: 'of' }} />
 
       {canManage && (
+        <Card title={L('إضافة موديل', 'Add model')}>
+          <p className="muted">{L('الموديل تجميع اختياري للمنتجات، ولا يلزم اختياره عند إنشاء SKU.', 'A model is an optional grouping of SKUs; it is not required when creating a SKU.')}</p>
+          <ApiForm
+            endpoint="/api/v1/admin/models"
+            submitLabel={L('إضافة الموديل', 'Add model')}
+            successMessage={L('تمت إضافة الموديل.', 'Model added.')}
+            fields={[
+              { name: 'name', label: L('اسم الموديل', 'Model name'), required: true },
+              { name: 'brandId', label: L('العلامة التجارية (اختياري)', 'Brand (optional)'), type: 'select', options: tax.brands.map((b) => ({ value: b.id, label: b.name })) },
+            ]}
+          />
+        </Card>
+      )}
+
+      {canManage && (
         <Card title={L('إضافة SKU جديد', 'Create SKU')}>
           <ApiForm
             endpoint="/api/v1/admin/skus"

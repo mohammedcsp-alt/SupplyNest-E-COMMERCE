@@ -9,6 +9,8 @@ import { errors } from '@/lib/errors';
 import { writeAudit } from '@/lib/audit';
 import { parseIqdAmount, toApiAmount } from '@/lib/money';
 import { availableOf } from '@/modules/inventory/inventory';
+import { PERMISSIONS } from '@/lib/rbac';
+import type { CurrentUser } from '@/lib/session';
 
 export const MAX_IMAGES_PER_SKU = 10;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -339,6 +341,35 @@ export async function upsertBrand(actorId: string, input: { name: string; active
     const b = await tx.brand.create({ data: { name, slug: `${slug}-${randomUUID().slice(0, 4)}`, active: input.active ?? true } });
     await writeAudit(tx, { actorId, action: 'brand.create', entityType: 'brand', entityId: b.id, after: { name } });
     return b;
+  });
+}
+
+/**
+ * Creates a product model (an optional grouping of SKUs, never required). Idempotent per (brandId, normalized name):
+ * returns the existing row with existing=true instead of creating a duplicate. Requires catalog.manage.
+ */
+export async function upsertModel(actor: CurrentUser, input: { name: string; brandId?: string | null }, ip?: string | null) {
+  if (!actor.permissions.has(PERMISSIONS.CATALOG_MANAGE)) throw errors.forbidden();
+  const name = input.name.trim();
+  if (!name || name.length > 200) throw errors.validation('Model name must be 1–200 characters');
+  const normalizedName = name.toLowerCase();
+  const brandId = input.brandId ?? null;
+  return db.$transaction(async (tx) => {
+    if (brandId && !(await tx.brand.findUnique({ where: { id: brandId }, select: { id: true } }))) throw errors.validation('Brand does not exist');
+    // findFirst (not upsert): a NULL brandId is never unique-constrained in Postgres, so the lookup must be explicit.
+    const existing = await tx.productModel.findFirst({ where: { brandId, normalizedName } });
+    if (existing) return { model: existing, existing: true };
+    const model = await tx.productModel.create({ data: { brandId, name, normalizedName } });
+    await writeAudit(tx, { actorId: actor.id, action: 'model.create', entityType: 'product_model', entityId: model.id, after: { name, brandId }, ip: ip ?? null });
+    return { model, existing: false };
+  });
+}
+
+export async function listModels(brandId?: string) {
+  return db.productModel.findMany({
+    where: brandId ? { brandId } : {},
+    orderBy: { name: 'asc' },
+    include: { brand: { select: { name: true } } },
   });
 }
 

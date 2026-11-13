@@ -10,15 +10,19 @@ export const dynamic = 'force-dynamic';
 
 const LIVE = ['ACTIVE', 'REVIEW_REQUIRED', 'EXTENDED'];
 
-export default async function AdminReservations({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+export default async function AdminReservations({ searchParams }: { searchParams: Promise<{ status?: string; order?: string }> }) {
   const g = await gatePage(PERMISSIONS.RESERVATION_VIEW, '/admin/reservations');
   if (!g.ok) return g.node;
   const { L, locale, user } = g;
   const sp = await searchParams;
   const status = (RESERVATION_STATUSES_LIST as readonly string[]).includes(sp.status ?? '') ? sp.status! : '';
+  const orderFilter = (sp.order ?? '').trim().slice(0, 40);
   const canManage = user.permissions.has(PERMISSIONS.RESERVATION_MANAGE);
   const rows = await db.inventoryReservation.findMany({
-    where: status ? { status: status as (typeof RESERVATION_STATUSES_LIST)[number] } : {},
+    where: {
+      ...(status ? { status: status as (typeof RESERVATION_STATUSES_LIST)[number] } : {}),
+      ...(orderFilter ? { order: { orderNumber: { contains: orderFilter } } } : {}),
+    },
     orderBy: [{ status: 'asc' }, { expiresAt: 'asc' }],
     take: 200,
     include: { sku: { select: { sku: true, nameEn: true } }, order: { select: { orderNumber: true } } },
@@ -37,6 +41,10 @@ export default async function AdminReservations({ searchParams }: { searchParams
         }
       />
       <form method="GET" className="form-row" style={{ marginBlockEnd: 16 }}>
+        <div className="field">
+          <label htmlFor="res-order">{L('رقم الطلب', 'Order number')}</label>
+          <input id="res-order" name="order" type="search" defaultValue={orderFilter} maxLength={40} />
+        </div>
         <div className="field">
           <label htmlFor="res-status">{L('الحالة', 'Status')}</label>
           <select id="res-status" name="status" defaultValue={status}>

@@ -1,103 +1,135 @@
 # Test report (verified results)
 
-Date of final verification: 2026-11-13 (Baghdad time, local machine). Environment: Windows 11, Node 24.21, PostgreSQL 16
-in Docker container `b2b-store-postgres` on 127.0.0.1:5440. Databases: `b2b_store_dev` (development) and `b2b_store_test`
-(tests only). No WMS system was contacted.
-
-Only results listed here were produced by a command run during the final verification pass unless marked
-"agent-reported".
+Last full verification: 2026-11-13 (local machine, Windows 11, Node 24.21, PostgreSQL 16 in Docker container
+`b2b-store-postgres` on 127.0.0.1:5440). Databases: `b2b_store_dev` (development) and `b2b_store_test` (tests only).
+No WMS system, port, database or credential was accessed. Results below come from commands run in this pass; anything
+marked "agent-reported" was produced by a subagent and was not re-run by me.
 
 ## 1. Summary
 
 | Check | Command | Result |
 |---|---|---|
 | Type check | `npx tsc --noEmit` | PASS (exit 0) |
-| Unit + integration (vitest) | `npx vitest run` | PASS: 12 files, **103 tests**, 0 failed |
-| Production build | `NEXT_DIST_DIR=.next-build npx next build` | PASS (compiled; all app routes generated) |
-| Browser + API E2E (Playwright) | `npx playwright test` | PASS: **31 tests**, 0 failed (setup 1, API 12, browser 9 × 2 projects) |
-| Route inventory | `node scripts/gen-openapi.mjs` | 106 routes written to `OPENAPI.yaml` |
+| Unit, integration and concurrency (vitest) | `npx vitest run` | PASS: **15 files, 126 tests**, 0 failed |
+| Browser and API end-to-end (Playwright) | `npx playwright test` | PASS: **72 tests** (api 36, browser 36), 0 failed; plus 3 sign-in setup steps |
+| Production build | `NEXT_DIST_DIR=.next-build npx next build` | PASS |
+| Production server smoke | `next start` on 127.0.0.1:3220 | Serves; GET returns 200; TRACE returns 500 (see §6) |
+| Development server | `npm run dev` on 127.0.0.1:3200 | Serves pages and APIs (checked with curl) |
+| Backup and restore (independent) | API run + restore test; manual restore | PASS (§4) |
+| Concurrency and load (controlled) | vitest `tests/load` | PASS, 5 tests (§5) |
 
-## 2. Unit and integration tests (vitest, 103 tests)
+Browser tests were executed in two projects: `desktop-arabic-rtl` (1280×800, Arabic, RTL) and `mobile-english-ltr`
+(Pixel 5 profile, English, LTR). Each browser test below runs in both projects unless stated.
 
-| File | Area | Count |
+## 2. Unit and integration tests (vitest, 126 tests)
+
+| File | Area | Tests |
 |---|---|---|
-| `tests/unit/money.test.ts` | IQD integer money, exact arithmetic, formatting | 4 |
+| `tests/unit/money.test.ts` | IQD integer money | 4 |
 | `tests/unit/phone.test.ts` | Iraqi mobile normalization | 11 |
-| `tests/unit/settlement-math.test.ts` | NET_DEDUCTION / GROSS_REMITTANCE math, adjustments, aggregates | 9 |
+| `tests/unit/settlement-math.test.ts` | NET_DEDUCTION / GROSS_REMITTANCE arithmetic | 9 |
 | `tests/unit/passwords-and-images.test.ts` | scrypt hashing, password policy, image magic-byte sniffing | 4 |
 | `tests/unit/table-parse.test.ts` | CSV/XLSX reader, Arabic header aliases | 4 |
-| `tests/unit/http-guards.test.ts` | Same-origin (CSRF) check, Idempotency-Key, JSON size limits | 5 |
+| `tests/unit/http-guards.test.ts` | Same-origin (CSRF) check, Idempotency-Key, JSON size limit | 5 |
 | `tests/unit/export-safe.test.ts` | Spreadsheet formula neutralization, CSV BOM | 3 |
-| `tests/integration/identity-and-prices.test.ts` | Registration, OTP limits, approval, suspension, price isolation (ACX-01, T001–T006) | 13 |
-| `tests/integration/checkout-and-inventory.test.ts` | Concurrent last-unit checkout (ACX-02), idempotency and duplicate submission (T024), price-change consent (ACX-06), shipping rule missing (T027), reservations expiry and exactly-once release (ACX-03, ACX-08), order edits, reorder, holds | 20 |
-| `tests/integration/imports.test.ts` | Atomic import (T014), duplicates, absent SKUs unchanged (PRODUCT-002), freshness gates (ACX-04), manager-only override, double-commit claim, stock-conflict alert, price import | 9 |
-| `tests/integration/fulfillment-and-accounting.test.ts` | Picker ≠ checker, discrepancy hold and resolution, handover consumes accepted quantity only, invoice revisions, NET and GROSS settlement, over-allocation refused, fee payment limits, rejection and reversal, immutable posted rows | 12 |
-| `tests/integration/db-guards-and-rate-limits.test.ts` | Append-only audit log, 10-image trigger (T008), non-negative stock CHECK, one open alert per type, invoice uniqueness, rate-limit atomicity | 9 |
+| `tests/unit/fulfillment-visibility.test.ts` | Picker's shortage reason hidden from checker until counted | 10 |
+| `tests/integration/identity-and-prices.test.ts` | Registration, OTP, approval, suspension, price isolation | 13 |
+| `tests/integration/checkout-and-inventory.test.ts` | Last-unit checkout race, idempotency, price consent, shipping rule, reservations, edits, reorder | 20 |
+| `tests/integration/imports.test.ts` | Atomic import, freshness gates, manager override, double-commit claim, stock conflict, price import | 9 |
+| `tests/integration/fulfillment-and-accounting.test.ts` | Picker ≠ checker, discrepancy hold, handover, invoices, NET/GROSS, allocations, reversals, immutability | 12 |
+| `tests/integration/db-guards-and-rate-limits.test.ts` | Append-only audit, 10-image trigger, non-negative stock CHECK, one open alert per type, rate limits | 9 |
+| `tests/integration/models-and-cms.test.ts` | Optional product models (general-purpose catalog), banner update and deactivate, CMS page delete rules | 8 |
+| `tests/load/concurrency.test.ts` | Concurrency (§5) | 5 |
 
-Total: 40 unit + 63 integration = 103. All passed.
+## 3. Browser and API end-to-end tests (Playwright, 72 tests + 3 setup steps)
 
-## 3. Browser and API E2E tests (Playwright, 31 tests)
+The E2E server runs on port 3210 against the test database. The global setup clears transient rate-limit rows and
+tops up the shared test SKU's stock (test database only). Each signed-in role has its session saved once per run by a
+setup step, which avoids exhausting the per-account sign-in limit (5 per 15 minutes).
 
-Run against a separate dev server on port 3210 using `.env.test` (test database) and build directory `.next-test`.
-The global setup deletes only the transient `security_rate_limits` table in the test database.
-
-| Project | Tests | Result |
+| File | Scope | Tests |
 |---|---|---|
-| setup (`auth.setup.ts`) | 1 — UI sign-in of the approved customer, session saved | PASS |
-| `api` (`api-security.spec.ts`) | 12 — anonymous catalog has no price fields; price endpoint 401; admin and staff APIs 401 anonymous and 403 customer; manager reaches admin API; per-IP login limit returns 429; cross-origin write 403; form-encoded write rejected; checkout without Idempotency-Key refused; security headers | PASS (12) |
-| `desktop-arabic-rtl` (`ui-*.spec.ts`) | 9 — layout direction (RTL), language toggle flips direction, no horizontal overflow, navigation reachable; visitor sees no price; approved customer sees price, adds to cart, places COD order; cancellation request then manager approval cancels the order, required reason; reorder copies lines back to cart | PASS (9) |
-| `mobile-english-ltr` (`ui-*.spec.ts`) | 9 — the same nine tests in English LTR on a Pixel 5 viewport | PASS (9) |
+| `api-security.spec.ts` | Anonymous visitors see no prices; price endpoint 401 anonymous; admin/staff APIs 401/403; manager reaches admin API; per-IP login limit 429; cross-origin write 403; form-encoded write rejected; checkout needs Idempotency-Key; security headers | 12 (api) |
+| `api-hardening.spec.ts` | Session cookie flags; no hash/token in login response; logout revokes session; generic login errors; OTP limit per phone (known or unknown); cross-customer order 404; price endpoint cannot be steered to another level; customers refused admin APIs; mass-assignment refused; SQL-like input treated as data; reflected HTML escaped; malformed JSON clean 400; oversized body refused; traversal and unknown media ids 404; secrets and storage not served; upload refuses SVG, HTML, oversized, accepts real PNG; security headers; no X-Powered-By | 24 (api) |
+| `ui-customer-flow.spec.ts` | Visitor sees no price; approved customer sees price, adds to cart, places COD order | 2 (browser) |
+| `ui-layout.spec.ts` | Document direction and language; language toggle flips direction; no horizontal overflow; navigation reachable | 4 (browser) |
+| `ui-orders.spec.ts` | Cancellation request, manager approval cancels, second approval refused, reason required; reorder copies lines to cart | 3 (browser) |
+| `ui-admin-catalog.spec.ts` | Create SKU through the form; change LEVEL_A price; upload PNG; refuse non-image upload (server-checked) | 3 per project |
+| `ui-admin-imports.spec.ts` | Valid import previewed, committed, SKU exists; invalid row shown and blocked; stale file needs manager reason | 3 per project |
+| `ui-admin-orders.spec.ts` | Customer cancellation request shows status and approve/reject controls | 2 per project |
+| `ui-admin-reservations.spec.ts` | Manager extends then releases a reservation; second release refused | 1 per project |
 
-### Defects found by the E2E run and fixed in this pass
+Per-project browser totals: customer flow 2, layout 4, orders 3, admin 9 (18 across both projects). Setup steps are counted separately.
 
-1. **Language toggle did not switch direction (real bug).** The locale route redirected to an absolute URL built from the
-   request, which could name `localhost` rather than `127.0.0.1`; the browser then dropped the language cookie.
-   Fixed: `src/app/api/v1/locale/route.ts` now returns a relative `Location` header.
-2. **Browser sessions were not saved for later tests.** Fixed by a single UI sign-in in a setup project that writes
-   the storage state, with later tests reusing it (`tests/e2e/auth.setup.ts`, `playwright.config.ts`).
-3. **Repeated sign-ins hit the login rate limit** (5 per account per 15 minutes), which is the intended control.
-   The E2E global setup now clears the transient rate-limit table in the test database before each run.
-4. **Cancellation assertion raced a page reload.** The order form reloads the page on success, so the test now asserts
-   the resulting state rather than the transient message.
-5. **Accountant role missing `finance.adjustment.approve`** in the development database. Fixed by re-running the
-   idempotent seed (the code already granted it).
-6. **Unique-constraint violations returned 500.** They now map to 409 CONFLICT (`src/lib/api.ts`).
-7. **Order edit that removed a line crashed** (pick lines referenced the removed item). Fixed in
-   `src/modules/commerce/orders.ts`; covered by an integration test.
+### Defects found by the E2E runs and fixed
 
-## 4. Development database cleanup
+1. **Language toggle did not switch direction.** Redirect used an absolute URL that could name `localhost`, dropping the
+   locale cookie. Fixed: relative `Location` header (`src/app/api/v1/locale/route.ts`).
+2. **Order edit crashed when a line was removed with a pending fulfillment job.** Fixed (`src/modules/commerce/orders.ts`).
+3. **Unique-constraint violations returned 500.** Now 409 (`src/lib/api.ts`).
+4. **Accountant lacked adjustment approval in the development database.** Seed re-applied.
+5. **Success messages disappeared after a form submitted.** The form reloaded or navigated and lost the message. Fixed:
+   the message is kept in session storage and shown after the reload or navigation (`src/components/forms.tsx`).
+6. **Malformed identifiers returned 500.** A non-UUID path segment reached the database and failed. Now 404 (`src/lib/api.ts`).
+7. **OTP per-phone limit only counted known phones.** Unknown numbers could be probed without limit. Now every number
+   counts, with the same response either way (`src/app/api/v1/auth/otp/request/route.ts`).
+8. **Checker could see the picker's shortage reason before counting** (violates independent checking). Fixed in the job
+   page and job API; rule in `src/modules/fulfillment/visibility.ts`; unit-tested.
+9. **Banner activation was allowed with content-edit rights only,** while creation required publish rights. Activation
+   and re-dating now require publish rights (`src/app/api/v1/admin/cms/banners/[id]/route.ts`).
+10. **Concurrency test helper had a type error.** Fixed (`tests/load/concurrency.test.ts`).
 
-Only test-generated rows with explicit QA markers were removed (script `scripts/cleanup-test-data.ts`, which checks
-dependencies and aborts if any are found). Removed: QA category, QA SKU (unpublished, no orders or reservations), QA
-CMS page, two QA banners, QA governorate `QA_GOV_4141` and its rules, the QA staff account created by the admin test
-run, and the two backup run records with their dump file.
+## 4. Backup and restore (independent rerun)
 
-**Not removed (by design):** 3 orders, 3 fulfillment jobs, 2 courier shipments and 1 live reservation created by the
-earlier workflow tests. The shipments are linked to immutable financial rows (collections, adjustments, remittances,
-fee payments) that database triggers protect. Removing them would require disabling those triggers, which I did not do.
-Options: keep them as labelled test data, or rebuild the development database from migrations and seed (needs your
-approval).
+- Backup through the manager API (`POST /api/v1/admin/backup/run`): status SUCCEEDED, SHA-256 recorded.
+- Restore test through the API (`POST /api/v1/admin/backup/restore-test`): PASSED, no row-count mismatches; the scratch
+  database `b2b_store_restore_scratch` was dropped afterwards.
+- Independent check: recomputed the dump's SHA-256 (matches the recorded value) and restored it by hand into a separate
+  scratch database `b2b_manual_restore_check`. Row counts matched the development database for `users` (18), `orders` (3),
+  `order_items` (3), `product_skus` (33), `tier_prices` (66), `inventory_balances` (33). `audit_logs` differed by two
+  rows (64 in the dump vs 66 live), which are the login and backup audit rows written after the dump was taken. The
+  scratch database was dropped.
+- Only the development and scratch databases in the isolated container were touched.
 
-## 5. Verification reported by subagents (not independently re-run in this pass)
+## 5. Concurrency and load (controlled, small scale)
 
-These were run by the admin and fulfillment/accounting agents with curl against the development server. I did not re-run
-them, so treat them as agent-reported:
+Run against the test database, through the real services, with simultaneous callers.
 
-- Manager can open all admin pages; customer and report viewer are refused; prices are hidden from users without
-  `price.view`; settings range validation; MANAGER permission removal refused (409); staff creation and login.
-- CSV and XLSX report exports include a SHA-256 checksum and write an audit row.
-- Image upload, serving and deletion; order hold on and off.
-- **Backup run and restore test against the real Docker container: reported PASSED**, scratch database dropped.
-  (Its dump file was later removed by the cleanup above.)
-- Fulfillment workflow via API: same-person assignment refused; short pick without reason refused; checker payload
-  omits picked quantities; discrepancy hold; picker cannot resolve; handover (NET) produced expected COD 19,000 = 15,000
-  goods + 4,000 delivery; over-allocation refused.
+| Scenario | Callers | Result | Timing (this machine) |
+|---|---|---|---|
+| Checkout for 10 units | 15 simultaneous | Exactly 10 succeed; reserved = 10 = physical limit | 773 ms |
+| Same Idempotency-Key | 20 simultaneous | Exactly 1 order and 1 reservation | 163 ms |
+| Multi-SKU checkout | 12 simultaneous, 3 SKUs | No SKU oversold; reservations match reserved counts | 328 ms |
+| Collection of one shipment | 5 simultaneous | Exactly 1 collection recorded | 72 ms |
+| Allocation from one transfer | 12 simultaneous (transfer 30,000) | 4 accepted; total 28,000; never above 30,000 or per-shipment due | 319 ms |
 
-## 6. Not verified
+Limits: the largest run used 20 simultaneous callers, well below the 50-user design target. No sustained-load, soak or
+HTTP-level load test was run. Timings are measurements on this machine, not performance guarantees.
 
-- Browser interaction with the admin forms, import panel, image upload, reservation actions, lock-for-preparation,
-  cancellation approve or reject from the browser, and the stale-file override path.
-- Printing and PDF output in a real browser.
-- Load and concurrency beyond two to four simultaneous requests (no load test was run).
-- Accessibility beyond the automated checks listed here.
-- Any physical device, older browsers, and any external integration (none exists).
+## 6. Internal security testing (NOT an independent review)
+
+The security checks listed in §3 (`api-security`, `api-hardening`) cover authentication, session cookies, logout,
+generic errors, rate limits, object ownership, mass assignment, input validation, file upload restrictions, secrets
+exposure and security headers. They are internal tests and do not replace an independent security review.
+
+**Open finding (framework-level):** the HTTP method `TRACE` returns a 500 error page. The runtime rejects `TRACE` before
+application code runs ("'TRACE' HTTP method is unsupported"), so no application-level fix is possible. In the production
+build the body is the generic `500: Internal Server Error` page with no stack trace. In the development server the body
+includes diagnostic detail, which is expected there. A reverse proxy in front of the app should refuse `TRACE` with 405.
+The test asserts only that `TRACE` is not a success.
+
+## 7. Development database
+
+- Removed agent-generated QA rows earlier (category, SKU, CMS page, banners, governorate, staff account, backup records)
+  and, in this pass, the QA-AGENT banner and model (`scripts/cleanup-agent-residue.ts`, guarded by database name).
+- Not removed: three orders, three fulfillment jobs, two courier shipments, their immutable financial rows, and one live
+  reservation from earlier workflow runs. Removing them would require disabling immutability triggers, which was not done.
+
+## 8. Not verified
+
+- Visual regression and accessibility beyond the checks above.
+- Printing and PDF output in a real browser (print views exist; not exercised in a browser).
+- Behaviour on physical devices and older browsers.
+- Load beyond 20 simultaneous callers, soak tests, and HTTP-level load tests.
+- The production server behaviour for flows other than the smoke checks listed above.
+- Independent security review (not performed).

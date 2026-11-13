@@ -11,6 +11,7 @@ loadEnv({ path: path.resolve(__dirname, '.env.test') });
  */
 const PORT = 3210;
 const CUSTOMER_STATE = 'tests/e2e/.auth/customer.json';
+const MANAGER_STATE = 'tests/e2e/.auth/manager.json';
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -38,8 +39,8 @@ export default defineConfig({
     env: { NEXT_DIST_DIR: '.next-test' },
   },
   projects: [
-    { name: 'api', testMatch: /api-.*\.spec\.ts/ },
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'setup', testMatch: /auth.*\.setup\.ts/ },
+    { name: 'api', testMatch: /api-.*\.spec\.ts/, dependencies: ['setup'] },
     {
       name: 'desktop-arabic-rtl',
       testMatch: /ui-.*\.spec\.ts/,

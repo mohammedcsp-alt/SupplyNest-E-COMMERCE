@@ -81,3 +81,71 @@ export async function createCmsBanner(
     return banner;
   });
 }
+
+export type BannerPatch = {
+  titleAr?: string;
+  titleEn?: string;
+  targetPath?: string;
+  position?: number;
+  active?: boolean;
+  activeFrom?: Date | null;
+  activeTo?: Date | null;
+};
+
+function bannerSnapshot(b: { titleAr: string; titleEn: string; targetPath: string; position: number; active: boolean; activeFrom: Date | null; activeTo: Date | null }) {
+  return {
+    titleAr: b.titleAr,
+    titleEn: b.titleEn,
+    targetPath: b.targetPath,
+    position: b.position,
+    active: b.active,
+    activeFrom: b.activeFrom?.toISOString() ?? null,
+    activeTo: b.activeTo?.toISOString() ?? null,
+  };
+}
+
+/** Partial banner update. The date window is validated against the merged (stored + patched) values. */
+export async function updateCmsBanner(actorId: string, bannerId: string, input: BannerPatch, ip: string | null) {
+  return db.$transaction(async (tx) => {
+    const before = await tx.cmsBanner.findUnique({ where: { id: bannerId } });
+    if (!before) throw errors.notFound('Banner not found');
+    const from = input.activeFrom !== undefined ? input.activeFrom : before.activeFrom;
+    const to = input.activeTo !== undefined ? input.activeTo : before.activeTo;
+    if (from && to && to <= from) throw errors.validation('activeTo must be after activeFrom', { fieldErrors: { activeTo: ['activeTo must be after activeFrom'] } });
+    const after = await tx.cmsBanner.update({ where: { id: bannerId }, data: input });
+    await writeAudit(tx, { actorId, action: 'cms.banner.update', entityType: 'cms_banner', entityId: bannerId, before: bannerSnapshot(before), after: bannerSnapshot(after), ip });
+    return after;
+  });
+}
+
+/** Banners are never hard-deleted: deactivation keeps the row and its history. */
+export async function deactivateCmsBanner(actorId: string, bannerId: string, ip: string | null) {
+  return db.$transaction(async (tx) => {
+    const before = await tx.cmsBanner.findUnique({ where: { id: bannerId } });
+    if (!before) throw errors.notFound('Banner not found');
+    const after = await tx.cmsBanner.update({ where: { id: bannerId }, data: { active: false } });
+    await writeAudit(tx, { actorId, action: 'cms.banner.deactivate', entityType: 'cms_banner', entityId: bannerId, before: { active: before.active }, after: { active: false }, ip });
+    return after;
+  });
+}
+
+/** Hard-deletes an unpublished page. Published pages must be unpublished first (409). */
+export async function deleteCmsPage(actorId: string, pageId: string, reason: string, ip: string | null) {
+  return db.$transaction(async (tx) => {
+    const before = await tx.cmsPage.findUnique({ where: { id: pageId } });
+    if (!before) throw errors.notFound('Page not found');
+    if (before.publishedAt) throw errors.conflict('Unpublish first');
+    // Conditional delete: a concurrent publish between the read and the delete must not remove a live page.
+    const res = await tx.cmsPage.deleteMany({ where: { id: pageId, publishedAt: null } });
+    if (res.count !== 1) throw errors.conflict('Unpublish first');
+    await writeAudit(tx, {
+      actorId,
+      action: 'cms.page.delete',
+      entityType: 'cms_page',
+      entityId: pageId,
+      before: { slug: before.slug, titleAr: before.titleAr, titleEn: before.titleEn },
+      reason,
+      ip,
+    });
+  });
+}

@@ -30,6 +30,9 @@ export function fail(requestId: string, err: unknown) {
   if (err instanceof AppError) {
     status = err.status;
     body = { code: err.code, message: err.message, ...(err.details !== undefined ? { details: err.details } : {}) };
+  } else if (isInvalidIdentifier(err)) {
+    status = 404;
+    body = { code: 'NOT_FOUND', message: 'Resource not found' };
   } else if (isUniqueViolation(err)) {
     // A concurrent or duplicate write hit a unique constraint: report a conflict, never a 500.
     status = 409;
@@ -52,6 +55,11 @@ export function fail(requestId: string, err: unknown) {
 }
 
 type Handler<P> = (req: NextRequest, ctx: RouteContext<P>, requestId: string) => Promise<Response>;
+
+/** Prisma P2023: a value that is not a valid id for its column (e.g. a non-UUID path segment). */
+function isInvalidIdentifier(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === 'P2023';
+}
 
 function isUniqueViolation(err: unknown): boolean {
   return typeof err === 'object' && err !== null && (err as { code?: string }).code === 'P2002';

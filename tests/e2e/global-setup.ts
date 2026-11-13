@@ -15,6 +15,11 @@ export default async function globalSetup() {
   const db = new PrismaClient({ datasources: { db: { url } } });
   try {
     await db.$executeRawUnsafe('DELETE FROM "security_rate_limits"');
+    // Test fixture: every E2E run reserves units of the shared seeded SKU. Top it up on the TEST database only.
+    const sku = await db.sku.findUnique({ where: { sku: 'DEV-TS-S-WH' }, include: { inventory: true } });
+    if (sku?.inventory && sku.inventory.physicalOnHand < 300) {
+      await db.inventoryBalance.update({ where: { skuId: sku.id }, data: { physicalOnHand: 300 } });
+    }
   } finally {
     await db.$disconnect();
   }

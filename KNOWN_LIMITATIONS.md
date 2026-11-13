@@ -1,58 +1,87 @@
 # Known limitations (V1 local build)
 
-Read this before relying on the build. Items are grouped by impact.
+Read this before relying on the build. Items are grouped by impact. Resolved items from earlier drafts were removed only
+where a command in TEST_REPORT.md verified the fix.
 
-## A. Not implemented (by design or by lack of approved inputs)
+## A. Not implemented (by design or waiting for owner input)
 
-1. **No SMS OTP provider.** Only a development mock exists (returns the code to the caller in development). Production refuses to start with the mock. Needs a provider, credentials and approval.
-2. **No email, WhatsApp or push notifications.** In-site notifications only (spec CUSTOMER-008).
-3. **WMS integration is disabled.** Contracts are documented (`WMS_CONTRACTS_ONLY.md`). No connection to port 3100 or any WMS database exists.
-4. **No payment gateway.** COD only (STORE-005).
-5. **No discounts, promotions, taxes or VAT** (OPEN-21).
-6. **No merge execution.** Merge suggestions are recorded and can be accepted or rejected by the customer; nothing merges (OPEN-13 defers execution).
-7. **No general ledger, payroll, profit and loss, or cost of goods.** Out of scope (spec 20.2).
-8. **No courier API integration.** Courier collections, remittances and fee payments are entered manually with references (spec 20.11).
-9. **No automatic restock on returns.** A returned unit must be entered by a manual inventory adjustment (movements are recorded).
-10. **No automatic scheduler inside the application.** The reservation expiry job is a script (`npm run jobs:sweep`) to run from the OS scheduler, or the admin sweep button.
-11. **Governorate shipping fees are not business values.** Three governorates carry clearly labelled synthetic placeholder rates in the development seed. Other governorates block checkout until an admin sets a rule (OPEN-10).
+1. **No SMS OTP provider.** Only a development mock exists; the mock returns the code to the caller in development. The
+   production start guard refuses the mock. Needs a provider, credentials and approval.
+2. **No email, WhatsApp or push notifications.** In-site notifications only.
+3. **WMS integration is disabled.** Contracts are documented (`WMS_CONTRACTS_ONLY.md`). No connection to the operational
+   WMS, its port or its database exists in this code.
+4. **No payment gateway.** Cash on delivery only.
+5. **No discounts, promotions, taxes or VAT.**
+6. **No merge execution.** Merge suggestions are recorded and can be accepted or rejected; nothing merges.
+7. **No general ledger, payroll, profit and loss, or cost of goods.** Out of scope.
+8. **No courier API integration.** Collections, remittances and fee payments are entered manually with references.
+9. **No automatic restock on returns.** A returned unit is entered by a manual inventory adjustment.
+10. **No scheduler inside the application process.** The expiry review is a script (`npm run jobs:sweep`) for the OS scheduler,
+    or the admin sweep button.
+11. **Shipping fee values and courier identities are placeholders.** The development seed labels three governorates with
+    synthetic rates. Every other governorate blocks checkout until an administrator sets a rule. The owner must supply
+    real values.
+12. **No product-model deletion.** Models are created and listed; removal is not offered.
+13. **Banners can be updated and deactivated but not deleted.** CMS pages can be deleted only when unpublished.
 
 ## B. Partially implemented
 
-1. **PDF output.** Printable HTML views (browser "Save as PDF") are provided for reports and the internal preparation document. There is no server-side PDF generator, because Arabic shaping requires an engine that is not part of this build. Excel and CSV exports are server-side.
-2. **Search.** Substring matching with relevance ordering over the first 2,000 matches. Adequate for the design target, not a full-text engine.
-3. **Attribute filters.** Category attributes are stored and shown; only the listed filterable attributes are exposed in filters where the UI supports them.
-4. **Reconciliation.** Shows unallocated transfers, collection variances, uncollected shipments and the number of recorded adjustments. It is a review aid, not an automatic matcher.
-5. **Allocation corrections.** A wrong allocation is removed with an audited void; the transfer record itself is never edited.
-6. **Locale.** Arabic and English are complete for the shell and for bilingual fields. Some admin-only labels are English-first where translation was not reviewed.
-7. **Responsive layout.** Verified with automated viewport checks on desktop (1280 px) and a mobile device profile (Pixel 5). Not verified on physical devices or older browsers.
+1. **PDF output.** Printable HTML views (browser "Save as PDF") exist for reports and the internal preparation document.
+   There is no server-side PDF generator, because Arabic shaping needs an engine that is not in this build.
+   Excel and CSV exports are server-side with SHA-256 checksums.
+2. **Search.** Substring matching with relevance ordering over at most 2,000 matches per query. Not a full-text engine.
+3. **Attribute filters.** Attributes are stored and displayed; only attributes marked filterable are offered in filters.
+4. **Reconciliation.** Lists unallocated transfers, collection variances and uncollected shipments. It is a review aid, not
+   an automatic matcher.
+5. **Allocation corrections.** A wrong allocation is removed with an audited void; the transfer record is never edited.
+6. **Reservations list.** Shows at most 200 rows, oldest expiry first. Filter by status or order number to find a row.
+7. **Shipping amounts** are hidden from users without `price.view` (a judgement call made when building the admin area).
+   Order operators can manage shipping rules but cannot see amounts.
+8. **Locale.** Arabic and English are complete for the shell and bilingual fields. Some admin-only labels are English-first.
+9. **Responsive layout.** Verified with automated viewport checks on a 1280-pixel desktop and a Pixel 5 profile only.
+10. **Checker visibility rule.** The picker's shortage reason is hidden from the checker until the checker has counted. The
+    checker still sees the job's line list and item names.
 
 ## C. Limits of verification
 
-1. **No load test.** The design target (20,000 SKUs, 1,000 orders/day, 50 concurrent users) is not demonstrated. Concurrency correctness was tested at the level of two to four simultaneous requests.
-2. **No external security review.** See `SECURITY_REPORT.md` section 3.
-3. **Backup restore** was exercised only against the local container; no off-site copy and no measured RTO.
-4. **No accessibility audit by an external tool beyond automated checks** that were run (see TEST_REPORT.md).
-5. **Test data persists** between runs in the test database by design (tests create unique fixtures). A clean slate requires dropping the test database manually (the agent-run tooling refuses `prisma migrate reset`).
+1. **No independent security review.** The internal security tests (TEST_REPORT §6) do not replace one.
+2. **Load testing is small-scale.** The largest controlled run used 20 simultaneous callers. The design target (20,000 SKUs,
+    1,000 orders a day, 50 concurrent users) is not demonstrated. No soak test was run.
+3. **Backup and restore** were run and independently re-checked against the local container only. No off-site copy and no
+    measured recovery time exist.
+4. **Browser coverage is partial.** Browser tests cover the admin catalog, imports, orders and reservations, the customer
+    checkout and cancellation, and the layout. Fulfillment and accounting forms are verified through the API and by HTML
+    inspection, not in a browser.
+5. **No accessibility audit by a dedicated tool** beyond the automated checks listed in TEST_REPORT.md.
+6. **Test data persists** in the test database between runs by design. Stock for the shared seeded SKU is topped up by the
+    E2E setup, and rate-limit rows are cleared; nothing else is reset.
 
-## D. Operational constraints
+## D. Security and operational findings
 
-1. Runs only on `127.0.0.1`. No TLS, no HSTS. Not suitable for public exposure without a reverse proxy and TLS.
-2. Single application process; no horizontal scaling tested.
-3. Upload storage is on the local disk (`storage/uploads`). Back it up alongside the database.
-4. Dependency vulnerability scan was not part of the verification.
-5. Time zone display is fixed to Asia/Baghdad.
+1. **TRACE returns a 500 error page.** The runtime rejects the TRACE method before application code runs, so the
+    application cannot refuse it. In the production build the body is a generic error page with no stack trace. In the
+    development server the body contains diagnostic detail. A reverse proxy in front of the application must refuse
+    TRACE with 405. The test asserts only that TRACE is not a success.
+2. **Development error pages expose internals.** Any unexpected error in development shows framework detail. Production
+    shows a generic page with a request id.
+3. **Development credentials are in pushed history.** The shared synthetic development password was committed in the
+    README before this change and is in the pushed history of the repository. It is synthetic, but rotation is recommended
+    before any shared use. The current seed writes the account list to a gitignored file, `DEV-CREDENTIALS.local.md`.
+4. **Local HTTP only.** No TLS and no HSTS. Not suitable for public exposure without a reverse proxy and TLS.
+5. **Single application process.** Horizontal scaling was not tested.
+6. **Upload storage is on local disk** (`storage/uploads`). Back it up with the database.
+7. **Dependency vulnerabilities were not scanned** as part of verification.
+8. **Time zone display** is fixed to Asia/Baghdad.
 
-## E. Decisions awaiting the owner
+## E. Development database residue
 
-See `IMPLEMENTATION_DECISIONS.md` section B. The most important commercial decisions are: shipping fee values, courier identities and agreements, the cancellation and merge rules after preparation, backup retention, and the SMS provider.
+Three orders, three fulfillment jobs, two courier shipments, their immutable financial rows, and one live reservation
+from earlier workflow tests remain in `b2b_store_dev`. Removing them would require disabling immutability triggers, which
+was not done. Options: keep them as labelled test data, or rebuild the development database from migrations and seed (needs
+the owner's approval).
 
-## F. Gaps reported during the final pass (agent reports, verified where noted)
+## F. Decisions awaiting the owner
 
-1. **Checker can see the picker's shortage reason text** (fulfillment job lines). It does not reveal a count, but it may hint at one. Candidate fix: hide `discrepancyReason` from the checker until after the blind count.
-2. **No product-model creation API.** The SKU form lists existing models only.
-3. **No banner update or deactivate API, and no CMS page delete.** Banners can be created only.
-4. **Shipping amounts are hidden from users without `price.view`** (judgement call by the admin agent). Order operators can manage rules but not see amounts.
-5. **Publish-denied path not exercised** with a real account, because the seeded content editor holds `content.publish`.
-6. **Development database residue:** 3 orders, 3 fulfillment jobs, 2 courier shipments, their immutable financial rows, and 1 live reservation from workflow tests. Removal would require disabling immutability triggers, which was not done.
-7. **Admin and fulfillment forms** (import panel, image upload, reservation actions, lock-for-preparation, approve/reject cancellation from the admin side, stale override) were verified through the API only, not in a browser.
-8. **Backup restore** was reported PASSED by the admin agent against the real container; it was not re-run in the final pass.
+See `IMPLEMENTATION_DECISIONS.md` section B. The most important commercial decisions are: shipping fee values, courier
+identities and agreements, the cancellation and merge rules after preparation starts, backup retention, the SMS provider,
+whether to rotate the development password, and whether to rebuild the development database.

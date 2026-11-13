@@ -52,10 +52,11 @@ npm run dev                   # http://127.0.0.1:3200
 
 Or use `scripts/start-local.ps1` and `scripts/stop-local.ps1` (see `OPERATIONS.md`).
 
-## Development accounts (synthetic, development seed only)
+## Development accounts (synthetic)
 
-All seeded accounts share the password **`Dev-Only-Pass-2026!`**. They exist only in the development database and must
-never be created in production.
+The password and the full account list are written by the seed to **DEV-CREDENTIALS.local.md**, a gitignored file in this folder. They are not stored in tracked documentation. Re-run `npm run db:seed` to regenerate it. These accounts exist only in the development database and must never be created in production.
+
+Roles at a glance:
 
 | Role | Phone | Notes |
 |---|---|---|

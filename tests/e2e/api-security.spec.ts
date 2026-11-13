@@ -1,5 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
+const CUSTOMER_STATE = 'tests/e2e/.auth/customer.json';
+const MANAGER_STATE = 'tests/e2e/.auth/manager.json';
 
 /** HTTP-level security checks against the running API (ACX-01, ACX-09, ACX-10, T001, T033). */
 
@@ -55,9 +57,8 @@ test.describe('anonymous visitors (ACX-01, T001)', () => {
 });
 
 test.describe('authorization on the server (ACX-09, T033)', () => {
+  test.use({ storageState: CUSTOMER_STATE });
   test('an active customer is forbidden from admin and staff APIs', async ({ request }) => {
-    const login1 = await login(request, ACTIVE_LEVEL_A);
-    expect(login1.status()).toBe(200);
     for (const path of ['/api/v1/admin/customers', '/api/v1/admin/inventory', '/api/v1/fulfillment/jobs', '/api/v1/accounting/reconciliation']) {
       const res = await request.get(path);
       expect([401, 403], path).toContain(res.status());
@@ -68,12 +69,6 @@ test.describe('authorization on the server (ACX-09, T033)', () => {
     expect(Array.isArray(body.data)).toBe(true);
   });
 
-  test('a manager can reach the admin API', async ({ request }) => {
-    const res = await login(request, MANAGER);
-    expect(res.status()).toBe(200);
-    const customers = await request.get('/api/v1/admin/customers?pageSize=5');
-    expect(customers.status()).toBe(200);
-  });
 
   test('wrong passwords are generic and rate-limited per IP (AUTH-01, OPEN-22)', async ({ request }) => {
     // one IP, a fresh phone per attempt: the per-account limit (5/15 min) must not trip first
@@ -91,8 +86,8 @@ test.describe('authorization on the server (ACX-09, T033)', () => {
 });
 
 test.describe('request hardening (CSRF, body type)', () => {
+  test.use({ storageState: CUSTOMER_STATE });
   test('a cross-origin JSON write is rejected with 403', async ({ request }) => {
-    await login(request, ACTIVE_LEVEL_A);
     const res = await request.put('/api/v1/cart/items', {
       data: { sku: 'DEV-SCR-11', qty: 1 },
       headers: { Origin: 'https://attacker.example', 'Content-Type': 'application/json' },
@@ -101,7 +96,6 @@ test.describe('request hardening (CSRF, body type)', () => {
   });
 
   test('a form-encoded write to a JSON API is rejected', async ({ request }) => {
-    await login(request, ACTIVE_LEVEL_A);
     const res = await request.put('/api/v1/cart/items', {
       form: { sku: 'DEV-SCR-11', qty: '1' },
     });
@@ -109,7 +103,6 @@ test.describe('request hardening (CSRF, body type)', () => {
   });
 
   test('checkout without an Idempotency-Key is refused', async ({ request }) => {
-    await login(request, ACTIVE_LEVEL_A);
     const res = await request.post('/api/v1/orders', {
       data: { addressId: randomUUID(), quoteHash: 'a'.repeat(64) },
       headers: { 'Content-Type': 'application/json' },
@@ -125,5 +118,14 @@ test.describe('security headers', () => {
     expect(res.headers()['x-frame-options']).toBe('DENY');
     expect(res.headers()['x-content-type-options']).toBe('nosniff');
     expect(res.headers()['cache-control']).toContain('no-store');
+  });
+});
+
+test.describe('manager session (admin API)', () => {
+  test.use({ storageState: MANAGER_STATE });
+
+  test('a manager can reach the admin API', async ({ request }) => {
+    const customers = await request.get('/api/v1/admin/customers?pageSize=5');
+    expect(customers.status()).toBe(200);
   });
 });

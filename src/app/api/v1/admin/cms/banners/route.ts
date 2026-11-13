@@ -4,7 +4,7 @@ import { getCurrentUser, requirePermission } from '@/lib/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { errors } from '@/lib/errors';
 import { createCmsBanner, listCmsBanners } from '@/modules/admin/cms';
-import { parseAdminDateTime } from '@/modules/admin/time';
+import { dateOrNull } from '@/modules/admin/time';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,13 +19,6 @@ const schema = z.object({
   activeFrom: z.string().trim().max(40).nullable().optional(),
   activeTo: z.string().trim().max(40).nullable().optional(),
 });
-
-function dateOrNull(raw: string | null | undefined, field: string): Date | null {
-  if (!raw) return null;
-  const d = parseAdminDateTime(raw);
-  if (!d) throw errors.validation(`${field} must be a valid date`, { fieldErrors: { [field]: ['Invalid date'] } });
-  return d;
-}
 
 export const GET = apiRoute(async (_req, _ctx, requestId) => {
   requirePermission(await getCurrentUser(), PERMISSIONS.CONTENT_EDIT);

@@ -13,7 +13,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts'],
+    include: ['tests/unit/**/*.test.ts', 'tests/integration/**/*.test.ts', 'tests/load/**/*.test.ts'],
     setupFiles: ['tests/setup/env.ts'],
     globalSetup: ['tests/setup/global-setup.ts'],
     // Integration tests share one database: run files sequentially for deterministic state.

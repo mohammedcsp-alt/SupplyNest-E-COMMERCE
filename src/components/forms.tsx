@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useId, useState, type FormEvent, type ReactNode } from 'react';
 import { api, fieldErrorsOf, newIdempotencyKey, type ApiErr } from '@/lib/client-api';
 
 /**
@@ -52,10 +52,24 @@ export type ApiFormProps = {
 export function ApiForm(props: ApiFormProps) {
   const { endpoint, method = 'POST', fields, submitLabel, successMessage, successHref, successLink, refreshOnSuccess, idempotent, extra, resetOnSuccess, busyLabel, onSuccess } = props;
   const formId = useId();
+  // A success message survives the data refresh through sessionStorage (shown once on the next render).
+  const flashKey = 'b2b-flash:' + endpoint;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<ApiErr | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [ok, setOk] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const msg = sessionStorage.getItem(flashKey);
+      if (msg) {
+        sessionStorage.removeItem(flashKey);
+        setOk(msg);
+      }
+    } catch {
+      /* storage unavailable: no flash message */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [extraInfo, setExtraInfo] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -95,6 +109,12 @@ export function ApiForm(props: ApiFormProps) {
     onSuccess?.(res.data);
     if (resetOnSuccess) (e.currentTarget as HTMLFormElement).reset();
     if (successLink) return;
+    // keep the message across the navigation or reload that follows
+    try {
+      sessionStorage.setItem(flashKey, successMessage ?? 'Saved.');
+    } catch {
+      /* storage unavailable */
+    }
     if (successHref) window.location.assign(successHref);
     else if (refreshOnSuccess !== false) window.location.reload();
   }

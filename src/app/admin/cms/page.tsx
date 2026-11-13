@@ -1,8 +1,9 @@
 import { PageHeader, Card, EmptyState, Badge } from '@/components/ui';
-import { ApiForm } from '@/components/forms';
+import { ApiForm, ActionButton } from '@/components/forms';
 import { formatDateTime } from '@/lib/time';
 import { PERMISSIONS } from '@/lib/rbac';
 import { listCmsBanners, listCmsPages } from '@/modules/admin/cms';
+import { toBaghdadInputValue } from '@/modules/admin/time';
 import { gatePage } from '../_lib/gate';
 
 export const dynamic = 'force-dynamic';
@@ -50,6 +51,22 @@ export default async function AdminCms() {
                     ]}
                   />
                   {!canPublish && <p className="muted">{L('لا تملك صلاحية النشر؛ تغيير حالة النشر غير متاح.', 'You lack content.publish; publish state cannot be changed.')}</p>}
+                  {canPublish && (
+                    <div style={{ paddingBlockStart: 10 }}>
+                      {p.publishedAt ? (
+                        <p className="muted">{L('ألغِ النشر أولاً لحذف الصفحة.', 'Unpublish the page first to delete it.')}</p>
+                      ) : (
+                        <ActionButton
+                          endpoint={`/api/v1/admin/cms/pages/${p.id}`}
+                          method="DELETE"
+                          label={L('حذف الصفحة', 'Delete page')}
+                          tone="danger"
+                          confirmText={L('حذف هذه الصفحة نهائياً؟', 'Permanently delete this page?')}
+                          reasonLabel={L('سبب الحذف (3 أحرف على الأقل)', 'Reason for deleting (at least 3 characters)')}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
               </details>
             ))}
@@ -103,6 +120,46 @@ export default async function AdminCms() {
               </tbody>
             </table>
           </div>
+        )}
+        {banners.length > 0 && (
+          <>
+            <h3>{L('تعديل البنرات', 'Edit banners')}</h3>
+            <div className="stack">
+              {banners.map((b) => (
+                <details key={b.id}>
+                  <summary>
+                    <strong>{locale === 'ar' ? b.titleAr : b.titleEn}</strong> {b.active ? <Badge tone="ok">{L('فعال', 'Active')}</Badge> : <Badge>{L('غير فعال', 'Inactive')}</Badge>}
+                  </summary>
+                  <div style={{ paddingBlockStart: 10 }}>
+                    <ApiForm
+                      endpoint={`/api/v1/admin/cms/banners/${b.id}`}
+                      method="PATCH"
+                      submitLabel={L('حفظ البنر', 'Save banner')}
+                      successMessage={L('تم حفظ البنر.', 'Banner saved.')}
+                      fields={[
+                        { name: 'titleAr', label: L('العنوان بالعربية', 'Title (Arabic)'), required: true, defaultValue: b.titleAr, dir: 'rtl' },
+                        { name: 'titleEn', label: L('العنوان بالإنجليزية', 'Title (English)'), required: true, defaultValue: b.titleEn },
+                        { name: 'targetPath', label: L('الوجهة (مسار داخلي)', 'Target (internal path)'), required: true, defaultValue: b.targetPath, dir: 'ltr' },
+                        { name: 'position', label: L('الترتيب', 'Position'), type: 'number', defaultValue: b.position, min: 0, max: 1000 },
+                        { name: 'active', label: L('فعال', 'Active'), type: 'checkbox', defaultValue: b.active },
+                        { name: 'activeFrom', label: L('يبدأ (بغداد، اختياري)', 'Starts (Baghdad, optional)'), type: 'datetime-local', defaultValue: toBaghdadInputValue(b.activeFrom) },
+                        { name: 'activeTo', label: L('ينتهي (بغداد، اختياري)', 'Ends (Baghdad, optional)'), type: 'datetime-local', defaultValue: toBaghdadInputValue(b.activeTo) },
+                      ]}
+                    />
+                    {canPublish && b.active && (
+                      <ActionButton
+                        endpoint={`/api/v1/admin/cms/banners/${b.id}`}
+                        method="DELETE"
+                        label={L('إلغاء تفعيل البنر', 'Deactivate banner')}
+                        tone="danger"
+                        confirmText={L('إلغاء تفعيل هذا البنر؟ يبقى السجل محفوظاً.', 'Deactivate this banner? The record is kept.')}
+                      />
+                    )}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </>
         )}
         <h3>{L('إضافة بنر', 'Add banner')}</h3>
         <ApiForm

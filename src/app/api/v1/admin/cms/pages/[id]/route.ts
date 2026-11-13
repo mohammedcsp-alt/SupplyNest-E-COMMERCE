@@ -4,7 +4,7 @@ import { getCurrentUser, requirePermission } from '@/lib/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { errors } from '@/lib/errors';
 import { db } from '@/lib/db';
-import { updateCmsPage } from '@/modules/admin/cms';
+import { deleteCmsPage, updateCmsPage } from '@/modules/admin/cms';
 import { requireUuid } from '@/modules/admin/ids';
 
 export const dynamic = 'force-dynamic';
@@ -30,4 +30,18 @@ export const PUT = apiRoute<{ id: string }>(async (req, ctx: RouteContext<{ id: 
   }
   const { page, publishChanged } = await updateCmsPage(actor.id, id, body, clientIp(req));
   return ok(requestId, { id: page.id, publishedAt: page.publishedAt, publishChanged });
+});
+
+const deleteSchema = z.object({ reason: z.string().trim().min(3, 'A reason of at least 3 characters is required').max(500) });
+
+/**
+ * Hard-deletes an unpublished page (content.publish). Published pages are refused with 409 until unpublished via PUT.
+ * The reason travels in the JSON body and is stored on the audit row (cms.page.delete).
+ */
+export const DELETE = apiRoute<{ id: string }>(async (req, ctx: RouteContext<{ id: string }>, requestId) => {
+  const actor = requirePermission(await getCurrentUser(), PERMISSIONS.CONTENT_PUBLISH);
+  const id = requireUuid((await ctx.params).id);
+  const { reason } = await readJson(req, deleteSchema);
+  await deleteCmsPage(actor.id, id, reason, clientIp(req));
+  return ok(requestId, { deleted: true });
 });
