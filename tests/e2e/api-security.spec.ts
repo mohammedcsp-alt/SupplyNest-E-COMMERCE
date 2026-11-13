@@ -1,11 +1,12 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
+import { devPassword } from '../../prisma/seed/dev-secret';
 const CUSTOMER_STATE = 'tests/e2e/.auth/customer.json';
 const MANAGER_STATE = 'tests/e2e/.auth/manager.json';
 
 /** HTTP-level security checks against the running API (ACX-01, ACX-09, ACX-10, T001, T033). */
 
-const DEV_PASSWORD = 'Dev-Only-Pass-2026!';
+const DEV_PASSWORD = devPassword();
 const ACTIVE_LEVEL_A = '+9647700001001';
 const MANAGER = '+9647700000001';
 

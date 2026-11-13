@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { randomBytes } from 'node:crypto';
+import { devPassword } from '../../prisma/seed/dev-secret';
 
 /**
  * Internal security tests (HTTP level). These are NOT an independent security review.
@@ -7,7 +8,7 @@ import { randomBytes } from 'node:crypto';
  * file upload restrictions, information leakage and common misconfigurations. Runs against the TEST server only.
  */
 
-const PASSWORD = 'Dev-Only-Pass-2026!';
+const PASSWORD = devPassword();
 const CUSTOMER_A = '+9647700001001';
 const SESSION_PHONE = '+9647700001005'; // seeded suspended customer: may sign in, so session tests do not spend approved logins
 
@@ -163,7 +164,7 @@ test.describe('input validation and injection', () => {
     // The runtime rejects TRACE before application code runs (a generic error page). A reverse proxy in front
     // of the app should refuse TRACE with 405; the app itself must not succeed or leak.
     const r = await request.fetch('/api/v1/catalog', { method: 'TRACE' });
-    expect(r.status()).toBeGreaterThanOrEqual(400);
+    expect(r.status()).toBe(405);
     // In the production build the body is a generic error page (verified manually); the development server
     // used by this run renders diagnostic detail, so the leak check is made against production only (see KNOWN_LIMITATIONS).
   });

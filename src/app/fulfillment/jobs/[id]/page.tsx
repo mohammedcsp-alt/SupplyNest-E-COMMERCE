@@ -19,10 +19,11 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Address = { recipientName?: string; recipientPhone?: string; governorate?: string; area?: string | null; details?: string };
 
-export default async function FulfillmentJobPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function FulfillmentJobPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ done?: string }> }) {
   const locale = await currentLocale();
   const L = (ar: string, en: string) => localized(locale, ar, en);
   const { id } = await params;
+  const { done } = await searchParams;
   const next = `/fulfillment/jobs/${id}`;
 
   if (!(await getCurrentUser())) return <LoginRequired locale={locale} next={next} />;
@@ -131,6 +132,7 @@ export default async function FulfillmentJobPage({ params }: { params: Promise<{
       <Alert tone="warn" role="status">
         {L('مستند تجهيز داخلي — ليس فاتورة مبيعات. تسليم الشركة ليس تأكيداً للتوصيل.', 'Internal preparation — not a sales invoice. Handover to a courier does not confirm delivery.')}
       </Alert>
+      {done === 'handover' && <Alert tone="ok">{L('تم التسليم للشركة.', 'Handed over to courier.')}</Alert>}
 
       <Card title={L('الحالة', 'Status')}>
         <p className="row">
@@ -334,7 +336,7 @@ export default async function FulfillmentJobPage({ params }: { params: Promise<{
               <ApiForm
                 endpoint={`/api/v1/fulfillment/jobs/${job.id}/handover`}
                 submitLabel={L('سُلّم للشركة', 'Handed over to courier')}
-                successMessage={L('تم التسليم للشركة.', 'Handed over to courier.')}
+                successHref={`/fulfillment/jobs/${job.id}?done=handover`}
                 fields={[
                   { name: 'courierId', label: L('شركة التوصيل', 'Courier'), type: 'select', required: true, options: couriers.map((c) => ({ value: c.id, label: c.name })) },
                   { name: 'trackingNote', label: L('ملاحظة التتبع (اختياري)', 'Tracking note (optional)'), type: 'text', help: L('مثال: رقم بوليصة الشركة.', 'e.g. courier waybill number.') },

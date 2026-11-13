@@ -5,6 +5,9 @@ import { z } from 'zod';
  * Central configuration. Validated once at import time.
  * Secrets are read from the environment only (never committed).
  */
+/** Empty environment values (e.g. `SMS_PROVIDER_URL=` in an env file) are treated as unset. */
+const emptyToUndefined = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v);
+
 const schema = z.object({
   DATABASE_URL: z.string().min(10),
   APP_SECRET: z.string().min(32, 'APP_SECRET must be at least 32 characters'),
@@ -19,6 +22,12 @@ const schema = z.object({
   BACKUP_DIR: z.string().default('./storage/backups'),
   SESSION_HOURS: z.coerce.number().int().min(1).max(720).default(12),
   SMS_PROVIDER_API_KEY: z.string().optional(),
+  /** HTTPS endpoint of the SMS provider (required when OTP_PROVIDER=sms). No default: no provider is assumed. */
+  SMS_PROVIDER_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
+  SMS_SENDER_ID: z.preprocess(emptyToUndefined, z.string().min(1).max(11).optional()),
+  SMS_PROVIDER_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(10000),
+  /** Base URL the PDF exporter uses to load the print view. Defaults to this process on loopback. */
+  PDF_RENDER_BASE_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -43,8 +52,16 @@ export function assertProductionSafe(): void {
   if (config.otpMockEnabled) {
     throw new Error('Refusing to start in production with OTP_PROVIDER=mock. Configure a real SMS provider.');
   }
-  if (config.OTP_PROVIDER === 'sms' && !config.SMS_PROVIDER_API_KEY) {
-    throw new Error('Refusing to start: SMS provider selected but SMS_PROVIDER_API_KEY is missing.');
+  if (config.OTP_PROVIDER === 'sms') {
+    if (!config.SMS_PROVIDER_URL) {
+      throw new Error('Refusing to start: OTP_PROVIDER=sms requires SMS_PROVIDER_URL.');
+    }
+    if (!config.SMS_PROVIDER_URL.startsWith('https://')) {
+      throw new Error('Refusing to start: SMS_PROVIDER_URL must use https:// in production.');
+    }
+    if (!config.SMS_PROVIDER_API_KEY) {
+      throw new Error('Refusing to start: OTP_PROVIDER=sms requires SMS_PROVIDER_API_KEY.');
+    }
   }
   if (config.FEATURE_FLAG_WMS_INTEGRATION) {
     throw new Error('Refusing to start: WMS integration is not enabled in V1.');

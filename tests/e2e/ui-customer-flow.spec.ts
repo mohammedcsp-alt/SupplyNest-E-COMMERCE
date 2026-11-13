@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { CUSTOMER_A, SKU_IN_STOCK, setLang, clearCartLine, langOf } from './helpers';
+import { resetCheckoutLimit } from './rate-limit-reset';
 
 /**
  * Customer journey in the browser: visitors do not see prices; an approved customer sees a price, adds an item,
@@ -25,6 +26,7 @@ test.describe('approved customer', () => {
     const lang = langOf(info.project.name);
     await setLang(page, lang);
 
+    await resetCheckoutLimit();
     await clearCartLine(page, SKU_IN_STOCK);
     await page.goto(`/products/${SKU_IN_STOCK}`);
     await expect(page.getByText(/IQD|د\.ع/).first()).toBeVisible();

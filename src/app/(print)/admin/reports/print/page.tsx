@@ -30,18 +30,23 @@ export default async function ReportPrint({ searchParams }: { searchParams: Prom
       .filter(([, v]) => !!v)
       .map(([k, v]) => `${k}: ${v}`)
       .join(' · ');
+    // data-report-state lets the server-side PDF exporter (reports-pdf / integrations/pdf) know whether the page is a report.
     body = (
-      <>
+      <div data-report-state="ok" data-report-rows={result.rowCount}>
         <PageHeader
           title={label}
           subtitle={`${L('عدد الصفوف', 'Rows')}: ${result.rowCount}${result.truncated ? '+' : ''} · ${L('طُبع في', 'Generated')}: ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC${filterText ? ` · ${filterText}` : ''}`}
           actions={<PrintButton label={L('طباعة / حفظ كـ PDF', 'Print / Save as PDF')} />}
         />
         {result.rows.length === 0 ? <EmptyState>{L('لا توجد صفوف مطابقة.', 'No matching rows.')}</EmptyState> : <ReportTable result={result} locale={locale} limit={5000} />}
-      </>
+      </div>
     );
   } catch (err) {
-    body = <Alert tone="error">{err instanceof AppError ? err.message : L('تعذر إنشاء التقرير.', 'The report could not be built.')}</Alert>;
+    body = (
+      <div data-report-state="error">
+        <Alert tone="error">{err instanceof AppError ? err.message : L('تعذر إنشاء التقرير.', 'The report could not be built.')}</Alert>
+      </div>
+    );
   }
   return (
     <>

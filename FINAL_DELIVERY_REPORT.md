@@ -24,9 +24,9 @@
 | Check | Result |
 |---|---|
 | Type check | PASS |
-| Vitest: unit, integration, concurrency | PASS — 15 files, 126 tests |
-| Playwright: API security and hardening | PASS — 36 tests |
-| Playwright: browser (admin, customer, layout, orders) | PASS — 36 tests (both projects: Arabic RTL desktop, English LTR mobile) |
+| Vitest: unit, integration, concurrency | PASS — 30 files, 231 tests |
+| Playwright: API security, hardening and reports | PASS — 37 tests |
+| Playwright: browser (admin, customer, fulfillment, accounting, responsive) | PASS — 68 tests (both projects: Arabic RTL desktop, English LTR mobile) |
 | Production build | PASS |
 | Production server smoke (port 3220) | PASS for pages and GET API; TRACE returns a framework 500 (see §5) |
 | Backup and restore (independent) | PASS — API run, dump checksum recomputed, manual restore compared with development counts |
@@ -78,7 +78,7 @@ Details: `TEST_REPORT.md`.
 
 **بيانات الدخول:** موجودة في الملف المحلي غير المرفوع `DEV-CREDENTIALS.local.md` الذي تكتبه بذرة البيانات. لا تُشاركه.
 
-**النتائج المتحقق منها:** فحص الأنواع ينجح؛ 126 اختبار وحدات وتكامل وتزامن ينجح؛ 72 اختبار متصفح وواجهة برمجية ينجح؛ بناء الإنتاج ينجح؛ النسخ الاحتياطي والاستعادة يُعاد التحقق منهما بشكل مستقل؛ الاختبارات المتزامنة تنجح حتى 20 طلبًا متزامنًا.
+**النتائج المتحقق منها:** فحص الأنواع ينجح؛ 231 اختبار وحدات وتكامل وتزامن ينجح؛ 105 اختبارات متصفح وواجهة برمجية ينجح؛ بناء الإنتاج ينجح؛ النسخ الاحتياطي والاستعادة يُعاد التحقق منهما بشكل مستقل؛ الاختبارات المتزامنة تنجح حتى 20 طلبًا متزامنًا.
 
 **الإخفاقات والقيود المفتوحة:** أسلوب الطلب TRACE يعيد خطأ 500 من إطار العمل ويجب أن يرفضه الوكيل العكسي (reverse proxy)؛ لم يُجرَ اختبار أحمال أعلى من 20 طلبًا متزامنًا، ولا مراجعة أمنية مستقلة، ولا اختبار للطباعة وPDF في المتصفح.
 

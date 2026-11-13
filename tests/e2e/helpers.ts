@@ -1,8 +1,11 @@
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
 
 /** Seeded development accounts (test database). */
-export const CUSTOMER_A = { phone: '+9647700001001', password: 'Dev-Only-Pass-2026!' };
-export const MANAGER = { phone: '+9647700000001', password: 'Dev-Only-Pass-2026!' };
+import { devPassword } from '../../prisma/seed/dev-secret';
+import { resetCheckoutLimit } from './rate-limit-reset';
+
+export const CUSTOMER_A = { phone: '+9647700001001', password: devPassword() };
+export const MANAGER = { phone: '+9647700000001', password: devPassword() };
 export const SKU_IN_STOCK = 'DEV-TS-S-WH'; // seeded T-shirt, 40 units, priced for every level
 
 export type Lang = 'ar' | 'en';
@@ -39,6 +42,7 @@ export async function clearCartLine(page: Page, sku: string) {
  * Returns the order URL path (/orders/<uuid>).
  */
 export async function placeOrderViaUi(page: Page, lang: Lang, qty = 1): Promise<string> {
+  await resetCheckoutLimit();
   await clearCartLine(page, SKU_IN_STOCK);
   await page.goto(`/products/${SKU_IN_STOCK}`);
   if (qty > 1) {
@@ -58,12 +62,8 @@ export async function placeOrderViaUi(page: Page, lang: Lang, qty = 1): Promise<
 
 /** Separate API context logged in as the manager (approvals happen on the staff side). */
 export async function managerApi(baseURL: string): Promise<APIRequestContext> {
+  // Reuse the manager session saved by the setup project. A fresh login per test exhausts the per-account login
+  // limit (5 per 15 minutes) during a full run.
   const { request } = await import('@playwright/test');
-  const ctx = await request.newContext({ baseURL });
-  const res = await ctx.post('/api/v1/auth/login', {
-    data: { phone: MANAGER.phone, password: MANAGER.password },
-    headers: { 'X-Forwarded-For': `10.201.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}` },
-  });
-  expect(res.status()).toBe(200);
-  return ctx;
+  return request.newContext({ baseURL, storageState: 'tests/e2e/.auth/manager.json' });
 }

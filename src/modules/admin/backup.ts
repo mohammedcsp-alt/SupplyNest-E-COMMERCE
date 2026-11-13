@@ -1,7 +1,7 @@
 import 'server-only';
 import { execFile, type ExecFileException } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
@@ -76,7 +76,78 @@ export async function listBackupRuns() {
   return db.backupRun.findMany({ orderBy: { startedAt: 'desc' }, take: 100 });
 }
 
-export async function runBackup(actorId: string, ip: string | null) {
+/** Dump files are kept for this many days (OPEN-15). The newest dump is never pruned, whatever its age. */
+export const BACKUP_RETENTION_DAYS = 30;
+const DUMP_NAME_RE = /^b2b-store-(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z\.dump$/;
+
+export type BackupFileEntry = { path: string; createdAt: Date };
+
+/** Reads the creation time from the file name written by runBackup. Files with other names are never touched. */
+export function backupCreatedAtFromName(fileName: string): Date | null {
+  const m = DUMP_NAME_RE.exec(fileName);
+  if (!m) return null;
+  const [y, mo, d, h, mi, s, ms] = m.slice(1).map(Number);
+  return new Date(Date.UTC(y, mo - 1, d, h, mi, s, ms));
+}
+
+/**
+ * Pure retention rule. Given the dump files in the backup directory, returns the ones older than the retention window.
+ * The newest file is always kept, so a long gap between runs can never leave the store without a backup.
+ */
+export function selectBackupFilesToPrune(files: BackupFileEntry[], now: Date, retentionDays: number = BACKUP_RETENTION_DAYS): BackupFileEntry[] {
+  if (files.length === 0) return [];
+  const cutoff = now.getTime() - retentionDays * 24 * 3600 * 1000;
+  const newest = files.reduce((a, b) => (b.createdAt.getTime() > a.createdAt.getTime() ? b : a));
+  return files.filter((f) => f.path !== newest.path && f.createdAt.getTime() < cutoff);
+}
+
+/** Lists dump files written by runBackup in a directory (names that do not match the pattern are ignored). */
+export async function listBackupFiles(dir: string): Promise<BackupFileEntry[]> {
+  const names = await readdir(dir).catch(() => [] as string[]);
+  const out: BackupFileEntry[] = [];
+  for (const name of names) {
+    const createdAt = backupCreatedAtFromName(name);
+    if (createdAt) out.push({ path: path.join(dir, name), createdAt });
+  }
+  return out;
+}
+
+/**
+ * Deletes dump files past retention and marks their BackupRun rows (evidence.prunedAt). Only files inside the
+ * backup directory, matching the dump name pattern, are considered.
+ */
+export async function pruneBackupFiles(actorId: string | null, ip: string | null, now: Date = new Date()) {
+  const dir = backupDirectory();
+  const doomed = selectBackupFilesToPrune(await listBackupFiles(dir), now);
+  const deleted: string[] = [];
+  for (const f of doomed) {
+    try {
+      await unlink(f.path);
+      deleted.push(path.basename(f.path));
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
+  }
+  if (deleted.length === 0) return { deleted, marked: 0 };
+  let marked = 0;
+  await db.$transaction(async (tx) => {
+    for (const name of deleted) {
+      const rows = await tx.backupRun.findMany({ where: { artifactPath: { endsWith: name } } });
+      for (const row of rows) {
+        const evidence = (row.evidence && typeof row.evidence === 'object' ? row.evidence : {}) as Record<string, unknown>;
+        await tx.backupRun.update({
+          where: { id: row.id },
+          data: { evidence: { ...evidence, prunedAt: now.toISOString() } as Prisma.InputJsonValue },
+        });
+        marked += 1;
+      }
+    }
+    await writeAudit(tx, { actorId, action: 'backup.prune', entityType: 'backup_run', entityId: 'retention', after: { deleted, retentionDays: BACKUP_RETENTION_DAYS, marked }, ip });
+  });
+  return { deleted, marked };
+}
+
+export async function runBackup(actorId: string | null, ip: string | null) {
   await assertDockerAvailable();
   const started = new Date();
   const stamp = started.toISOString().replace(/[:.]/g, '-');
@@ -121,7 +192,7 @@ export async function runBackup(actorId: string, ip: string | null) {
  * Restores the latest successful dump into the scratch database, compares key table counts with the counts
  * recorded at backup time, then drops the scratch database. Refuses to run on any other database name.
  */
-export async function runRestoreTest(actorId: string, ip: string | null) {
+export async function runRestoreTest(actorId: string | null, ip: string | null) {
   if (SCRATCH_DATABASE !== 'b2b_store_restore_scratch' || SCRATCH_DATABASE === DEV_DATABASE) throw errors.forbidden('Restore test refused: invalid scratch database');
   await assertDockerAvailable();
   const source = await db.backupRun.findFirst({ where: { kind: 'MANUAL', status: 'SUCCEEDED' }, orderBy: { startedAt: 'desc' } });

@@ -1,12 +1,16 @@
 import 'server-only';
 import { config } from '@/lib/config';
 import { logger } from '@/lib/logger';
+import { AppError } from '@/lib/errors';
+import { smsProviderFromConfig } from '@/integrations/sms/config';
 
 /**
- * OTP delivery adapter (spec 19.1 / OPEN-07).
- * - mock: development simulator. Returns the code to the caller ONLY outside production, and it is
- *   visibly labelled as a dev code. It is never written to logs.
- * - sms: production adapter placeholder. Not functional in V1 (no provider credentials); it fails closed.
+ * OTP delivery adapter (spec 19.1 / OPEN-07 / CUSTOMER-002).
+ * - mock: DEVELOPMENT SIMULATOR ONLY. Returns the code to the caller as devCode outside production. It is never sent
+ *   to a phone and is refused at startup in production (assertProductionSafe).
+ * - sms: real delivery through the HTTP provider in src/integrations/sms (configured by environment only).
+ *   It is not active until SMS_PROVIDER_URL and SMS_PROVIDER_API_KEY are set and the owner has chosen a provider.
+ * The code is never written to logs.
  */
 export type OtpDelivery = { delivered: boolean; devCode?: string; provider: 'mock' | 'sms' };
 
@@ -17,8 +21,13 @@ export const OTP_RULES = {
   resendCooldownSeconds: 60,
 } as const;
 
+export function otpMessageText(code: string): string {
+  return `Verification code: ${code}. Valid for ${OTP_RULES.validitySeconds / 60} minutes. Do not share it.`;
+}
+
 export async function deliverOtp(phone: string, code: string): Promise<OtpDelivery> {
   if (config.OTP_PROVIDER === 'mock') {
+    // DEVELOPMENT MOCK: no SMS is sent. The code is returned to the caller only outside production.
     logger.info('otp_mock_delivery', { phoneMasked: `${phone.slice(0, 5)}••••${phone.slice(-2)}` });
     return {
       delivered: false,
@@ -26,6 +35,15 @@ export async function deliverOtp(phone: string, code: string): Promise<OtpDelive
       devCode: config.isProduction ? undefined : code,
     };
   }
-  // SMS provider is not implemented in V1 and must not pretend to send.
-  throw new Error('SMS OTP provider is not configured in this build (development adapter only).');
+
+  // Real SMS. A missing URL or key fails here, closed, with a configuration error (never a silent success).
+  const provider = smsProviderFromConfig();
+  try {
+    await provider.send({ to: phone, text: otpMessageText(code) });
+  } catch (err) {
+    // The provider error text never contains the code. The phone number is not logged.
+    logger.warn('otp_sms_failed', { provider: provider.name, reason: (err as Error).message });
+    throw new AppError('INTERNAL_ERROR', 'The verification code could not be sent. Please try again in a few minutes.');
+  }
+  return { delivered: true, provider: 'sms' };
 }

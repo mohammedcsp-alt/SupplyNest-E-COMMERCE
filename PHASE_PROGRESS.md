@@ -63,8 +63,8 @@ Verification details: TEST_REPORT.md. Last verified: 2026-11-13. Local commit hi
 - [~] Browser tests cover catalog, imports, orders and reservations; other admin pages verified over HTTP only
 
 ## Phase 8 — Testing and stabilization
-- [x] Vitest: 126 tests in 15 files (unit, integration, concurrency), all passing
-- [x] Playwright: 72 tests (36 API, 36 browser) plus 3 sign-in setup steps, all passing
+- [x] Vitest: 231 tests in 30 files (unit, integration, concurrency, requirement tests), all passing
+- [x] Playwright: 105 tests (37 API, 68 browser across Arabic RTL and English LTR) plus 7 sign-in setup steps, all passing (final run)
 - [x] Production build passes; type check passes; production server serves (smoke)
 - [x] Internal security tests: 36 API tests; findings recorded (TRACE framework behaviour; dev error detail)
 - [x] Controlled concurrency: 5 tests (up to 20 simultaneous callers)

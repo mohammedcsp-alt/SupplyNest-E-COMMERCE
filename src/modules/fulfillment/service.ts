@@ -304,17 +304,61 @@ export async function getJobForActor(actor: CurrentUser, jobId: string) {
 }
 
 /** Task queue for staff. Pickers/checkers see only their assignments (plus unassigned work for managers). */
-export async function listJobs(actor: CurrentUser, opts: { status?: FulfillmentStatus; mine?: boolean }) {
+export const JOB_PAGE_SIZE = 50;
+
+/** Paginated queue, newest first, so fresh jobs are not hidden behind an older backlog. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export type JobListOptions = {
+  status?: FulfillmentStatus;
+  mine?: boolean;
+  page?: number;
+  /** 'desc' (newest first, default) or 'asc' (oldest first). Display order only. */
+  dir?: 'asc' | 'desc';
+  /** Filter by the picker or checker assigned to the job. */
+  assigneeId?: string;
+  /** Matches the order number, the preparation document number, or the job id (exact). */
+  q?: string;
+};
+
+/**
+ * Staff task queue. Display only: sorting, filters and search never change execution priority, which is defined
+ * by the job status and the workflow transitions.
+ */
+export async function listJobs(actor: CurrentUser, opts: JobListOptions) {
   requirePerm(actor, PERMISSIONS.FULFILLMENT_VIEW);
   const manager = actor.permissions.has(PERMISSIONS.FULFILLMENT_ASSIGN);
-  const where: Prisma.FulfillmentJobWhereInput = {
-    ...(opts.status ? { status: opts.status } : {}),
-    ...(!manager ? { OR: [{ assignedPickerId: actor.id }, { assignedCheckerId: actor.id }] } : opts.mine ? { OR: [{ assignedPickerId: actor.id }, { assignedCheckerId: actor.id }] } : {}),
-  };
-  return db.fulfillmentJob.findMany({
-    where,
-    orderBy: [{ status: 'asc' }, { createdAt: 'asc' }],
-    take: 200,
-    select: { id: true, prepDocumentNo: true, status: true, orderId: true, assignedPickerId: true, assignedCheckerId: true, createdAt: true, order: { select: { orderNumber: true } } },
-  });
+  // Packers have no picker/checker assignment; they see the jobs that are ready for packing.
+  const canPack = actor.permissions.has(PERMISSIONS.FULFILLMENT_PACK);
+  const assignedToActor: Prisma.FulfillmentJobWhereInput[] = [{ assignedPickerId: actor.id }, { assignedCheckerId: actor.id }];
+  const packingScope: Prisma.FulfillmentJobWhereInput[] = canPack ? [{ status: { in: ['CHECKED', 'PACKING', 'PACKED'] } }] : [];
+  const and: Prisma.FulfillmentJobWhereInput[] = [];
+  if (!manager) and.push({ OR: [...assignedToActor, ...packingScope] });
+  else if (opts.mine) and.push({ OR: assignedToActor });
+  if (opts.status) and.push({ status: opts.status });
+  if (opts.assigneeId) and.push({ OR: [{ assignedPickerId: opts.assigneeId }, { assignedCheckerId: opts.assigneeId }] });
+  const q = opts.q?.trim();
+  if (q) {
+    and.push({
+      OR: [
+        { order: { orderNumber: { contains: q, mode: 'insensitive' } } },
+        { prepDocumentNo: { contains: q, mode: 'insensitive' } },
+        ...(UUID_RE.test(q) ? [{ id: q }] : []),
+      ],
+    });
+  }
+  const where: Prisma.FulfillmentJobWhereInput = and.length ? { AND: and } : {};
+  const page = Math.max(1, Math.floor(opts.page ?? 1));
+  const dir = opts.dir === 'asc' ? 'asc' : 'desc';
+  const [total, rows] = await db.$transaction([
+    db.fulfillmentJob.count({ where }),
+    db.fulfillmentJob.findMany({
+      where,
+      orderBy: [{ createdAt: dir }, { id: dir }],
+      skip: (page - 1) * JOB_PAGE_SIZE,
+      take: JOB_PAGE_SIZE,
+      select: { id: true, prepDocumentNo: true, status: true, orderId: true, assignedPickerId: true, assignedCheckerId: true, createdAt: true, order: { select: { orderNumber: true } } },
+    }),
+  ]);
+  return { rows, total, page, pageSize: JOB_PAGE_SIZE };
 }

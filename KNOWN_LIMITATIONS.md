@@ -85,3 +85,13 @@ the owner's approval).
 See `IMPLEMENTATION_DECISIONS.md` section B. The most important commercial decisions are: shipping fee values, courier
 identities and agreements, the cancellation and merge rules after preparation starts, backup retention, the SMS provider,
 whether to rotate the development password, and whether to rebuild the development database.
+
+## Open items after the final verification run (2026-11-13)
+
+- **SMS provider:** the HTTP adapter is tested against a local fake server only. No provider is configured; production refuses to start with OTP_PROVIDER=sms until SMS_PROVIDER_URL and SMS_PROVIDER_API_KEY are set (owner input).
+- **Per-IP order limit:** not implemented. Checkout is limited per customer (10 per hour), and login and OTP are limited per IP and per account.
+- **Backup scheduling:** `npm run backup:job` works, but the daily Windows Task Scheduler task is not registered (owner action; see docs/SCHEDULING.md).
+- **PDF export:** the renderer and route are written, but the route has not been exercised end to end in a browser.
+- **Fee values and periodic import source (OPS-003, OPS-004):** owner input required; not invented.
+- **Fulfillment queue cap:** 50 per page with pagination; very large backlogs need the next page to be reached, and the queue is not exported.
+- **Test suite notes:** Arabic amounts render as `د.ع`, and browser tests accept either label. The E2E checkout limit is reset per UI order on the test database; the limit itself is covered by integration tests.

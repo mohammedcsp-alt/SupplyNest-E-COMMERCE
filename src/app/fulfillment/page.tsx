@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/session';
 import { userWithPermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
 import { db } from '@/lib/db';
-import { Card, EmptyState, ForbiddenNotice, LoginRequired, PageHeader, StatusBadge } from '@/components/ui';
+import { Card, EmptyState, ForbiddenNotice, LoginRequired, PageHeader, Pagination, StatusBadge } from '@/components/ui';
 import { FULFILLMENT_AR, fmtDateTime, personName } from '@/components/ops';
 import { FULFILLMENT_LABELS, listJobs } from '@/modules/fulfillment/service';
 import type { FulfillmentStatus } from '@prisma/client';
@@ -24,7 +24,17 @@ export default async function FulfillmentQueuePage({ searchParams }: { searchPar
 
   const status = sp.status && sp.status in FULFILLMENT_LABELS ? (sp.status as FulfillmentStatus) : undefined;
   const isManager = user.permissions.has(PERMISSIONS.FULFILLMENT_ASSIGN);
-  const jobs = await listJobs(user, { status, mine: sp.mine === '1' });
+  const pageNo = Math.max(1, Number.parseInt(sp.page ?? '1', 10) || 1);
+  const dir = sp.dir === 'asc' ? 'asc' : 'desc';
+  const q = (sp.q ?? '').trim().slice(0, 80) || undefined;
+  const assigneeId = sp.assignee && /^[0-9a-f-]{36}$/i.test(sp.assignee) ? sp.assignee : undefined;
+  const { rows: jobs, total, pageSize } = await listJobs(user, { status, mine: sp.mine === '1', page: pageNo, dir, q, assigneeId });
+
+  // Employees who currently hold a picker or checker assignment (the filter's options).
+  const assignedRows = await db.fulfillmentJob.findMany({ select: { assignedPickerId: true, assignedCheckerId: true }, distinct: ['assignedPickerId'], take: 200 });
+  const checkerRows = await db.fulfillmentJob.findMany({ select: { assignedCheckerId: true }, distinct: ['assignedCheckerId'], take: 200 });
+  const assigneeIds = [...new Set([...assignedRows.map((r) => r.assignedPickerId), ...checkerRows.map((r) => r.assignedCheckerId)].filter((x): x is string => !!x))];
+  const assigneeUsers = assigneeIds.length ? await db.user.findMany({ where: { id: { in: assigneeIds } }, select: { id: true, phone: true, fullNameAr: true, fullNameEn: true } }) : [];
 
   const staffIds = [...new Set(jobs.flatMap((j) => [j.assignedPickerId, j.assignedCheckerId]).filter((x): x is string => !!x))];
   const staff = staffIds.length ? await db.user.findMany({ where: { id: { in: staffIds } }, select: { id: true, phone: true, fullNameAr: true, fullNameEn: true } }) : [];
@@ -51,6 +61,28 @@ export default async function FulfillmentQueuePage({ searchParams }: { searchPar
                   {locale === 'ar' ? FULFILLMENT_AR[s] : FULFILLMENT_LABELS[s as FulfillmentStatus]}
                 </option>
               ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="f-q">{L('بحث برقم الطلب أو المستند', 'Search by order or document no.')}</label>
+            <input id="f-q" name="q" type="search" defaultValue={q ?? ''} dir="ltr" maxLength={80} />
+          </div>
+          <div className="field">
+            <label htmlFor="f-assignee">{L('الموظف', 'Employee')}</label>
+            <select id="f-assignee" name="assignee" defaultValue={assigneeId ?? ''}>
+              <option value="">{L('الكل', 'Everyone')}</option>
+              {assigneeUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {personName(u, locale)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label htmlFor="f-dir">{L('الترتيب', 'Order')}</label>
+            <select id="f-dir" name="dir" defaultValue={dir}>
+              <option value="desc">{L('الأحدث أولاً', 'Newest first')}</option>
+              <option value="asc">{L('الأقدم أولاً', 'Oldest first')}</option>
             </select>
           </div>
           <div className="field">
@@ -111,6 +143,14 @@ export default async function FulfillmentQueuePage({ searchParams }: { searchPar
             </table>
           </div>
         )}
+        <Pagination
+          page={pageNo}
+          pageSize={pageSize}
+          total={total}
+          basePath="/fulfillment"
+          params={{ status, mine: sp.mine === '1' ? '1' : undefined, q, assignee: assigneeId, dir: dir === 'asc' ? 'asc' : undefined }}
+          labels={{ prev: L('السابق', 'Previous'), next: L('التالي', 'Next'), of: L('من', 'of') }}
+        />
       </Card>
     </section>
   );

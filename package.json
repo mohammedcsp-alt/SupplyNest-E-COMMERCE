@@ -4,9 +4,9 @@
   "private": true,
   "description": "B2B general-purpose product e-commerce platform V1 (local development)",
   "scripts": {
-    "dev": "next dev -p 3200 -H 127.0.0.1",
+    "dev": "node server.mjs --dev",
     "build": "next build",
-    "start": "next start -p 3200 -H 127.0.0.1",
+    "start": "node server.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
@@ -18,6 +18,8 @@
     "test:integration": "vitest run tests/integration",
     "test:e2e": "dotenv -e .env.test -- prisma migrate deploy && dotenv -e .env.test -- tsx prisma/seed/index.ts && playwright test",
     "jobs:sweep": "dotenv -e .env -- tsx --conditions=react-server scripts/jobs-sweep.ts",
+    "backup:job": "dotenv -e .env -- tsx --conditions=react-server scripts/backup-job.ts",
+    "restore:test": "dotenv -e .env -- tsx --conditions=react-server scripts/restore-test.ts",
     "test:e2e:api": "npm run test:e2e -- --project=api"
   },
   "engines": {

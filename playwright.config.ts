@@ -32,11 +32,11 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: `npx dotenv -e .env.test -- next dev -p ${PORT} -H 127.0.0.1`,
+    command: 'npx dotenv -e .env.test -- node server.mjs --dev',
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: false,
     timeout: 180_000,
-    env: { NEXT_DIST_DIR: '.next-test' },
+    env: { NEXT_DIST_DIR: '.next-test', PORT: String(PORT) },
   },
   projects: [
     { name: 'setup', testMatch: /auth.*\.setup\.ts/ },

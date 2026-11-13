@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
+import { devPassword } from '../../prisma/seed/dev-secret';
 import { db } from '@/lib/db';
 import { loadCurrentUserByUserId, type CurrentUser } from '@/lib/session';
 import { registerCustomer, confirmRegistrationPhone } from '@/modules/identity/auth-service';
@@ -30,7 +31,7 @@ export const STAFF = {
 export const BAGHDAD_ID = (await db.governorate.findUniqueOrThrow({ where: { code: 'BAGHDAD' } })).id;
 export const KIRKUK_ID = (await db.governorate.findUniqueOrThrow({ where: { code: 'KIRKUK' } })).id; // no shipping rule seeded
 export const MANSOUR_AREA_ID = '00000000-0000-4000-8000-000000000001';
-export const DEV_PASSWORD = 'Dev-Only-Pass-2026!';
+export const DEV_PASSWORD = devPassword();
 
 let phoneCounter = 0;
 export function uniquePhone(): string {

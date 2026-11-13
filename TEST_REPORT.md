@@ -10,10 +10,10 @@ marked "agent-reported" was produced by a subagent and was not re-run by me.
 | Check | Command | Result |
 |---|---|---|
 | Type check | `npx tsc --noEmit` | PASS (exit 0) |
-| Unit, integration and concurrency (vitest) | `npx vitest run` | PASS: **15 files, 126 tests**, 0 failed |
-| Browser and API end-to-end (Playwright) | `npx playwright test` | PASS: **72 tests** (api 36, browser 36), 0 failed; plus 3 sign-in setup steps |
+| Unit, integration and concurrency (vitest) | `npx vitest run` | PASS: **30 files, 231 tests**, 0 failed (final run, 2026-11-13) |
+| Browser and API end-to-end (Playwright) | `npx playwright test` | PASS: **112 results, 0 failed** (105 tests: api 37, desktop Arabic RTL 34, mobile English LTR 34; plus 7 sign-in setup steps; final run, 2026-11-13) |
 | Production build | `NEXT_DIST_DIR=.next-build npx next build` | PASS |
-| Production server smoke | `next start` on 127.0.0.1:3220 | Serves; GET returns 200; TRACE returns 500 (see §6) |
+| Production server smoke | `node server.mjs` (earlier session) | Earlier run: GET returns 200; TRACE returns 405 from server.mjs. **Not repeated in the final run.** |
 | Development server | `npm run dev` on 127.0.0.1:3200 | Serves pages and APIs (checked with curl) |
 | Backup and restore (independent) | API run + restore test; manual restore | PASS (§4) |
 | Concurrency and load (controlled) | vitest `tests/load` | PASS, 5 tests (§5) |
@@ -21,7 +21,7 @@ marked "agent-reported" was produced by a subagent and was not re-run by me.
 Browser tests were executed in two projects: `desktop-arabic-rtl` (1280×800, Arabic, RTL) and `mobile-english-ltr`
 (Pixel 5 profile, English, LTR). Each browser test below runs in both projects unless stated.
 
-## 2. Unit and integration tests (vitest, 126 tests)
+## 2. Unit and integration tests (vitest, 231 tests in 30 files)
 
 | File | Area | Tests |
 |---|---|---|
@@ -41,7 +41,7 @@ Browser tests were executed in two projects: `desktop-arabic-rtl` (1280×800, Ar
 | `tests/integration/models-and-cms.test.ts` | Optional product models (general-purpose catalog), banner update and deactivate, CMS page delete rules | 8 |
 | `tests/load/concurrency.test.ts` | Concurrency (§5) | 5 |
 
-## 3. Browser and API end-to-end tests (Playwright, 72 tests + 3 setup steps)
+## 3. Browser and API end-to-end tests (Playwright, 105 tests + 7 setup steps)
 
 The E2E server runs on port 3210 against the test database. The global setup clears transient rate-limit rows and
 tops up the shared test SKU's stock (test database only). Each signed-in role has its session saved once per run by a
@@ -133,3 +133,22 @@ The test asserts only that `TRACE` is not a success.
 - Load beyond 20 simultaneous callers, soak tests, and HTTP-level load tests.
 - The production server behaviour for flows other than the smoke checks listed above.
 - Independent security review (not performed).
+
+## 7. Final verification run (2026-11-13)
+
+| Check | Command | Result |
+|---|---|---|
+| Type check | `npx tsc --noEmit` | PASS |
+| Vitest (full) | `npx vitest run` | PASS: 30 files, 231 tests |
+| Playwright (full) | `npx playwright test` | PASS: 112 results (105 tests + 7 setup), 0 failed |
+| Production build | `NEXT_DIST_DIR=.next-build npx next build` | PASS |
+| Backup job (dev database) | `npm run backup:job` | SUCCEEDED, checksum recorded, no pruning needed |
+| Restore verification (scratch database only) | `npm run restore:test` | PASSED; row counts match; no mismatches |
+
+Fixes made during this run (verified by the rerun above):
+- Fulfillment queue: packers now see CHECKED, PACKING and PACKED jobs; the list is paginated (50 per page, newest first), with search by order number or job ID, a sort-direction control and an assignee filter. Display only; job workflow priority is unchanged.
+- Handover success message is shown on the job page after the form redirects (the form unmounts once the job is handed over).
+- Test harness: browser steps wait for hydration after page loads (an unhydrated form submits natively and drops input). The shared customer's checkout limit is cleared before each UI order on the test database only. Manager API calls reuse the saved session instead of logging in per test.
+- Startup safety: `src/instrumentation.ts` calls `assertProductionSafe()`, so production refuses mock OTP, SMS without credentials, and the WMS flag.
+
+Requirement tests added in this run: `tests/integration/req-*.test.ts`, `tests/unit/req-*.test.ts`, `tests/unit/part-*.test.ts`, `tests/integration/part-abuse.test.ts`, `tests/integration/req-queue.test.ts`.
