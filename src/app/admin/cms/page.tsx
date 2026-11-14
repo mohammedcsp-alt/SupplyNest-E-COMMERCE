@@ -5,6 +5,7 @@ import { PERMISSIONS } from '@/lib/rbac';
 import { listCmsBanners, listCmsPages } from '@/modules/admin/cms';
 import { toBaghdadInputValue } from '@/modules/admin/time';
 import { gatePage } from '../_lib/gate';
+import { OwnerImage } from '../_components/OwnerImage';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,6 +132,13 @@ export default async function AdminCms() {
                     <strong>{locale === 'ar' ? b.titleAr : b.titleEn}</strong> {b.active ? <Badge tone="ok">{L('فعال', 'Active')}</Badge> : <Badge>{L('غير فعال', 'Inactive')}</Badge>}
                   </summary>
                   <div style={{ paddingBlockStart: 10 }}>
+                    <OwnerImage
+                      endpoint={`/api/v1/admin/cms/banners/${b.id}/image`}
+                      previewUrl={`/api/v1/cms/banners/${b.id}/image`}
+                      hasImage={Boolean(b.imageKey)}
+                      locale={locale}
+                      label={L('صورة البنر', 'Banner image')}
+                    />
                     <ApiForm
                       endpoint={`/api/v1/admin/cms/banners/${b.id}`}
                       method="PATCH"
@@ -140,6 +148,10 @@ export default async function AdminCms() {
                         { name: 'titleAr', label: L('العنوان بالعربية', 'Title (Arabic)'), required: true, defaultValue: b.titleAr, dir: 'rtl' },
                         { name: 'titleEn', label: L('العنوان بالإنجليزية', 'Title (English)'), required: true, defaultValue: b.titleEn },
                         { name: 'targetPath', label: L('الوجهة (مسار داخلي)', 'Target (internal path)'), required: true, defaultValue: b.targetPath, dir: 'ltr' },
+                        { name: 'descriptionAr', label: L('الوصف بالعربية (اختياري)', 'Description (Arabic, optional)'), type: 'textarea', defaultValue: b.descriptionAr ?? '', dir: 'rtl' },
+                        { name: 'descriptionEn', label: L('الوصف بالإنجليزية (اختياري)', 'Description (English, optional)'), type: 'textarea', defaultValue: b.descriptionEn ?? '' },
+                        { name: 'linkLabelAr', label: L('نص الرابط بالعربية (اختياري)', 'Link label (Arabic, optional)'), defaultValue: b.linkLabelAr ?? '', dir: 'rtl' },
+                        { name: 'linkLabelEn', label: L('نص الرابط بالإنجليزية (اختياري)', 'Link label (English, optional)'), defaultValue: b.linkLabelEn ?? '' },
                         { name: 'position', label: L('الترتيب', 'Position'), type: 'number', defaultValue: b.position, min: 0, max: 1000 },
                         { name: 'active', label: L('فعال', 'Active'), type: 'checkbox', defaultValue: b.active },
                         { name: 'activeFrom', label: L('يبدأ (بغداد، اختياري)', 'Starts (Baghdad, optional)'), type: 'datetime-local', defaultValue: toBaghdadInputValue(b.activeFrom) },
@@ -170,7 +182,10 @@ export default async function AdminCms() {
             { name: 'titleAr', label: L('العنوان بالعربية', 'Title (Arabic)'), required: true, dir: 'rtl' },
             { name: 'titleEn', label: L('العنوان بالإنجليزية', 'Title (English)'), required: true },
             { name: 'targetPath', label: L('الوجهة (مسار داخلي)', 'Target (internal path)'), required: true, placeholder: '/catalog', dir: 'ltr' },
-            { name: 'imageKey', label: L('مفتاح الصورة (اختياري)', 'Image key (optional)'), dir: 'ltr' },
+            { name: 'descriptionAr', label: L('الوصف بالعربية (اختياري)', 'Description (Arabic, optional)'), type: 'textarea', dir: 'rtl' },
+            { name: 'descriptionEn', label: L('الوصف بالإنجليزية (اختياري)', 'Description (English, optional)'), type: 'textarea' },
+            { name: 'linkLabelAr', label: L('نص الرابط بالعربية (اختياري)', 'Link label (Arabic, optional)'), dir: 'rtl' },
+            { name: 'linkLabelEn', label: L('نص الرابط بالإنجليزية (اختياري)', 'Link label (English, optional)') },
             { name: 'position', label: L('الترتيب', 'Position'), type: 'number', defaultValue: 0, min: 0, max: 1000 },
             ...(canPublish ? [{ name: 'active', label: L('فعال', 'Active'), type: 'checkbox' as const, defaultValue: false }] : []),
             { name: 'activeFrom', label: L('يبدأ (بغداد، اختياري)', 'Starts (Baghdad, optional)'), type: 'datetime-local' },

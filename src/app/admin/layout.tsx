@@ -11,6 +11,7 @@ const NAV: Array<{ href: string; ar: string; en: string; perm?: string }> = [
   { href: '/admin', ar: 'لوحة التحكم', en: 'Dashboard' },
   { href: '/admin/customers', ar: 'العملاء', en: 'Customers', perm: PERMISSIONS.CUSTOMER_VIEW },
   { href: '/admin/catalog', ar: 'الكتالوج', en: 'Catalog', perm: PERMISSIONS.CATALOG_VIEW },
+  { href: '/admin/merchandising', ar: 'المنتجات المميزة', en: 'Featured products', perm: PERMISSIONS.CATALOG_VIEW },
   { href: '/admin/categories', ar: 'الفئات والعلامات', en: 'Categories & brands', perm: PERMISSIONS.CATALOG_VIEW },
   { href: '/admin/imports', ar: 'الاستيراد', en: 'Imports', perm: PERMISSIONS.IMPORT_PREVIEW },
   { href: '/admin/inventory', ar: 'المخزون', en: 'Inventory', perm: PERMISSIONS.INVENTORY_VIEW },

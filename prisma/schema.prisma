@@ -416,6 +416,10 @@ model Category {
   nameEn    String    @db.VarChar(160)
   sortOrder Int       @default(0)
   active    Boolean   @default(true)
+  /**
+   * V3.3: optional category image (storage key under UPLOAD_DIR).
+   */
+  imageKey  String?   @db.VarChar(255)
   deletedAt DateTime? @db.Timestamptz(3)
   createdAt DateTime  @default(now()) @db.Timestamptz(3)
 
@@ -465,6 +469,10 @@ model Brand {
   name      String   @unique @db.VarChar(160)
   slug      String   @unique @db.VarChar(160)
   active    Boolean  @default(true)
+  /**
+   * V3.3: optional brand logo or image (storage key under UPLOAD_DIR).
+   */
+  imageKey  String?  @db.VarChar(255)
   createdAt DateTime @default(now()) @db.Timestamptz(3)
 
   models ProductModel[]
@@ -516,6 +524,11 @@ model Sku {
   active        Boolean   @default(true)
   published     Boolean   @default(false)
   deletedAt     DateTime? @db.Timestamptz(3)
+  /**
+   * V3.3: merchandising flags. Do not affect price, stock or eligibility.
+   */
+  featured      Boolean   @default(false)
+  featuredOrder Int       @default(0)
   createdAt     DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
 
@@ -539,6 +552,7 @@ model Sku {
   @@index([categoryId])
   @@index([modelId])
   @@index([published, active])
+  @@index([featured, featuredOrder])
   @@map("product_skus")
 }
 
@@ -923,15 +937,22 @@ model CmsPage {
 }
 
 model CmsBanner {
-  id         String    @id @default(uuid()) @db.Uuid
-  titleAr    String    @db.VarChar(200)
-  titleEn    String    @db.VarChar(200)
-  imageKey   String?   @db.VarChar(255)
-  targetPath String    @db.VarChar(255)
-  position   Int       @default(0)
-  active     Boolean   @default(true)
-  activeFrom DateTime? @db.Timestamptz(3)
-  activeTo   DateTime? @db.Timestamptz(3)
+  id            String    @id @default(uuid()) @db.Uuid
+  titleAr       String    @db.VarChar(200)
+  titleEn       String    @db.VarChar(200)
+  imageKey      String?   @db.VarChar(255)
+  targetPath    String    @db.VarChar(255)
+  /**
+   * V3.3: optional text and link label shown on the banner.
+   */
+  descriptionAr String?   @db.VarChar(400)
+  descriptionEn String?   @db.VarChar(400)
+  linkLabelAr   String?   @db.VarChar(120)
+  linkLabelEn   String?   @db.VarChar(120)
+  position      Int       @default(0)
+  active        Boolean   @default(true)
+  activeFrom    DateTime? @db.Timestamptz(3)
+  activeTo      DateTime? @db.Timestamptz(3)
 
   @@map("cms_banners")
 }

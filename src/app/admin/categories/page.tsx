@@ -7,6 +7,7 @@ import { gatePage } from '../_lib/gate';
 import { categoryOptions, loadTaxonomyOptions, type CategoryRow } from '../_lib/taxonomy';
 import { NullableJsonForm } from '../_components/NullableJsonForm';
 import { AttributeDefForm } from '../_components/AttributeDefForm';
+import { OwnerImage } from '../_components/OwnerImage';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,20 @@ export default async function AdminCategories() {
           {!c.active && <Badge tone="danger">{L('غير فعال', 'Inactive')}</Badge>}
           <span className="muted">{L(`المستوى ${depth + 1}`, `Level ${depth + 1}`)}</span>
         </div>
+        {canCategory && (
+          <details>
+            <summary>{L('صورة الفئة', 'Category image')}</summary>
+            <div style={{ paddingBlockStart: 10 }}>
+              <OwnerImage
+                endpoint={`/api/v1/admin/categories/${c.id}/image`}
+                previewUrl={`/api/v1/public/categories/${c.id}/image`}
+                hasImage={Boolean((c as { imageKey?: string | null }).imageKey)}
+                locale={locale}
+                label={L('صورة الفئة', 'Category image')}
+              />
+            </div>
+          </details>
+        )}
         <details>
           <summary>{L('تعديل الفئة والخصائص', 'Edit category and attributes')}</summary>
           <div className="stack" style={{ paddingBlockStart: 10 }}>
@@ -118,13 +133,24 @@ export default async function AdminCategories() {
       {canCatalog && (
         <div className="card-grid">
           <Card title={L('العلامات التجارية', 'Brands')}>
-            <ul>
+            <div className="stack">
               {tax.brands.map((b) => (
-                <li key={b.id}>
-                  {b.name} {!b.active && <Badge tone="danger">{L('غير فعالة', 'Inactive')}</Badge>}
-                </li>
+                <details key={b.id}>
+                  <summary>
+                    {b.name} {!b.active && <Badge tone="danger">{L('غير فعالة', 'Inactive')}</Badge>} {(b as { imageKey?: string | null }).imageKey ? <Badge tone="ok">{L('بصورة', 'Image')}</Badge> : null}
+                  </summary>
+                  <div style={{ paddingBlockStart: 8 }}>
+                    <OwnerImage
+                      endpoint={`/api/v1/admin/brands/${b.id}/image`}
+                      previewUrl={`/api/v1/public/brands/${b.id}/image`}
+                      hasImage={Boolean((b as { imageKey?: string | null }).imageKey)}
+                      locale={locale}
+                      label={b.name}
+                    />
+                  </div>
+                </details>
               ))}
-            </ul>
+            </div>
             <ApiForm
               endpoint="/api/v1/admin/taxonomy"
               submitLabel={L('إضافة علامة', 'Add brand')}

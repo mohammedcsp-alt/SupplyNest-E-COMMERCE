@@ -559,3 +559,12 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
 .hero-banner.has-image > img.hero-img { position: absolute; z-index: 0; inset-block: 0; inset-inline-end: 0; inline-size: 46%; block-size: 100%; object-fit: cover; opacity: 0.85; }
 .hero-banner.has-image::after { z-index: 1; pointer-events: none; }
 .hero-banner.has-image > h1, .hero-banner.has-image > p, .hero-banner.has-image > .row { z-index: 2; }
+
+/* Brand tiles (homepage) */
+.brand-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.brand-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 10px; background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg); color: var(--c-text); text-decoration: none; text-align: center; font-weight: 600; font-size: 0.9rem;
+}
+.brand-tile:hover { border-color: var(--brand); }
+.brand-tile img { block-size: 56px; inline-size: 100%; object-fit: contain; }

@@ -3,11 +3,11 @@ import { currentLocale, localized } from '@/lib/i18n';
 import { getCurrentUser, canSeePrices, canOrder, viewerOf } from '@/lib/session';
 import { listCatalog, categoryTree, projectSkusForViewer } from '@/modules/catalog/public';
 import { catalogFacets } from '@/modules/catalog/facets';
+import { listFeaturedSkus } from '@/modules/catalog/merchandising';
 import { listCmsBanners } from '@/modules/admin/cms';
 import { db } from '@/lib/db';
 import { EmptyState } from '@/components/ui';
 import { ProductCard, type CardItem } from '@/components/storefront/ProductCard';
-import { categoryImageSrc } from '@/lib/storefront-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,11 +21,14 @@ export default async function HomePage() {
   const isCustomer = user?.userType === 'CUSTOMER';
   const now = new Date();
 
-  const [tree, facets, newest, banners] = await Promise.all([
+  const [tree, facets, newest, featured, banners, categoryRows, brandRows] = await Promise.all([
     categoryTree(),
     catalogFacets(),
     listCatalog({ sort: 'newest', page: 1, pageSize: 8 }, viewer),
+    listFeaturedSkus(viewer, 8),
     listCmsBanners(),
+    db.category.findMany({ where: { active: true, deletedAt: null, parentId: null }, select: { id: true, imageKey: true }, orderBy: [{ sortOrder: 'asc' }, { nameEn: 'asc' }] }),
+    db.brand.findMany({ where: { active: true }, select: { id: true, name: true, imageKey: true }, orderBy: { name: 'asc' } }),
   ]);
 
   // Recently viewed: only for active customers (the same rule as the product page).
@@ -44,29 +47,35 @@ export default async function HomePage() {
     }
   }
 
-  const banner = banners.find((b) => b.active && (!b.activeFrom || b.activeFrom <= now) && (!b.activeTo || b.activeTo >= now));
+  const activeBanners = banners.filter((b) => b.active && (!b.activeFrom || b.activeFrom <= now) && (!b.activeTo || b.activeTo >= now));
+  const [hero, ...promos] = activeBanners;
   const topCategories = tree.slice(0, 12);
+  const imageCat = new Map(categoryRows.map((c) => [c.id, c.imageKey]));
+  const brandsWithImage = brandRows.filter((b) => b.imageKey);
+  const brandCount = new Map(facets.brands.map((b) => [b.id, b.count]));
   const cardViewer = { locale, canSeePrice: priced, canBuy: buyable, canFavorite: isCustomer, favoriteSkus };
 
   return (
     <div>
-      {/* Hero + promo tiles */}
+      {/* Hero + promotional tiles (CMS-managed) */}
       <section className="home-hero" aria-label={L('الواجهة الرئيسية', 'Featured')}>
-        <div className={`hero-banner${banner ? ' has-image' : ''}`}>
-          {banner && (
+        <div className={`hero-banner${hero ? ' has-image' : ''}`}>
+          {hero && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className="hero-img" src={`/api/v1/cms/banners/${banner.id}/image`} alt="" aria-hidden="true" />
+            <img className="hero-img" src={`/api/v1/cms/banners/${hero.id}/image`} alt="" aria-hidden="true" />
           )}
-          <h1>{banner ? localized(locale, banner.titleAr, banner.titleEn) : L('كتالوج الجملة للمنتجات المادية', 'Wholesale catalogue for physical goods')}</h1>
+          <h1>{hero ? localized(locale, hero.titleAr, hero.titleEn) : L('كتالوج الجملة للمنتجات المادية', 'Wholesale catalogue for physical goods')}</h1>
           <p>
-            {L(
-              'تصفّح الفئات والعلامات التجارية، وأضف الكميات إلى السلة. تظهر أسعار الجملة لحسابك بعد اعتماده.',
-              'Browse categories and brands, and add quantities to your cart. Your wholesale prices appear once your account is approved.',
-            )}
+            {hero?.descriptionEn || hero?.descriptionAr
+              ? localized(locale, hero.descriptionAr, hero.descriptionEn)
+              : L(
+                  'تصفّح الفئات والعلامات التجارية، وأضف الكميات إلى السلة. تظهر أسعار الجملة لحسابك بعد اعتماده.',
+                  'Browse categories and brands, and add quantities to your cart. Your wholesale prices appear once your account is approved.',
+                )}
           </p>
           <div className="row">
-            <Link className="btn btn-accent" href={banner ? banner.targetPath : '/catalog'}>
-              {banner ? L('عرض العرض', 'View offer') : L('تصفح الكتالوج', 'Browse catalogue')}
+            <Link className="btn btn-accent" href={hero ? hero.targetPath : '/catalog'}>
+              {hero?.linkLabelEn || hero?.linkLabelAr ? localized(locale, hero.linkLabelAr, hero.linkLabelEn) : L('تصفح الكتالوج', 'Browse catalogue')}
             </Link>
             {!user && (
               <Link className="btn" href="/register" style={{ background: 'transparent', color: '#fff', borderColor: 'rgb(255 255 255 / 50%)' }}>
@@ -76,18 +85,21 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="hero-side">
-          <Link href={isCustomer ? '/bulk-order' : '/login'} className="promo-tile">
-            <strong>{L('طلب سريع وبالجملة', 'Quick and bulk ordering')}</strong>
-            <span>{L('أدخل SKU والكمية أو ارفع ملف Excel.', 'Enter SKUs and quantities, or upload an Excel file.')}</span>
-          </Link>
-          <Link href="/catalog?sort=newest" className="promo-tile">
-            <strong>{L('وصل حديثًا', 'New arrivals')}</strong>
-            <span>{L('أحدث المنتجات المضافة إلى الكتالوج.', 'The most recently added products.')}</span>
-          </Link>
+          {promos.slice(0, 2).map((b) => (
+            <Link key={b.id} href={b.targetPath} className="promo-tile">
+              <strong>{localized(locale, b.titleAr, b.titleEn)}</strong>
+              {(b.descriptionEn || b.descriptionAr) && <span>{localized(locale, b.descriptionAr, b.descriptionEn)}</span>}
+            </Link>
+          ))}
+          {promos.length < 2 && (
+            <Link href={isCustomer ? '/bulk-order' : '/login'} className="promo-tile">
+              <strong>{L('طلب سريع وبالجملة', 'Quick and bulk ordering')}</strong>
+              <span>{L('أدخل SKU والكمية أو ارفع ملف Excel.', 'Enter SKUs and quantities, or upload an Excel file.')}</span>
+            </Link>
+          )}
         </div>
       </section>
 
-      {/* Account status notice */}
       {user && !priced && user.status === 'APPROVAL_PENDING' && (
         <div className="alert alert-warn" style={{ marginBlockStart: 16 }}>
           {L(
@@ -97,7 +109,7 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Categories */}
+      {/* Categories with dedicated images when configured */}
       <section aria-labelledby="home-cats">
         <div className="section-head">
           <h2 id="home-cats">{L('تصفح حسب الفئة', 'Shop by category')}</h2>
@@ -109,11 +121,12 @@ export default async function HomePage() {
           <div className="category-cards">
             {topCategories.map((c) => {
               const name = localized(locale, c.nameAr, c.nameEn);
+              const hasImage = Boolean(imageCat.get(c.id));
               return (
                 <Link key={c.id} href={`/catalog?categoryId=${c.id}`} className="category-card">
-                  {categoryImageSrc(c.slug) ? (
+                  {hasImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img className="cat-img" src={categoryImageSrc(c.slug)!} alt="" loading="lazy" />
+                    <img className="cat-img" src={`/api/v1/public/categories/${c.id}/image`} alt="" loading="lazy" />
                   ) : (
                     <span className="cat-icon" aria-hidden="true">
                       {name.trim().charAt(0).toUpperCase()}
@@ -128,21 +141,53 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Brands (only brands that have published products) */}
+      {/* Featured brands: logo tiles where configured, otherwise name chips with counts */}
       {facets.brands.length > 0 && (
         <section aria-labelledby="home-brands">
           <div className="section-head">
             <h2 id="home-brands">{L('العلامات التجارية', 'Brands')}</h2>
           </div>
-          <div className="row" style={{ gap: 8 }}>
-            {facets.brands.slice(0, 12).map((b) => (
-              <Link key={b.id} href={`/catalog?brand=${b.id}`} className="badge" style={{ fontSize: '0.9rem', padding: '6px 12px', textDecoration: 'none' }}>
-                {b.name} <span className="muted">({b.count})</span>
+          <div className="brand-tiles">
+            {brandsWithImage.slice(0, 8).map((b) => (
+              <Link key={b.id} href={`/catalog?brand=${b.id}`} className="brand-tile">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/api/v1/public/brands/${b.id}/image`} alt={b.name} loading="lazy" />
+                <span>
+                  {b.name}
+                  {brandCount.has(b.id) && <span className="muted"> ({brandCount.get(b.id)})</span>}
+                </span>
               </Link>
             ))}
+            {facets.brands
+              .filter((b) => !brandsWithImage.some((x) => x.id === b.id))
+              .slice(0, 12)
+              .map((b) => (
+                <Link key={b.id} href={`/catalog?brand=${b.id}`} className="badge" style={{ fontSize: '0.9rem', padding: '6px 12px', textDecoration: 'none' }}>
+                  {b.name} <span className="muted">({b.count})</span>
+                </Link>
+              ))}
           </div>
         </section>
       )}
+
+      {/* Featured products (configured by administrators) */}
+      <section aria-labelledby="home-featured">
+        <div className="section-head">
+          <h2 id="home-featured">{L('منتجات مختارة', 'Featured products')}</h2>
+          <Link href="/catalog">{L('عرض الكل', 'View all')} →</Link>
+        </div>
+        {featured.length === 0 ? (
+          <EmptyState>{L('لم تُحدَّد منتجات مختارة بعد.', 'No featured products have been selected yet.')}</EmptyState>
+        ) : (
+          <div className="product-grid" role="list">
+            {(featured as CardItem[]).map((it) => (
+              <div role="listitem" key={it.id}>
+                <ProductCard item={it} v={cardViewer} />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Quick order entry point */}
       {isCustomer ? (
@@ -180,7 +225,6 @@ export default async function HomePage() {
         )}
       </section>
 
-      {/* Recently viewed (customers) */}
       {recent.length > 0 && (
         <section aria-labelledby="home-recent">
           <div className="section-head">
@@ -197,7 +241,6 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Wholesale registration */}
       {!user && (
         <section className="wholesale-cta" aria-labelledby="home-register">
           <div>

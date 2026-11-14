@@ -71,7 +71,20 @@ export async function updateCmsPage(actorId: string, pageId: string, input: Page
 
 export async function createCmsBanner(
   actorId: string,
-  input: { titleAr: string; titleEn: string; imageKey?: string | null; targetPath: string; position: number; active: boolean; activeFrom?: Date | null; activeTo?: Date | null },
+  input: {
+    titleAr: string;
+    titleEn: string;
+    imageKey?: string | null;
+    targetPath: string;
+    descriptionAr?: string | null;
+    descriptionEn?: string | null;
+    linkLabelAr?: string | null;
+    linkLabelEn?: string | null;
+    position: number;
+    active: boolean;
+    activeFrom?: Date | null;
+    activeTo?: Date | null;
+  },
   ip: string | null,
 ) {
   if (input.activeFrom && input.activeTo && input.activeTo <= input.activeFrom) throw errors.validation('activeTo must be after activeFrom');
@@ -86,6 +99,10 @@ export type BannerPatch = {
   titleAr?: string;
   titleEn?: string;
   targetPath?: string;
+  descriptionAr?: string | null;
+  descriptionEn?: string | null;
+  linkLabelAr?: string | null;
+  linkLabelEn?: string | null;
   position?: number;
   active?: boolean;
   activeFrom?: Date | null;

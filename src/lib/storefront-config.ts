@@ -24,17 +24,3 @@ export const storefront = {
   supportEmail: env('STORE_SUPPORT_EMAIL', ''),
 } as const;
 
-/** Development demonstration category images (public/demo/categories). Real categories show a letter tile unless listed. */
-export const DEMO_CATEGORY_IMAGE_SLUGS: readonly string[] = [
-  'dev-apparel',
-  'dev-batteries',
-  'dev-hand-tools',
-  'dev-hardware',
-  'dev-mobile-spare-parts',
-  'dev-office',
-  'dev-screens',
-  'dev-tshirts',
-];
-export function categoryImageSrc(slug: string): string | null {
-  return DEMO_CATEGORY_IMAGE_SLUGS.includes(slug) ? `/demo/categories/${slug}.png` : null;
-}

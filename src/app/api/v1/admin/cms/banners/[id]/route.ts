@@ -21,6 +21,10 @@ const patchSchema = z
       .refine((v) => !v.startsWith('//'), 'Target must not start with //')
       .optional(),
     position: z.number().int().min(0).max(1000).optional(),
+    descriptionAr: z.string().trim().max(400).nullable().optional(),
+    descriptionEn: z.string().trim().max(400).nullable().optional(),
+    linkLabelAr: z.string().trim().max(120).nullable().optional(),
+    linkLabelEn: z.string().trim().max(120).nullable().optional(),
     active: z.boolean().optional(),
     activeFrom: z.string().trim().max(40).nullable().optional(),
     activeTo: z.string().trim().max(40).nullable().optional(),
