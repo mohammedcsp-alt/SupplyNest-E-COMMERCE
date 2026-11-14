@@ -658,7 +658,7 @@
       "priority": "P0",
       "status": "done",
       "acceptance": "All tests pass; none weakened",
-      "verification_evidence": "npx vitest run (full suite): 31 files, 241 tests passed, 0 failed (was 30 files/231 before T-01; no test weakened)",
+      "verification_evidence": "current run on commit f9a4c55: npx vitest run 31 files / 241 tests passed (2026-11-14 16:56); tsc --noEmit exit 0",
       "blocker_reason": null
     },
     {
