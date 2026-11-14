@@ -49,18 +49,37 @@ export default async function CourierStatementPage({ params, searchParams }: { p
   const canPay = user.permissions.has(PERMISSIONS.FINANCE_FEE_PAYMENT_RECORD);
   const t = st.totals;
 
-  const totalRows: Array<{ label: string; value: string | null; note?: string }> = [
-    { label: L('COD المتوقع', 'Expected COD'), value: t.codExpected, note: L('مجموع البضاعة المقبولة + رسوم توصيل العميل ± التعديلات المتوقعة', 'Accepted goods + customer delivery fee ± expected-side adjustments') },
-    { label: L('COD المحصّل (المؤكد من الشركة)', 'Collected COD (confirmed by courier)'), value: t.codCollected, note: L('لا يُستنتج من المتوقع', 'Never inferred from expected COD') },
-    { label: L('رسوم توصيل العميل (منفصلة)', 'Customer delivery fees (separate)'), value: t.customerDeliveryFees, note: L('يدفعها العميل، ولا تُجمع مع أجر الشركة', 'Paid by the customer; never added to the courier fee') },
-    { label: L('أجور الشركة المخصومة من COD (صافي)', 'Courier fees deducted from COD (NET)'), value: t.courierFeesDeductedFromCod },
-    { label: L('المستحق من الشركة', 'Courier due'), value: t.courierDue, note: L('صافي: المحصّل − الأجر المخصوم · إجمالي: المحصّل', 'NET: collected − deducted fee · GROSS: collected') },
-    { label: L('التحويلات المستلمة والمخصصة', 'Transfers received (allocated)'), value: t.transfersReceived },
-    { label: L('المتبقي على الشركة', 'Merchant outstanding'), value: t.merchantOutstanding, note: L('المستحق − التحويلات المخصصة', 'Courier due − allocated transfers') },
-    { label: L('أجور تُدفع منفصلاً (إجمالي)', 'Courier fees payable separately (GROSS)'), value: t.courierFeesPayableSeparately },
-    { label: L('دفعات الأجور المسجلة', 'Fee payments recorded'), value: t.courierFeePayments },
-    { label: L('أجور متبقية', 'Fees outstanding'), value: t.courierFeesOutstanding },
-    { label: L('المركز الصافي', 'Net position'), value: t.netPosition, note: L('المتبقي على الشركة − الأجور المتبقية (مجموع التزامين منفصلين)', 'Merchant outstanding − fees outstanding (sum of two separate obligations)') },
+  type TotalRow = { label: string; value: string | null; note?: string };
+  const totalGroups: Array<{ title: string; tone: 'info' | 'warn' | 'ok'; rows: TotalRow[] }> = [
+    {
+      title: L('COD', 'COD'),
+      tone: 'info',
+      rows: [
+        { label: L('COD المتوقع', 'Expected COD'), value: t.codExpected, note: L('مجموع البضاعة المقبولة + رسوم توصيل العميل ± التعديلات المتوقعة', 'Accepted goods + customer delivery fee ± expected-side adjustments') },
+        { label: L('COD المحصّل (المؤكد من الشركة)', 'Collected COD (confirmed by courier)'), value: t.codCollected, note: L('لا يُستنتج من المتوقع', 'Never inferred from expected COD') },
+        { label: L('رسوم توصيل العميل (منفصلة)', 'Customer delivery fees (separate)'), value: t.customerDeliveryFees, note: L('يدفعها العميل، ولا تُجمع مع أجر الشركة', 'Paid by the customer; never added to the courier fee') },
+      ],
+    },
+    {
+      title: L('أجور الشركة والمستحق', 'Courier fees and amount due'),
+      tone: 'warn',
+      rows: [
+        { label: L('أجور الشركة المخصومة من COD (صافي)', 'Courier fees deducted from COD (NET)'), value: t.courierFeesDeductedFromCod },
+        { label: L('المستحق من الشركة', 'Courier due'), value: t.courierDue, note: L('صافي: المحصّل − الأجر المخصوم · إجمالي: المحصّل', 'NET: collected − deducted fee · GROSS: collected') },
+        { label: L('أجور تُدفع منفصلاً (إجمالي)', 'Courier fees payable separately (GROSS)'), value: t.courierFeesPayableSeparately },
+        { label: L('دفعات الأجور المسجلة', 'Fee payments recorded'), value: t.courierFeePayments },
+        { label: L('أجور متبقية', 'Fees outstanding'), value: t.courierFeesOutstanding },
+      ],
+    },
+    {
+      title: L('الرصيد والمركز', 'Balance and position'),
+      tone: 'ok',
+      rows: [
+        { label: L('التحويلات المستلمة والمخصصة', 'Transfers received (allocated)'), value: t.transfersReceived },
+        { label: L('المتبقي على الشركة', 'Merchant outstanding'), value: t.merchantOutstanding, note: L('المستحق − التحويلات المخصصة', 'Courier due − allocated transfers') },
+        { label: L('المركز الصافي', 'Net position'), value: t.netPosition, note: L('المتبقي على الشركة − الأجور المتبقية (مجموع التزامين منفصلين)', 'Merchant outstanding − fees outstanding (sum of two separate obligations)') },
+      ],
+    },
   ];
 
   return (
@@ -96,15 +115,24 @@ export default async function CourierStatementPage({ params, searchParams }: { p
       </Card>
 
       <Card title={L('الإجماليات', 'Totals')}>
-        <dl className="form-row" style={{ alignItems: 'start' }}>
-          {totalRows.map((r) => (
-            <div key={r.label} className="kpi" style={{ minWidth: 220 }}>
-              <dt className="kpi-label">{r.label}</dt>
-              <dd style={{ margin: 0 }}>{r.value === null ? <span className="muted">{L('لم يُؤكَّد بعد', 'Not confirmed yet')}</span> : <Money value={r.value} locale={locale} />}</dd>
-              {r.note && <div className="field-help">{r.note}</div>}
-            </div>
+        <div className="stack">
+          {totalGroups.map((g) => (
+            <section key={g.title} className="stack">
+              <h3 className="fa-group-title">{g.title}</h3>
+              <dl className="fa-group">
+                {g.rows.map((r) => (
+                  <div key={r.label} className={`fa-metric is-${g.tone}`}>
+                    <dt className="kpi-label">{r.label}</dt>
+                    <dd className="kpi" style={{ margin: 0 }}>
+                      {r.value === null ? <span className="muted">{L('لم يُؤكَّد بعد', 'Not confirmed yet')}</span> : <Money value={r.value} locale={locale} />}
+                    </dd>
+                    {r.note && <div className="fa-metric-hint">{r.note}</div>}
+                  </div>
+                ))}
+              </dl>
+            </section>
           ))}
-        </dl>
+        </div>
         <p className="field-help">{L(`عدد الشحنات: ${st.shipments.length}`, `Shipments: ${st.shipments.length}`)}</p>
       </Card>
 
@@ -204,7 +232,7 @@ export default async function CourierStatementPage({ params, searchParams }: { p
       )}
 
       <Card title={L('الاتفاقيات', 'Agreements')}>
-        <ul style={{ paddingInlineStart: 18 }}>
+        <ul className="fa-timeline">
           {courier.agreements.map((a) => (
             <li key={a.id}>
               {pickMode(a.settlementMode, locale)} · <Money value={a.serviceFee.toFixed(0)} locale={locale} /> · {fmtDateTime(a.effectiveFrom, locale)}

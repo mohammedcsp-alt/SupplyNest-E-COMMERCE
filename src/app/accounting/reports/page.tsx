@@ -125,6 +125,20 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </Card>
       ) : (
         <Card title={`${typeLabels[report.type]} — ${L('الصفوف', 'rows')}: ${report.rows.length}`}>
+          {report.rows.length > 0 && (
+            <div className="fa-metric-grid" style={{ marginBlockEnd: 16 }}>
+              {report.columns
+                .filter((c) => c.kind === 'money')
+                .map((c) => (
+                  <div key={c.key} className="fa-metric is-info">
+                    <span className="kpi-label">{locale === 'ar' ? c.label.ar : c.label.en}</span>
+                    <span className="kpi">
+                      <Money value={report.totals[c.key]} locale={locale} />
+                    </span>
+                  </div>
+                ))}
+            </div>
+          )}
           {report.rows.length === 0 ? (
             <EmptyState>{L('لا توجد بيانات لهذه المرشحات.', 'No data for these filters.')}</EmptyState>
           ) : (

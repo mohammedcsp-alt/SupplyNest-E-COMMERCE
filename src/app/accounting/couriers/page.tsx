@@ -31,23 +31,25 @@ export default async function CouriersPage() {
 
       <Card title={L('ما الفرق بين الطريقتين؟', 'What is the difference between the two methods?')}>
         <div className="stack">
-          <div>
-            <strong>{L('صافي (NET_DEDUCTION)', 'NET (NET_DEDUCTION)')}</strong>
-            <p>
-              {L(
-                'الشركة تحصّل COD من العميل، تخصم أجرها منه، وتحوّل الباقي. لا توجد دفعة أجر منفصلة لهذه الشحنة.',
-                'The courier collects COD from the customer, deducts its own fee, and transfers the rest. There is no separate fee payment for that shipment.',
-              )}
-            </p>
-          </div>
-          <div>
-            <strong>{L('إجمالي (GROSS_REMITTANCE)', 'GROSS (GROSS_REMITTANCE)')}</strong>
-            <p>
-              {L(
-                'الشركة تحوّل كامل COD دون خصم. أجر الشركة يُدفع منفصلاً عبر "دفعة أجور" ويُسجَّل كسجل مستقل.',
-                'The courier transfers the full COD without deduction. Its fee is paid separately through a fee payment record.',
-              )}
-            </p>
+          <div className="fa-metric-grid">
+            <div className="fa-metric is-info">
+              <span className="fa-metric-title">{L('صافي (NET_DEDUCTION)', 'NET (NET_DEDUCTION)')}</span>
+              <p className="fa-metric-hint">
+                {L(
+                  'الشركة تحصّل COD من العميل، تخصم أجرها منه، وتحوّل الباقي. لا توجد دفعة أجر منفصلة لهذه الشحنة.',
+                  'The courier collects COD from the customer, deducts its own fee, and transfers the rest. There is no separate fee payment for that shipment.',
+                )}
+              </p>
+            </div>
+            <div className="fa-metric is-warn">
+              <span className="fa-metric-title">{L('إجمالي (GROSS_REMITTANCE)', 'GROSS (GROSS_REMITTANCE)')}</span>
+              <p className="fa-metric-hint">
+                {L(
+                  'الشركة تحوّل كامل COD دون خصم. أجر الشركة يُدفع منفصلاً عبر "دفعة أجور" ويُسجَّل كسجل مستقل.',
+                  'The courier transfers the full COD without deduction. Its fee is paid separately through a fee payment record.',
+                )}
+              </p>
+            </div>
           </div>
           <p className="field-help">
             {L(

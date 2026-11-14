@@ -25,19 +25,23 @@ export default async function ReconciliationPage() {
       <PageHeader title={L('المطابقة', 'Reconciliation')} subtitle={L('أربع قوائم منفصلة. لا تُدمج الفروقات في رقم واحد.', 'Four separate lists. Differences are never merged into one number.')} />
       <AccountingNav locale={locale} current="/accounting/reconciliation" />
 
-      <div className="card-grid">
-        <Card title={L('تحويلات غير مخصصة', 'Transfers not fully allocated')}>
-          <p className="kpi" dir="ltr">{rec.unallocatedTransfers.length}</p>
-        </Card>
-        <Card title={L('فروقات التحصيل', 'Collection variances')}>
-          <p className="kpi" dir="ltr">{rec.collectionVariances.length}</p>
-        </Card>
-        <Card title={L('شحنات بدون تحصيل مؤكد', 'Shipments without confirmed collection')}>
-          <p className="kpi" dir="ltr">{rec.uncollectedShipments.length}</p>
-        </Card>
-        <Card title={L('التعديلات المسجلة', 'Adjustments recorded')}>
-          <p className="kpi" dir="ltr">{rec.adjustmentsRecorded}</p>
-        </Card>
+      <div className="fa-metric-grid">
+        <div className="fa-metric is-warn">
+          <span className="kpi-label">{L('تحويلات غير مخصصة', 'Transfers not fully allocated')}</span>
+          <span className="kpi" dir="ltr">{rec.unallocatedTransfers.length}</span>
+        </div>
+        <div className="fa-metric is-danger">
+          <span className="kpi-label">{L('فروقات التحصيل', 'Collection variances')}</span>
+          <span className="kpi" dir="ltr">{rec.collectionVariances.length}</span>
+        </div>
+        <div className="fa-metric is-warn">
+          <span className="kpi-label">{L('شحنات بدون تحصيل مؤكد', 'Shipments without confirmed collection')}</span>
+          <span className="kpi" dir="ltr">{rec.uncollectedShipments.length}</span>
+        </div>
+        <div className="fa-metric is-info">
+          <span className="kpi-label">{L('التعديلات المسجلة', 'Adjustments recorded')}</span>
+          <span className="kpi" dir="ltr">{rec.adjustmentsRecorded}</span>
+        </div>
       </div>
 
       <Card title={L('1. تحويلات غير مخصصة بالكامل', '1. Transfers not fully allocated')}>
@@ -110,7 +114,7 @@ export default async function ReconciliationPage() {
         {rec.uncollectedShipments.length === 0 ? (
           <EmptyState>{L('لا توجد.', 'None.')}</EmptyState>
         ) : (
-          <ul style={{ paddingInlineStart: 18, lineHeight: 2 }}>
+          <ul className="fa-timeline">
             {rec.uncollectedShipments.map((s) => (
               <li key={s.shipmentId}>
                 <Link href={`/accounting/shipments/${s.shipmentId}`} dir="ltr">{s.orderNumber}</Link> — {s.courier}

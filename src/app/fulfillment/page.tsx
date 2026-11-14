@@ -50,7 +50,7 @@ export default async function FulfillmentQueuePage({ searchParams }: { searchPar
         )}
       />
 
-      <Card>
+      <Card title={L('التصفية', 'Filters')}>
         <form method="get" className="form-row" aria-label={L('تصفية قائمة التجهيز', 'Filter the preparation queue')}>
           <div className="field">
             <label htmlFor="f-status">{L('الحالة', 'Status')}</label>
@@ -103,7 +103,20 @@ export default async function FulfillmentQueuePage({ searchParams }: { searchPar
         </p>
       </Card>
 
-      <Card>
+      <Card
+        title={L('قائمة المهام', 'Job queue')}
+        actions={
+          <span className="fa-count">
+            {L('عدد المهام:', 'Jobs:')} <strong dir="ltr">{total}</strong>
+          </span>
+        }
+      >
+        <p className="field-help">
+          {L(
+            'تظهر كل المهام، بما فيها المهام القديمة غير المكتملة. الترتيب الافتراضي: الأحدث أولاً.',
+            'All jobs are listed, including older unfinished ones. Default order: newest first.',
+          )}
+        </p>
         {jobs.length === 0 ? (
           <EmptyState>{L('لا توجد مهام تجهيز.', 'No preparation jobs.')}</EmptyState>
         ) : (

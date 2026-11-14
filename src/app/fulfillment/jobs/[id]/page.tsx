@@ -4,13 +4,14 @@ import { notFound } from 'next/navigation';
 import { ActionButton, ApiForm } from '@/components/forms';
 import { Alert, Card, EmptyState, ForbiddenNotice, LoginRequired, PageHeader, StatusBadge } from '@/components/ui';
 import { EVENT_LABEL, FULFILLMENT_AR, fmtDateTime, personName } from '@/components/ops';
-import { currentLocale, localized } from '@/lib/i18n';
+import { currentLocale, localized, type Locale } from '@/lib/i18n';
 import { getCurrentUser } from '@/lib/session';
 import { userWithPermission } from '@/lib/page-guards';
 import { PERMISSIONS } from '@/lib/rbac';
 import { db } from '@/lib/db';
 import { AppError } from '@/lib/errors';
 import { FULFILLMENT_LABELS, getJobForActor } from '@/modules/fulfillment/service';
+import type { FulfillmentStatus } from '@prisma/client';
 import { FulfillmentLinesForm, type LineInput } from './FulfillmentLinesForm';
 
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,9 @@ export const dynamic = 'force-dynamic';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Address = { recipientName?: string; recipientPhone?: string; governorate?: string; area?: string | null; details?: string };
+
+/** Display order of the happy path only. DISCREPANCY_HOLD sits inside checking and CANCELLED is outside the path. */
+const STAGE_ORDER = ['PENDING_ASSIGNMENT', 'ASSIGNED', 'PICKING', 'PICKED', 'CHECKING', 'CHECKED', 'PACKING', 'PACKED', 'HANDED_OVER'] as const;
 
 export default async function FulfillmentJobPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ done?: string }> }) {
   const locale = await currentLocale();
@@ -139,28 +143,34 @@ export default async function FulfillmentJobPage({ params, searchParams }: { par
           <StatusBadge status={status} /> <strong>{label}</strong>
         </p>
         <p>{guidance[status]}</p>
-        <dl className="kv" style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '6px 16px' }}>
-          <dt>{L('الملتقط', 'Picker')}</dt>
-          <dd>{job.assignedPickerId ? nameOf.get(job.assignedPickerId) ?? '—' : L('غير مكلّف', 'Unassigned')}</dd>
-          <dt>{L('المدقق', 'Checker')}</dt>
-          <dd>{job.assignedCheckerId ? nameOf.get(job.assignedCheckerId) ?? '—' : L('غير مكلّف', 'Unassigned')}</dd>
-          <dt>{L('طبعات المستند', 'Document prints')}</dt>
-          <dd>{job.prepPrintCount}</dd>
-        </dl>
+        <StageSteps status={status} locale={locale} />
       </Card>
 
-      <Card title={L('الطلب والتوصيل', 'Order and delivery')}>
-        <dl style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '6px 16px' }}>
-          <dt>{L('المستلم', 'Recipient')}</dt>
-          <dd>{address.recipientName ?? '—'} {address.recipientPhone ? <span dir="ltr">{address.recipientPhone}</span> : null}</dd>
-          <dt>{L('المحافظة / المنطقة', 'Governorate / area')}</dt>
-          <dd>{[address.governorate, address.area].filter(Boolean).join(' / ') || '—'}</dd>
-          <dt>{L('العنوان', 'Address')}</dt>
-          <dd>{address.details ?? '—'}</dd>
-          <dt>{L('ملاحظة العميل', 'Customer note')}</dt>
-          <dd>{job.order.customerNote ?? '—'}</dd>
-        </dl>
-      </Card>
+      <div className="card-grid">
+        <Card title={L('الموظفون والطباعة', 'Staff and prints')}>
+          <dl className="kv">
+            <dt>{L('الملتقط', 'Picker')}</dt>
+            <dd>{job.assignedPickerId ? nameOf.get(job.assignedPickerId) ?? '—' : L('غير مكلّف', 'Unassigned')}</dd>
+            <dt>{L('المدقق', 'Checker')}</dt>
+            <dd>{job.assignedCheckerId ? nameOf.get(job.assignedCheckerId) ?? '—' : L('غير مكلّف', 'Unassigned')}</dd>
+            <dt>{L('طبعات المستند', 'Document prints')}</dt>
+            <dd>{job.prepPrintCount}</dd>
+          </dl>
+        </Card>
+
+        <Card title={L('الطلب والتوصيل', 'Order and delivery')}>
+          <dl className="kv">
+            <dt>{L('المستلم', 'Recipient')}</dt>
+            <dd>{address.recipientName ?? '—'} {address.recipientPhone ? <span dir="ltr">{address.recipientPhone}</span> : null}</dd>
+            <dt>{L('المحافظة / المنطقة', 'Governorate / area')}</dt>
+            <dd>{[address.governorate, address.area].filter(Boolean).join(' / ') || '—'}</dd>
+            <dt>{L('العنوان', 'Address')}</dt>
+            <dd>{address.details ?? '—'}</dd>
+            <dt>{L('ملاحظة العميل', 'Customer note')}</dt>
+            <dd>{job.order.customerNote ?? '—'}</dd>
+          </dl>
+        </Card>
+      </div>
 
       <Card title={L('بنود الطلب', 'Lines')}>
         <div className="table-wrap">
@@ -351,7 +361,7 @@ export default async function FulfillmentJobPage({ params, searchParams }: { par
         {job.events.length === 0 ? (
           <EmptyState>{L('لا توجد أحداث.', 'No events yet.')}</EmptyState>
         ) : (
-          <ol style={{ paddingInlineStart: 18 }}>
+          <ol className="fa-timeline">
             {job.events.map((e, i) => (
               <li key={`${e.occurredAt.toISOString()}-${i}`}>
                 <span className="muted" dir="ltr">{fmtDateTime(e.occurredAt, locale)}</span> — {EVENT_LABEL[e.eventType] ? (locale === 'ar' ? EVENT_LABEL[e.eventType].ar : EVENT_LABEL[e.eventType].en) : e.eventType}
@@ -361,5 +371,33 @@ export default async function FulfillmentJobPage({ params, searchParams }: { par
         )}
       </Card>
     </section>
+  );
+}
+
+/** Read-only progress strip. Shows where the job is on the happy path; transitions stay in the server actions. */
+function StageSteps({ status, locale }: { status: FulfillmentStatus; locale: Locale }) {
+  const order: readonly string[] = STAGE_ORDER;
+  const at = status === 'DISCREPANCY_HOLD' ? order.indexOf('CHECKING') : order.indexOf(status);
+  const cancelled = status === 'CANCELLED';
+  const ar = locale === 'ar';
+  return (
+    <>
+      <ol className="fa-stages" aria-label={ar ? 'مراحل المهمة' : 'Job stages'}>
+        {STAGE_ORDER.map((s, i) => {
+          const done = at >= 0 && i < at;
+          const current = i === at;
+          const cls = `fa-stage${done ? ' is-done' : ''}${current ? ' is-current' : ''}`;
+          return (
+            <li key={s} className={cls} aria-current={current ? 'step' : undefined}>
+              {ar ? FULFILLMENT_AR[s] : FULFILLMENT_LABELS[s]}
+            </li>
+          );
+        })}
+      </ol>
+      {status === 'DISCREPANCY_HOLD' && (
+        <p className="field-help fa-stage-note">{ar ? 'المهمة معلّقة عند مرحلة التدقيق بسبب فرق في الكميات.' : 'The job is on hold at the checking stage because of a quantity difference.'}</p>
+      )}
+      {cancelled && <p className="field-help fa-stage-note">{ar ? 'المهمة ملغاة وخارج مسار التجهيز.' : 'The job is cancelled and outside the preparation path.'}</p>}
+    </>
   );
 }

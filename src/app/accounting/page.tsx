@@ -70,25 +70,37 @@ export default async function AccountingDashboard() {
         </Alert>
       )}
 
-      <div className="card-grid">
-        {tiles.map((t) => (
-          <Link key={t.label} href={t.href} className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div className="kpi-label">{t.label}</div>
-            <div className="kpi" dir="ltr">{t.value}</div>
-            <div className="muted" style={{ fontSize: '0.9rem' }}>{t.hint}</div>
+      <Card title={L('ما يحتاج متابعة', 'Items needing follow-up')}>
+        <div className="fa-metric-grid">
+          {tiles.slice(1).map((t) => (
+            <Link key={t.label} href={t.href} className="fa-metric is-warn">
+              <span className="kpi-label">{t.label}</span>
+              <span className="kpi" dir="ltr">{t.value}</span>
+              <span className="fa-metric-hint">{t.hint}</span>
+            </Link>
+          ))}
+        </div>
+      </Card>
+
+      <Card title={L('الشركات', 'Couriers')}>
+        <div className="fa-metric-grid">
+          <Link href={tiles[0].href} className="fa-metric is-info">
+            <span className="kpi-label">{tiles[0].label}</span>
+            <span className="kpi" dir="ltr">{tiles[0].value}</span>
+            <span className="fa-metric-hint">{tiles[0].hint}</span>
           </Link>
-        ))}
-      </div>
+        </div>
+      </Card>
 
       <Card title={L('الصفحات', 'Pages')}>
-        <ul style={{ paddingInlineStart: 18, lineHeight: 2 }}>
-          <li><Link href="/accounting/couriers">{L('شركات التوصيل والاتفاقيات', 'Couriers and agreements')}</Link></li>
-          <li><Link href="/accounting/shipments">{L('الشحنات وتأكيد التحصيل والتعديلات', 'Shipments, collection and adjustments')}</Link></li>
-          <li><Link href="/accounting/remittances">{L('التحويلات المستلمة والتخصيص', 'Transfers received and allocation')}</Link></li>
-          <li><Link href="/accounting/reconciliation">{L('المطابقة', 'Reconciliation')}</Link></li>
-          <li><Link href="/accounting/reports">{L('التقارير والتصدير', 'Reports and exports')}</Link></li>
-          <li><Link href="/accounting/customers">{L('أجور توصيل العملاء', 'Customer delivery fees')}</Link></li>
-        </ul>
+        <div className="fa-metric-grid">
+          <Link href="/accounting/couriers" className="fa-metric is-info"><span className="fa-metric-title">{L('شركات التوصيل والاتفاقيات', 'Couriers and agreements')}</span></Link>
+          <Link href="/accounting/shipments" className="fa-metric is-info"><span className="fa-metric-title">{L('الشحنات وتأكيد التحصيل والتعديلات', 'Shipments, collection and adjustments')}</span></Link>
+          <Link href="/accounting/remittances" className="fa-metric is-info"><span className="fa-metric-title">{L('التحويلات المستلمة والتخصيص', 'Transfers received and allocation')}</span></Link>
+          <Link href="/accounting/reconciliation" className="fa-metric is-info"><span className="fa-metric-title">{L('المطابقة', 'Reconciliation')}</span></Link>
+          <Link href="/accounting/reports" className="fa-metric is-info"><span className="fa-metric-title">{L('التقارير والتصدير', 'Reports and exports')}</span></Link>
+          <Link href="/accounting/customers" className="fa-metric is-info"><span className="fa-metric-title">{L('أجور توصيل العملاء', 'Customer delivery fees')}</span></Link>
+        </div>
       </Card>
     </section>
   );

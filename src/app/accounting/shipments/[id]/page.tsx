@@ -36,21 +36,40 @@ export default async function ShipmentDetailPage({ params }: { params: Promise<{
   const reversedIds = new Set(s.adjustments.map((a) => a.reversesId).filter((x): x is string => !!x));
   const collectionOpen = f.codCollected === null && s.deliveryStatus !== 'RETURNED';
 
-  const rows: Array<{ label: string; value: string | null; note?: string }> = [
-    { label: L('قيمة البضاعة المقبولة', 'Order value (accepted goods)'), value: f.orderValue, note: L('عند التسليم للشركة، قبل التعديلات', 'At handover, before adjustments') },
-    { label: L('رسوم توصيل العميل', 'Customer delivery fee'), value: f.customerDeliveryFee, note: L('يدفعها العميل، منفصلة عن أجر الشركة', 'Paid by the customer, separate from the courier fee') },
-    { label: L('COD المتوقع', 'Expected COD'), value: f.codExpected, note: L('البضاعة + رسوم العميل ± تعديلات COD المتوقع', 'Goods + customer fee ± expected-side adjustments') },
-    { label: L('COD المحصّل (مؤكد من الشركة)', 'Collected COD (courier-confirmed)'), value: f.codCollected, note: L('غير معروف حتى يُسجَّل التحصيل', 'Unknown until collection is recorded') },
-    { label: L('الفرق (محصّل − متوقع)', 'COD variance (collected − expected)'), value: f.codVariance },
-    { label: L('أجر الشركة (لقطة)', 'Courier fee (snapshot)'), value: f.courierFeeSnapshot, note: L('من الاتفاقية السارية عند التسليم', 'From the agreement in force at handover') },
-    isNet
-      ? { label: L('أجر الشركة المخصوم من COD (صافي)', 'Courier fee deducted from COD (NET)'), value: f.courierFeeDeducted }
-      : { label: L('أجر يُدفع منفصلاً (إجمالي)', 'Courier fee payable separately (GROSS)'), value: f.courierFeePayableSeparately },
-    { label: L('المستحق من الشركة', 'Courier due'), value: f.courierDue, note: L('لا يُحسب قبل تأكيد التحصيل', 'Not computed until collection is confirmed') },
-    { label: L('التحويلات المخصصة', 'Transfers allocated'), value: f.transfersReceived },
-    { label: L('المتبقي على الشركة', 'Merchant outstanding'), value: f.merchantOutstanding },
-    { label: L('تعديلات COD المتوقع', 'Expected-side adjustments'), value: f.expectedSideAdjustments },
-    { label: L('تعديلات المستحق', 'Due-side adjustments'), value: f.dueSideAdjustments },
+  type Row = { label: string; value: string | null; note?: string };
+  const groups: Array<{ title: string; tone: 'info' | 'warn' | 'ok'; rows: Row[] }> = [
+    {
+      title: L('COD (المتوقع والمحصّل منفصلان)', 'COD (expected and collected kept separate)'),
+      tone: 'info',
+      rows: [
+        { label: L('قيمة البضاعة المقبولة', 'Order value (accepted goods)'), value: f.orderValue, note: L('عند التسليم للشركة، قبل التعديلات', 'At handover, before adjustments') },
+        { label: L('رسوم توصيل العميل', 'Customer delivery fee'), value: f.customerDeliveryFee, note: L('يدفعها العميل، منفصلة عن أجر الشركة', 'Paid by the customer, separate from the courier fee') },
+        { label: L('COD المتوقع', 'Expected COD'), value: f.codExpected, note: L('البضاعة + رسوم العميل ± تعديلات COD المتوقع', 'Goods + customer fee ± expected-side adjustments') },
+        { label: L('COD المحصّل (مؤكد من الشركة)', 'Collected COD (courier-confirmed)'), value: f.codCollected, note: L('غير معروف حتى يُسجَّل التحصيل', 'Unknown until collection is recorded') },
+        { label: L('الفرق (محصّل − متوقع)', 'COD variance (collected − expected)'), value: f.codVariance },
+      ],
+    },
+    {
+      title: L('أجر الشركة والمستحق', 'Courier fee and amount due'),
+      tone: 'warn',
+      rows: [
+        { label: L('أجر الشركة (لقطة)', 'Courier fee (snapshot)'), value: f.courierFeeSnapshot, note: L('من الاتفاقية السارية عند التسليم', 'From the agreement in force at handover') },
+        isNet
+          ? { label: L('أجر الشركة المخصوم من COD (صافي)', 'Courier fee deducted from COD (NET)'), value: f.courierFeeDeducted }
+          : { label: L('أجر يُدفع منفصلاً (إجمالي)', 'Courier fee payable separately (GROSS)'), value: f.courierFeePayableSeparately },
+        { label: L('المستحق من الشركة', 'Courier due'), value: f.courierDue, note: L('لا يُحسب قبل تأكيد التحصيل', 'Not computed until collection is confirmed') },
+      ],
+    },
+    {
+      title: L('التحويلات والرصيد والتعديلات', 'Transfers, balance and adjustments'),
+      tone: 'ok',
+      rows: [
+        { label: L('التحويلات المخصصة', 'Transfers allocated'), value: f.transfersReceived },
+        { label: L('المتبقي على الشركة', 'Merchant outstanding'), value: f.merchantOutstanding },
+        { label: L('تعديلات COD المتوقع', 'Expected-side adjustments'), value: f.expectedSideAdjustments },
+        { label: L('تعديلات المستحق', 'Due-side adjustments'), value: f.dueSideAdjustments },
+      ],
+    },
   ];
 
   return (
@@ -86,15 +105,24 @@ export default async function ShipmentDetailPage({ params }: { params: Promise<{
       </Card>
 
       <Card title={L('القيم المالية (منفصلة)', 'Financial values (separate)')}>
-        <dl className="form-row" style={{ alignItems: 'start' }}>
-          {rows.map((r) => (
-            <div key={r.label} className="kpi" style={{ minWidth: 220 }}>
-              <dt className="kpi-label">{r.label}</dt>
-              <dd style={{ margin: 0 }}>{r.value === null ? <span className="muted">{L('غير متاح بعد', 'Not yet')}</span> : <Money value={r.value} locale={locale} />}</dd>
-              {r.note && <div className="field-help">{r.note}</div>}
-            </div>
+        <div className="stack">
+          {groups.map((g) => (
+            <section key={g.title} className="stack">
+              <h3 className="fa-group-title">{g.title}</h3>
+              <dl className="fa-group">
+                {g.rows.map((r) => (
+                  <div key={r.label} className={`fa-metric is-${g.tone}`}>
+                    <dt className="kpi-label">{r.label}</dt>
+                    <dd className="kpi" style={{ margin: 0 }}>
+                      {r.value === null ? <span className="muted">{L('غير متاح بعد', 'Not yet')}</span> : <Money value={r.value} locale={locale} />}
+                    </dd>
+                    {r.note && <div className="fa-metric-hint">{r.note}</div>}
+                  </div>
+                ))}
+              </dl>
+            </section>
           ))}
-        </dl>
+        </div>
       </Card>
 
       <div className="card-grid">
@@ -222,7 +250,7 @@ export default async function ShipmentDetailPage({ params }: { params: Promise<{
         {s.financialEvents.length === 0 ? (
           <EmptyState>{L('لا توجد أحداث تحصيل.', 'No collection events.')}</EmptyState>
         ) : (
-          <ul style={{ paddingInlineStart: 18 }}>
+          <ul className="fa-timeline">
             {s.financialEvents.map((e) => (
               <li key={e.id}>
                 {fmtDateTime(e.occurredAt, locale)} — {e.eventType.replace(/_/g, ' ')} <Money value={e.amount.toFixed(0)} locale={locale} /> <span dir="ltr">{e.reference ?? ''}</span>

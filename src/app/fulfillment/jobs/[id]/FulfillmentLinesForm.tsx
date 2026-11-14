@@ -117,7 +117,7 @@ export function FulfillmentLinesForm({ jobId, mode, lines, locale }: { jobId: st
                       step={1}
                       value={current ?? ''}
                       onChange={(e) => setQty((s) => ({ ...s, [l.id]: e.target.value }))}
-                      style={{ width: 100 }}
+                      className="fa-qty-input"
                       aria-describedby={`h-${l.id}`}
                     />
                     <div id={`h-${l.id}`} className="field-help">
@@ -134,7 +134,7 @@ export function FulfillmentLinesForm({ jobId, mode, lines, locale }: { jobId: st
                           onChange={(e) => setReason((s) => ({ ...s, [l.id]: e.target.value }))}
                           maxLength={500}
                           required={needsReason}
-                          style={{ minWidth: 180 }}
+                          className="fa-reason-input"
                         />
                       ) : (
                         <span className="muted">—</span>

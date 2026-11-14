@@ -60,11 +60,13 @@ export default async function CustomerFeesPage({ searchParams }: { searchParams:
       </Card>
 
       <Card title={L('الإجمالي', 'Total')}>
-        <div className="kpi-label">{L('رسوم توصيل العملاء (المجموع)', 'Customer delivery fees (total)')}</div>
-        <div className="kpi">
-          <Money value={total} locale={locale} />
+        <div className="fa-metric is-info">
+          <span className="kpi-label">{L('رسوم توصيل العملاء (المجموع)', 'Customer delivery fees (total)')}</span>
+          <span className="kpi">
+            <Money value={total} locale={locale} />
+          </span>
+          <span className="fa-metric-hint">{L(`عدد الطلبات: ${rows.length}`, `Orders: ${rows.length}`)}</span>
         </div>
-        <p className="field-help">{L(`عدد الطلبات: ${rows.length}`, `Orders: ${rows.length}`)}</p>
       </Card>
 
       <Card>

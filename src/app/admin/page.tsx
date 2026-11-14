@@ -64,15 +64,15 @@ export default async function AdminHome() {
         </div>
       </Card>
       <Card title={L('المناطق الإدارية', 'Administration areas')}>
-        <ul className="stack" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <div className="card-grid" style={{ gap: 10 }}>
           {areas
             .filter((a) => g.user.permissions.has(a.perm))
             .map((a) => (
-              <li key={a.href}>
-                <Link href={a.href}>{L(a.ar, a.en)}</Link>
-              </li>
+              <Link key={a.href} href={a.href} className="card admin-area-tile" style={{ marginBlockEnd: 0 }}>
+                <strong>{L(a.ar, a.en)}</strong>
+              </Link>
             ))}
-        </ul>
+        </div>
       </Card>
     </>
   );

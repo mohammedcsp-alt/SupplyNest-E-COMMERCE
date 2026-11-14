@@ -89,7 +89,7 @@ export function AllocationForm({
                     placeholder="0"
                     value={amounts[c.shipmentId] ?? ''}
                     onChange={(e) => setAmounts((s) => ({ ...s, [c.shipmentId]: e.target.value }))}
-                    style={{ width: 140 }}
+                    className="fa-amount-input"
                   />
                   <div className="field-help">{L('عدد صحيح، بدون فواصل عشرية', 'Whole number, no decimals')}</div>
                 </td>

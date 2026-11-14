@@ -13,7 +13,7 @@ export function AccountingNav({ locale, current }: { locale: Locale; current?: s
     { href: '/accounting/customers', ar: 'أجور توصيل العملاء', en: 'Customer delivery fees' },
   ];
   return (
-    <nav aria-label={locale === 'ar' ? 'قسم الحسابات' : 'Accounting sections'} className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+    <nav aria-label={locale === 'ar' ? 'قسم الحسابات' : 'Accounting sections'} className="fa-nav">
       {items.map((i) => (
         <Link key={i.href} href={i.href} className={`btn btn-small${current === i.href ? ' btn-primary' : ''}`} aria-current={current === i.href ? 'page' : undefined}>
           {locale === 'ar' ? i.ar : i.en}

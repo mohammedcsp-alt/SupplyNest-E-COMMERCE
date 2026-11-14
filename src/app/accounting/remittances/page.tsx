@@ -110,7 +110,7 @@ export default async function RemittancesPage() {
         {remittances.every((r) => r.allocations.length === 0) ? (
           <EmptyState>{L('لا توجد تخصيصات.', 'No allocations.')}</EmptyState>
         ) : (
-          <ul style={{ paddingInlineStart: 18, lineHeight: 2 }}>
+          <ul className="fa-timeline">
             {remittances.flatMap((r) =>
               r.allocations.map((a) => (
                 <li key={a.id}>
