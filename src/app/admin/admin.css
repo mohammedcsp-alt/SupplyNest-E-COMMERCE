@@ -1,0 +1,52 @@
+/* Administration shared primitives (V3.3 AD-03 to AD-13).
+   Module-specific rules live in src/app/admin/css/<module>.css. Logical properties only (RTL safe). */
+
+.adm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-block-end: 14px; }
+.adm-head h1 { margin: 0; font-size: 1.5rem; }
+.adm-head .muted { margin: 4px 0 0; }
+.adm-head-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.adm-section { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 16px; margin-block-end: 16px; box-shadow: var(--shadow); }
+.adm-section > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-block-end: 12px; }
+.adm-section > header h2 { margin: 0; font-size: 1.05rem; }
+.adm-section > header .muted { margin: 0; font-size: 0.88rem; }
+
+/* Filters and search: one row on wide screens, stacked on phones. */
+.adm-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-block-end: 14px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 12px; }
+.adm-filters .field { margin: 0; min-inline-size: 150px; flex: 1 1 150px; }
+.adm-filters .field label { font-size: 0.82rem; color: var(--c-muted); }
+.adm-filters .adm-filter-actions { display: flex; gap: 8px; flex: 0 0 auto; }
+
+/* KPI tiles. */
+.adm-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-block-end: 16px; }
+.adm-kpi { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 12px 14px; display: grid; gap: 4px; }
+.adm-kpi strong { font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.adm-kpi span { color: var(--c-muted); font-size: 0.86rem; }
+.adm-kpi.is-warn { border-inline-start: 4px solid var(--c-warn, #b7791f); }
+
+/* Tables used by administration: right-aligned numbers, no wrapping of codes, row hover. */
+.adm-table table { font-size: 0.92rem; }
+.adm-table th { white-space: nowrap; }
+.adm-table td { vertical-align: middle; }
+.adm-table tbody tr:hover { background: var(--c-surface-2); }
+.adm-table .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.adm-table .code { font-family: ui-monospace, Consolas, monospace; direction: ltr; text-align: start; white-space: nowrap; }
+.adm-row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* Pager at the foot of a list. */
+.adm-pager { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-block-start: 12px; font-size: 0.9rem; color: var(--c-muted); }
+
+/* Destructive or irreversible actions are wrapped in a disclosure that states the consequence first. */
+.adm-confirm { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 8px 10px; background: var(--c-surface-2); }
+.adm-confirm > summary { cursor: pointer; font-weight: 600; }
+.adm-confirm[open] > summary { margin-block-end: 8px; }
+
+/* Empty states inside tables and sections. */
+.adm-empty { padding: 18px; text-align: center; color: var(--c-muted); }
+
+@media (max-width: 640px) {
+  .adm-filters .field { flex-basis: 100%; min-inline-size: 0; }
+  .adm-filters .adm-filter-actions { flex-basis: 100%; }
+  .adm-filters .adm-filter-actions .btn { flex: 1 1 auto; }
+  .adm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

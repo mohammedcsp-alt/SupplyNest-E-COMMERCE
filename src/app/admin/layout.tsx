@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { currentLocale, localized } from '@/lib/i18n';
 import { getCurrentUser } from '@/lib/session';
 import { PERMISSIONS } from '@/lib/rbac';
+import './admin.css';
 
 export const dynamic = 'force-dynamic';
 
