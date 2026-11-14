@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { PageHeader, Card, Badge, EmptyState, Pagination } from '@/components/ui';
+import { PageHeader, Badge, EmptyState, Pagination } from '@/components/ui';
 import { formatDateTime } from '@/lib/time';
 import { PERMISSIONS } from '@/lib/rbac';
 import { db } from '@/lib/db';
@@ -7,6 +7,7 @@ import { getSetting } from '@/lib/settings';
 import { availableOf } from '@/modules/inventory/inventory';
 import { ALERT_TYPES_LIST } from '@/modules/admin/constants';
 import { gatePage } from '../_lib/gate';
+import '../css/operations.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,29 +61,47 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
     take: 200,
     include: { sku: { select: { sku: true, nameEn: true } } },
   });
+  const filtered = Boolean(q || onlyLow);
 
   return (
-    <>
+    <div className="ops ops-inventory">
       <PageHeader title={L('المخزون', 'Inventory')} subtitle={L(`الفعلي والمحجوز والمتاح. منخفض = المتاح ≤ ${lowThreshold}. قديم بعد ${staleHours} ساعة.`, `Physical, reserved and available. Low = available ≤ ${lowThreshold}. Stale after ${staleHours} hours.`)} />
-      <form method="GET" className="form-row" role="search" style={{ marginBlockEnd: 16 }}>
+
+      <div className="adm-kpis">
+        <div className="adm-kpi">
+          <span>{filtered ? L('رموز SKU المطابقة', 'SKUs matching') : L('كل رموز SKU', 'All SKUs')}</span>
+          <strong>{total}</strong>
+        </div>
+        <div className={openAlerts.length > 0 ? 'adm-kpi is-warn' : 'adm-kpi'}>
+          <span>{L('التنبيهات المفتوحة', 'Open alerts')}</span>
+          <strong>{openAlerts.length}</strong>
+        </div>
+      </div>
+
+      <form method="GET" className="adm-filters" role="search">
         <div className="field">
           <label htmlFor="inv-q">{L('بحث برمز SKU', 'Search SKU')}</label>
           <input id="inv-q" name="q" type="search" defaultValue={q} maxLength={64} />
         </div>
-        <div className="field" style={{ flex: '0 0 auto' }}>
-          <label className="row" style={{ fontWeight: 400 }}>
+        <div className="field ops-check">
+          <label>
             <input type="checkbox" name="low" value="1" defaultChecked={onlyLow} /> {L('المخزون المنخفض فقط', 'Low stock only')}
           </label>
         </div>
-        <div className="field">
+        <div className="adm-filter-actions">
           <button type="submit" className="btn btn-primary">{L('تصفية', 'Filter')}</button>
+          {filtered && (
+            <Link className="btn" href="/admin/inventory">
+              {L('مسح', 'Clear')}
+            </Link>
+          )}
         </div>
       </form>
 
       {pageRows.length === 0 ? (
-        <EmptyState>{L('لا توجد نتائج.', 'No rows.')}</EmptyState>
+        <div className="adm-empty">{L('لا توجد نتائج.', 'No rows.')}</div>
       ) : (
-        <div className="table-wrap">
+        <div className="table-wrap adm-table">
           <table>
             <thead>
               <tr>
@@ -94,25 +113,43 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
                 <th>{L('تعارض', 'Conflict')}</th>
                 <th>{L('الحداثة', 'Freshness')}</th>
                 <th>{L('التنبيهات', 'Alerts')}</th>
-                <th>{L('فتح', 'Open')}</th>
+                <th>
+                  <span className="sr-only">{L('فتح', 'Open')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {pageRows.map((r) => (
-                <tr key={r.id}>
-                  <td dir="ltr">{r.sku}</td>
+                <tr key={r.id} className={r.conflict ? 'ops-row-conflict' : undefined}>
+                  <td className="code">{r.sku}</td>
                   <td>{r.nameEn}</td>
                   <td className="num">{r.physical}</td>
                   <td className="num">{r.reserved}</td>
                   <td className="num">{r.available}</td>
-                  <td>{r.conflict ? <Badge tone="danger">{L('تعارض', 'Conflict')}</Badge> : '—'}</td>
+                  <td>{r.conflict ? <Badge tone="danger">{L('تعارض', 'Conflict')}</Badge> : <span className="muted">—</span>}</td>
                   <td>
                     <Badge tone={r.freshness === 'FRESH' ? 'ok' : 'warn'}>{r.freshness}</Badge>
-                    {r.ts && <div className="muted" style={{ fontSize: '0.8rem' }}>{formatDateTime(r.ts, locale)}</div>}
+                    {r.ts && <div className="ops-sub">{formatDateTime(r.ts, locale)}</div>}
                   </td>
-                  <td>{r.alerts.length ? r.alerts.map((a) => <Badge key={a} tone="warn">{a.replace(/_/g, ' ')}</Badge>) : '—'}</td>
                   <td>
-                    <Link href={`/admin/catalog/${r.id}`}>{L('تفاصيل', 'Details')}</Link>
+                    {r.alerts.length ? (
+                      <div className="ops-badges">
+                        {r.alerts.map((a) => (
+                          <Badge key={a} tone="warn">
+                            {a.replace(/_/g, ' ')}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="adm-row-actions">
+                      <Link className="btn btn-small" href={`/admin/catalog/${r.id}`}>
+                        {L('تفاصيل', 'Details')}
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -122,9 +159,14 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
       )}
       <Pagination page={page} pageSize={PAGE_SIZE} total={total} basePath="/admin/inventory" params={{ q, low: onlyLow ? '1' : undefined }} labels={{ prev: L('السابق', 'Previous'), next: L('التالي', 'Next'), of: 'of' }} />
 
-      <Card title={L('التنبيهات المفتوحة', 'Open alerts')}>
-        <p className="muted">{L('التنبيهات معلوماتية. لا يوجد حل يدوي لها من هذه الشاشة؛ تُحدَّث تلقائياً عند تغيّر الظروف.', 'Alerts are informational. There is no manual resolve; they refresh automatically when conditions change.')}</p>
-        <div className="row" style={{ marginBlockEnd: 10 }}>
+      <section className="adm-section" aria-labelledby="inv-alerts-h">
+        <header>
+          <div>
+            <h2 id="inv-alerts-h">{L('التنبيهات المفتوحة', 'Open alerts')}</h2>
+            <p className="muted">{L('التنبيهات معلوماتية. لا يوجد حل يدوي لها من هذه الشاشة؛ تُحدَّث تلقائياً عند تغيّر الظروف.', 'Alerts are informational. There is no manual resolve; they refresh automatically when conditions change.')}</p>
+          </div>
+        </header>
+        <div className="ops-badges" style={{ marginBlockEnd: 12 }}>
           {ALERT_TYPES_LIST.map((t) => (
             <Badge key={t} tone={openAlerts.some((a) => a.alertType === t) ? 'warn' : 'neutral'}>
               {t.replace(/_/g, ' ')}: {openAlerts.filter((a) => a.alertType === t).length}
@@ -132,9 +174,9 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
           ))}
         </div>
         {openAlerts.length === 0 ? (
-          <EmptyState>{L('لا توجد تنبيهات مفتوحة.', 'No open alerts.')}</EmptyState>
+          <div className="adm-empty">{L('لا توجد تنبيهات مفتوحة.', 'No open alerts.')}</div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap adm-table">
             <table>
               <thead>
                 <tr>
@@ -148,7 +190,7 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
                 {openAlerts.map((a) => (
                   <tr key={a.id}>
                     <td>{a.alertType.replace(/_/g, ' ')}</td>
-                    <td dir="ltr">{a.sku.sku}</td>
+                    <td className="code">{a.sku.sku}</td>
                     <td>{a.sku.nameEn}</td>
                     <td>{formatDateTime(a.detectedAt, locale)}</td>
                   </tr>
@@ -157,10 +199,11 @@ export default async function AdminInventory({ searchParams }: { searchParams: P
             </table>
           </div>
         )}
-      </Card>
+      </section>
+
       {user.permissions.has(PERMISSIONS.INVENTORY_ADJUST) && (
-        <p className="muted">{L('للتعديل اليدوي افتح SKU من الجدول واستخدم نموذج تعديل المخزون.', 'For manual adjustments open the SKU and use the stock adjustment form.')}</p>
+        <p className="ops-note">{L('للتعديل اليدوي افتح SKU من الجدول واستخدم نموذج تعديل المخزون.', 'For manual adjustments open the SKU and use the stock adjustment form.')}</p>
       )}
-    </>
+    </div>
   );
 }

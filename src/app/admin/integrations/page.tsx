@@ -1,4 +1,5 @@
-import { PageHeader, Card, Badge, Alert } from '@/components/ui';
+import '../css/system.css';
+import { Badge, Alert } from '@/components/ui';
 import { PERMISSIONS } from '@/lib/rbac';
 import { config } from '@/lib/config';
 import { db } from '@/lib/db';
@@ -26,21 +27,48 @@ export default async function AdminIntegrations() {
 
   return (
     <>
-      <PageHeader title={L('التكاملات (WMS)', 'Integrations (WMS)')} subtitle={L('توثيق فقط. لا يوجد اتصال شبكي من هذه الصفحة.', 'Documentation only. This page makes no network calls.')} />
+      <div className="adm-head">
+        <div>
+          <h1>{L('التكاملات (WMS)', 'Integrations (WMS)')}</h1>
+          <p className="muted">{L('توثيق فقط. لا يوجد اتصال شبكي من هذه الصفحة.', 'Documentation only. This page makes no network calls.')}</p>
+        </div>
+      </div>
+
       <Alert tone={enabled ? 'warn' : 'ok'}>
         {L(
           `تكامل WMS: ${enabled ? 'مفعّل في الإعدادات (غير مدعوم في V1)' : 'معطّل (FEATURE_FLAG_WMS_INTEGRATION=false)'}.`,
           `WMS integration: ${enabled ? 'enabled in configuration (not supported in V1)' : 'DISABLED (FEATURE_FLAG_WMS_INTEGRATION=false)'}.`,
         )}
       </Alert>
-      <Card title={L('صندوق التكامل الصادر', 'Integration outbox')}>
+
+      <div className="adm-kpis">
+        <div className={outboxCount > 0 ? 'adm-kpi is-warn' : 'adm-kpi'}>
+          <strong>{outboxCount}</strong>
+          <span>{L('رسائل في صندوق التكامل الصادر', 'Rows in integration outbox')}</span>
+        </div>
+        <div className="adm-kpi">
+          <strong>{CONTRACTS.length}</strong>
+          <span>{L('العقود التجريبية', 'Mock contracts')}</span>
+        </div>
+      </div>
+
+      <section className="adm-section">
+        <header>
+          <h2>{L('صندوق التكامل الصادر', 'Integration outbox')}</h2>
+        </header>
         <p>
           {L('عدد الرسائل في integration_outbox:', 'Rows in integration_outbox:')} <strong>{outboxCount}</strong>
         </p>
-        <p className="muted">{L('يجب أن يكون الرقم صفراً طالما التكامل معطّل.', 'This should be zero while the integration is disabled.')}</p>
-      </Card>
-      <Card title={L('العقود التجريبية (المواصفات القسم 10)', 'Mock contracts (spec section 10)')}>
-        <div className="table-wrap">
+        <p className="adm-note" style={{ margin: 0 }}>
+          {L('يجب أن يكون الرقم صفراً طالما التكامل معطّل.', 'This should be zero while the integration is disabled.')}
+        </p>
+      </section>
+
+      <section className="adm-section">
+        <header>
+          <h2>{L('العقود التجريبية (المواصفات القسم 10)', 'Mock contracts (spec section 10)')}</h2>
+        </header>
+        <div className="table-wrap adm-table">
           <table>
             <thead>
               <tr>
@@ -53,7 +81,7 @@ export default async function AdminIntegrations() {
             <tbody>
               {CONTRACTS.map((c) => (
                 <tr key={c.name}>
-                  <td><code>{c.name}</code></td>
+                  <td className="adm-code-cell">{c.name}</td>
                   <td>{c.direction}</td>
                   <td>{L(c.purpose.ar, c.purpose.en)}</td>
                   <td>
@@ -64,7 +92,7 @@ export default async function AdminIntegrations() {
             </tbody>
           </table>
         </div>
-      </Card>
+      </section>
     </>
   );
 }

@@ -1,4 +1,5 @@
-import { PageHeader, Card, Badge, EmptyState, Alert } from '@/components/ui';
+import '../css/system.css';
+import { Badge, EmptyState, Alert } from '@/components/ui';
 import { ActionButton } from '@/components/forms';
 import { formatDateTime } from '@/lib/time';
 import { PERMISSIONS } from '@/lib/rbac';
@@ -13,33 +14,88 @@ export default async function AdminBackup() {
   const { L, locale, user } = g;
   const runs = await listBackupRuns();
   const canRestore = user.permissions.has(PERMISSIONS.BACKUP_RESTORE);
+  const succeeded = runs.filter((r) => r.status === 'SUCCEEDED' || r.status === 'PASSED').length;
+  const failed = runs.filter((r) => r.status === 'FAILED').length;
 
   return (
     <>
-      <PageHeader title={L('النسخ الاحتياطي', 'Backup')} subtitle={L('النسخ تُنشأ بـ pg_dump داخل حاوية Docker المحلية. يتطلب تشغيل Docker Desktop.', 'Backups use pg_dump inside the local Docker container. Docker Desktop must be running.')} />
+      <div className="adm-head">
+        <div>
+          <h1>{L('النسخ الاحتياطي', 'Backup')}</h1>
+          <p className="muted">
+            {L(
+              'النسخ تُنشأ بـ pg_dump داخل حاوية Docker المحلية. يتطلب تشغيل Docker Desktop.',
+              'Backups use pg_dump inside the local Docker container. Docker Desktop must be running.',
+            )}
+          </p>
+        </div>
+      </div>
+
       <Alert tone="warn">
         {L(
           `اختبار الاستعادة يستخدم قاعدة بيانات مؤقتة باسم ${SCRATCH_DATABASE} فقط. لا يُعدِّل قاعدة التطوير الحالية ويحذف القاعدة المؤقتة بعد الاختبار.`,
           `The restore test uses a scratch database named ${SCRATCH_DATABASE} only. It never modifies the development database and drops the scratch database afterwards.`,
         )}
       </Alert>
-      <Card title={L('إجراءات', 'Actions')}>
-        <div className="row">
-          <ActionButton endpoint="/api/v1/admin/backup/run" label={L('تشغيل نسخة احتياطية الآن', 'Run backup now')} tone="primary" confirmText={L('تشغيل نسخة احتياطية الآن؟ قد يستغرق بضع دقائق.', 'Run a backup now? This may take a few minutes.')} />
-          {canRestore && (
+
+      <div className="adm-kpis">
+        <div className="adm-kpi">
+          <strong>{runs.length}</strong>
+          <span>{L('عمليات مسجّلة', 'Recorded runs')}</span>
+        </div>
+        <div className="adm-kpi">
+          <strong>{succeeded}</strong>
+          <span>{L('ناجحة', 'Succeeded')}</span>
+        </div>
+        <div className={failed > 0 ? 'adm-kpi is-warn' : 'adm-kpi'}>
+          <strong>{failed}</strong>
+          <span>{L('فاشلة', 'Failed')}</span>
+        </div>
+      </div>
+
+      <section className="adm-section">
+        <header>
+          <h2>{L('إجراءات', 'Actions')}</h2>
+        </header>
+        <div className="bkp-actions">
+          <div>
             <ActionButton
-              endpoint="/api/v1/admin/backup/restore-test"
-              label={L('تشغيل اختبار الاستعادة', 'Run restore test')}
-              confirmText={L(`اختبار الاستعادة يستعيد آخر نسخة إلى قاعدة مؤقتة (${SCRATCH_DATABASE}) فقط، ثم يحذفها. قاعدة التطوير لا تتأثر. متابعة؟`, `The restore test restores the latest backup into the scratch database (${SCRATCH_DATABASE}) only, then drops it. The development database is not touched. Continue?`)}
+              endpoint="/api/v1/admin/backup/run"
+              label={L('تشغيل نسخة احتياطية الآن', 'Run backup now')}
+              tone="primary"
+              confirmText={L('تشغيل نسخة احتياطية الآن؟ قد يستغرق بضع دقائق.', 'Run a backup now? This may take a few minutes.')}
             />
+          </div>
+          {canRestore && (
+            <details className="adm-confirm">
+              <summary>{L('اختبار الاستعادة…', 'Restore test…')}</summary>
+              <p className="adm-consequence">
+                {L(
+                  `يستعيد الاختبار آخر نسخة إلى قاعدة مؤقتة (${SCRATCH_DATABASE}) فقط ثم يحذفها. قاعدة التطوير لا تتأثر.`,
+                  `The test restores the latest backup into the scratch database (${SCRATCH_DATABASE}) only, then drops it. The development database is not touched.`,
+                )}
+              </p>
+              <ActionButton
+                endpoint="/api/v1/admin/backup/restore-test"
+                label={L('تشغيل اختبار الاستعادة', 'Run restore test')}
+                confirmText={L(
+                  `اختبار الاستعادة يستعيد آخر نسخة إلى قاعدة مؤقتة (${SCRATCH_DATABASE}) فقط، ثم يحذفها. قاعدة التطوير لا تتأثر. متابعة؟`,
+                  `The restore test restores the latest backup into the scratch database (${SCRATCH_DATABASE}) only, then drops it. The development database is not touched. Continue?`,
+                )}
+              />
+            </details>
           )}
         </div>
-      </Card>
-      <Card title={L('سجل النسخ والاختبارات', 'Backup and restore-test history')}>
+      </section>
+
+      <section className="adm-section">
+        <header>
+          <h2>{L('سجل النسخ والاختبارات', 'Backup and restore-test history')}</h2>
+        </header>
         {runs.length === 0 ? (
           <EmptyState>{L('لا توجد عمليات بعد.', 'No runs yet.')}</EmptyState>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap adm-table">
             <table>
               <thead>
                 <tr>
@@ -56,20 +112,23 @@ export default async function AdminBackup() {
               <tbody>
                 {runs.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.kind}</td>
+                    <td className="adm-code-cell">{r.kind}</td>
                     <td>
                       <Badge tone={r.status === 'SUCCEEDED' || r.status === 'PASSED' ? 'ok' : r.status === 'FAILED' ? 'danger' : 'neutral'}>{r.status}</Badge>
                     </td>
                     <td>{formatDateTime(r.startedAt, locale)}</td>
                     <td>{formatDateTime(r.completedAt, locale)}</td>
-                    <td dir="ltr" style={{ wordBreak: 'break-all', fontSize: '0.85rem' }}>{r.artifactPath ?? '—'}</td>
-                    <td dir="ltr" style={{ wordBreak: 'break-all', fontSize: '0.8rem' }}>{r.checksum ?? '—'}</td>
-                    <td>{r.restoreResult ?? '—'}{r.restoreTestAt ? <div className="muted" style={{ fontSize: '0.8rem' }}>{formatDateTime(r.restoreTestAt, locale)}</div> : null}</td>
+                    <td className="bkp-artifact">{r.artifactPath ?? '—'}</td>
+                    <td className="bkp-checksum">{r.checksum ?? '—'}</td>
+                    <td>
+                      {r.restoreResult ?? '—'}
+                      {r.restoreTestAt ? <div className="adm-muted-small">{formatDateTime(r.restoreTestAt, locale)}</div> : null}
+                    </td>
                     <td>
                       {r.rowCounts ? (
-                        <details>
+                        <details className="adm-disclose">
                           <summary>{L('عرض', 'Show')}</summary>
-                          <pre dir="ltr" style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', margin: 0 }}>{JSON.stringify(r.rowCounts, null, 2)}</pre>
+                          <pre dir="ltr" className="adm-json">{JSON.stringify(r.rowCounts, null, 2)}</pre>
                         </details>
                       ) : (
                         '—'
@@ -81,7 +140,7 @@ export default async function AdminBackup() {
             </table>
           </div>
         )}
-      </Card>
+      </section>
     </>
   );
 }

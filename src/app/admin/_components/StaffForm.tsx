@@ -50,7 +50,7 @@ export function StaffForm({ roles, locale }: { roles: Array<{ name: string; labe
     <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
       {error && <div className="alert alert-error" role="alert">{error.message}</div>}
       {ok && <div className="alert alert-ok" role="status">{ok}</div>}
-      <div className="form-row">
+      <div className="adm-form-fields">
         <div className="field">
           <label htmlFor={`${formId}-phone`}>{L('رقم الهاتف', 'Phone')} *</label>
           <input id={`${formId}-phone`} name="phone" type="tel" required autoComplete="off" placeholder="07XXXXXXXXX" />
@@ -68,11 +68,11 @@ export function StaffForm({ roles, locale }: { roles: Array<{ name: string; labe
           {fe('password')}
         </div>
       </div>
-      <fieldset style={{ border: 0, padding: 0 }}>
-        <legend style={{ fontWeight: 600 }}>{L('الأدوار', 'Roles')} *</legend>
-        <div className="row" style={{ gap: 14 }}>
+      <fieldset className="adm-fieldset" style={{ marginBlockEnd: 4 }}>
+        <legend className="adm-role-legend">{L('الأدوار', 'Roles')} *</legend>
+        <div className="adm-chips">
           {roles.map((r) => (
-            <label key={r.name} className="row" style={{ fontWeight: 400 }}>
+            <label key={r.name} className="adm-chip">
               <input type="checkbox" name={`role-${r.name}`} /> {r.label}
             </label>
           ))}

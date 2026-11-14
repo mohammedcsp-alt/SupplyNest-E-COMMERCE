@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/client-api';
+import { Badge } from '@/components/ui';
 
 /** One SKU row: featured toggle and display order. Only merchandising fields are sent; price and stock are untouched. */
 export function FeaturedRow({
@@ -43,12 +44,10 @@ export function FeaturedRow({
 
   return (
     <tr>
-      <td dir="ltr" style={{ fontFamily: 'ui-monospace, Consolas, monospace' }}>
-        {sku}
-      </td>
+      <td className="code">{sku}</td>
       <td>{name}</td>
       <td>
-        <label className="row" style={{ fontWeight: 400, margin: 0 }}>
+        <label className="mer-toggle">
           <input
             type="checkbox"
             checked={on}
@@ -59,21 +58,21 @@ export function FeaturedRow({
             }}
             aria-label={L(`تمييز ${sku}`, `Feature ${sku}`)}
           />
-          <span>{on ? L('مميز', 'Featured') : L('غير مميز', 'Not featured')}</span>
+          <Badge tone={on ? 'ok' : 'neutral'}>{on ? L('مميز', 'Featured') : L('غير مميز', 'Not featured')}</Badge>
         </label>
       </td>
       <td>
-        <div className="row" style={{ gap: 6 }}>
+        <div className="mer-order">
           <label htmlFor={`ord-${skuId}`} className="sr-only">
             {L('ترتيب العرض', 'Display order')}
           </label>
-          <input id={`ord-${skuId}`} type="number" min={0} max={100000} value={order} disabled={!canEdit || busy} onChange={(e) => setOrder(e.target.value)} style={{ inlineSize: 90 }} />
+          <input id={`ord-${skuId}`} type="number" min={0} max={100000} value={order} disabled={!canEdit || busy} onChange={(e) => setOrder(e.target.value)} />
           <button type="button" className="btn btn-small" disabled={!canEdit || busy} onClick={() => save({ featuredOrder: Math.max(0, Math.floor(Number(order) || 0)) })}>
             {L('حفظ الترتيب', 'Save order')}
           </button>
         </div>
         {err && (
-          <p role="alert" className="field-error" style={{ margin: 0 }}>
+          <p role="alert" className="field-error mer-order-error">
             {err}
           </p>
         )}

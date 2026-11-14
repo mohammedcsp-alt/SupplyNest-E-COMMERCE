@@ -64,17 +64,17 @@ export function OwnerImage({
   }
 
   return (
-    <div className="owner-image" style={{ display: 'grid', gap: 8, gridTemplateColumns: 'minmax(0,120px) minmax(0,1fr)', alignItems: 'start' }}>
-      <div style={{ inlineSize: 120, blockSize: 90, border: '1px solid var(--c-border)', borderRadius: 6, background: 'var(--c-surface-2)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+    <div className="owner-image">
+      <div className="owner-image-preview">
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewUrl} alt={label} style={{ inlineSize: '100%', blockSize: '100%', objectFit: 'contain' }} />
+          <img src={previewUrl} alt={label} />
         ) : (
-          <span className="muted" style={{ fontSize: '0.8rem' }}>{L('بلا صورة', 'No image')}</span>
+          <span className="muted">{L('بلا صورة', 'No image')}</span>
         )}
       </div>
-      <div className="stack" style={{ gap: 6 }}>
-        <form onSubmit={upload} className="row" style={{ gap: 6 }}>
+      <div className="owner-image-controls">
+        <form onSubmit={upload} className="owner-image-form">
           <label htmlFor={inputId} className="sr-only">
             {label}
           </label>
@@ -84,7 +84,7 @@ export function OwnerImage({
           </button>
         </form>
         {hasImage && (
-          <button type="button" className="btn btn-small btn-danger" onClick={remove} disabled={busy} style={{ alignSelf: 'flex-start' }}>
+          <button type="button" className="btn btn-small btn-danger owner-image-remove" onClick={remove} disabled={busy}>
             {L('إزالة الصورة', 'Remove image')}
           </button>
         )}

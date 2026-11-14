@@ -1,8 +1,9 @@
-import { PageHeader, Card, EmptyState, Badge } from '@/components/ui';
+import { EmptyState } from '@/components/ui';
 import { PERMISSIONS } from '@/lib/rbac';
 import { listMerchandising } from '@/modules/catalog/merchandising';
 import { gatePage } from '../_lib/gate';
 import { FeaturedRow } from '../_components/FeaturedRow';
+import '../css/catalog.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,32 +30,43 @@ export default async function AdminMerchandising({ searchParams }: { searchParam
 
   return (
     <>
-      <PageHeader
-        title={L('المنتجات المميزة', 'Featured products')}
-        subtitle={L(
-          'تمييز المنتجات يظهر في الصفحة الرئيسية. لا يغيّر السعر أو المخزون أو قواعد الطلب.',
-          'Featured flags show on the homepage. They do not change price, stock or ordering rules.',
-        )}
-      />
-      <Card>
-        <form method="get" className="form-row" role="search" style={{ marginBlockEnd: 12 }}>
-          <div className="field">
-            <label htmlFor="m-q">{L('بحث بالـ SKU أو الاسم', 'Search by SKU or name')}</label>
-            <input id="m-q" name="q" type="search" defaultValue={sp.q ?? ''} />
-          </div>
-          <div className="field" style={{ flex: '0 0 auto' }}>
-            <label className="row" style={{ fontWeight: 400 }}>
-              <input type="checkbox" name="featured" value="1" defaultChecked={featuredOnly} /> {L('المميزة فقط', 'Featured only')}
-            </label>
-          </div>
+      <div className="adm-head">
+        <div>
+          <h1>{L('المنتجات المميزة', 'Featured products')}</h1>
+          <p className="muted">
+            {L(
+              'تمييز المنتجات يظهر في الصفحة الرئيسية. لا يغيّر السعر أو المخزون أو قواعد الطلب.',
+              'Featured flags show on the homepage. They do not change price, stock or ordering rules.',
+            )}
+          </p>
+        </div>
+      </div>
+
+      <form method="get" role="search" className="adm-filters">
+        <div className="field">
+          <label htmlFor="m-q">{L('بحث بالـ SKU أو الاسم', 'Search by SKU or name')}</label>
+          <input id="m-q" name="q" type="search" defaultValue={sp.q ?? ''} />
+        </div>
+        <div className="field" style={{ flex: '0 0 auto', minInlineSize: 0 }}>
+          <label className="mer-toggle">
+            <input type="checkbox" name="featured" value="1" defaultChecked={featuredOnly} /> {L('المميزة فقط', 'Featured only')}
+          </label>
+        </div>
+        <div className="adm-filter-actions">
           <button className="btn btn-primary" type="submit">
             {L('تطبيق', 'Apply')}
           </button>
-        </form>
+        </div>
+      </form>
+
+      <section className="adm-section" aria-labelledby="mer-title">
+        <header>
+          <h2 id="mer-title">{L('قائمة المنتجات', 'Product list')}</h2>
+        </header>
         {rows.length === 0 ? (
           <EmptyState>{L('لا توجد نتائج.', 'No results.')}</EmptyState>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap adm-table">
             <table>
               <thead>
                 <tr>
@@ -81,14 +93,17 @@ export default async function AdminMerchandising({ searchParams }: { searchParam
             </table>
           </div>
         )}
-        <div className="pagination">
-          <span className="muted">{L(`${total} منتج`, `${total} products`)}</span>
-          <nav aria-label={L('ترقيم', 'Pagination')}>
-            {page > 1 && <a href={qs(page - 1)}>{L('السابق', 'Previous')}</a>} <Badge>{page} / {totalPages}</Badge>{' '}
-            {page < totalPages && <a href={qs(page + 1)}>{L('التالي', 'Next')}</a>}
+        <div className="adm-pager">
+          <span>{L(`${total} منتج`, `${total} products`)}</span>
+          <nav aria-label={L('ترقيم', 'Pagination')} className="row">
+            {page > 1 && <a className="btn btn-small" href={qs(page - 1)} rel="prev">{L('السابق', 'Previous')}</a>}
+            <span className="muted">
+              {page} / {totalPages}
+            </span>
+            {page < totalPages && <a className="btn btn-small" href={qs(page + 1)} rel="next">{L('التالي', 'Next')}</a>}
           </nav>
         </div>
-      </Card>
+      </section>
     </>
   );
 }

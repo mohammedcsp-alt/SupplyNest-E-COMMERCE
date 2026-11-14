@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from 'react';
 import { api, type ApiErr } from '@/lib/client-api';
+import { Badge } from '@/components/ui';
 
 type Issue = { rowNumber: number; field?: string | null; code: string; message: string };
 type Preview = {
@@ -86,7 +87,7 @@ export function ImportPanel({
   const canSubmitStale = !staleNeedsOverride || canOverride;
 
   return (
-    <div>
+    <div className="imp">
       {error && (
         <div className="alert alert-error" role="alert">
           {error.message}
@@ -100,7 +101,7 @@ export function ImportPanel({
       )}
       {done && <div className="alert alert-ok" role="status">{done}</div>}
 
-      <form id={formId} onSubmit={onUpload} noValidate aria-busy={busy}>
+      <form id={formId} className="imp-upload" onSubmit={onUpload} noValidate aria-busy={busy}>
         <div className="field">
           <label htmlFor={`${formId}-file`}>{L('ملف CSV أو XLSX', 'CSV or XLSX file')}</label>
           <input id={`${formId}-file`} name="file" type="file" accept=".csv,.xlsx,text/csv" disabled={busy} />
@@ -112,33 +113,36 @@ export function ImportPanel({
       </form>
 
       {preview && (
-        <div className="stack" style={{ marginBlockStart: 16 }}>
-          <p>
-            <strong>{L('النتيجة:', 'Result:')}</strong> {preview.status.replace(/_/g, ' ')} · {L('الحداثة:', 'Freshness:')} {preview.freshness ?? '—'}
-            {preview.extractedAt ? ` · ${L('وقت الاستخراج', 'extracted')} ${preview.extractedAt}` : ''}
-          </p>
+        <div className="imp-result">
+          <div className="imp-result-head">
+            <strong>{L('النتيجة:', 'Result:')}</strong>
+            <Badge tone={preview.status === 'PREVIEW_VALID' ? 'ok' : 'danger'}>{preview.status.replace(/_/g, ' ')}</Badge>
+            <span className="muted">{L('الحداثة:', 'Freshness:')}</span>
+            <Badge tone={preview.freshness === 'FRESH' ? 'ok' : preview.freshness ? 'warn' : 'neutral'}>{preview.freshness ?? '—'}</Badge>
+            {preview.extractedAt ? <span className="muted">{`${L('وقت الاستخراج', 'extracted')} ${preview.extractedAt}`}</span> : null}
+          </div>
           {preview.summary && (
-            <dl className="row" style={{ gap: 16 }}>
+            <div className="adm-kpis imp-summary">
               {Object.entries(preview.summary)
                 .filter(([, v]) => typeof v !== 'object')
                 .map(([k, v]) => (
-                  <div key={k}>
-                    <dt className="muted">{k}</dt>
-                    <dd style={{ margin: 0, fontWeight: 700 }}>{String(v)}</dd>
+                  <div className="adm-kpi" key={k}>
+                    <span>{k}</span>
+                    <strong>{String(v)}</strong>
                   </div>
                 ))}
-            </dl>
+            </div>
           )}
           {preview.errorCount > 0 && (
             <>
               <p className="field-error">
                 {L(`أخطاء الصفوف: ${preview.errorCount}`, `Row errors: ${preview.errorCount}`)}
               </p>
-              <div className="table-wrap">
+              <div className="table-wrap adm-table">
                 <table>
                   <thead>
                     <tr>
-                      <th>{L('الصف', 'Row')}</th>
+                      <th className="num">{L('الصف', 'Row')}</th>
                       <th>{L('الحقل', 'Field')}</th>
                       <th>{L('الرمز', 'Code')}</th>
                       <th>{L('الرسالة', 'Message')}</th>
@@ -149,7 +153,7 @@ export function ImportPanel({
                       <tr key={`${i.rowNumber}-${i.code}-${idx}`}>
                         <td className="num">{i.rowNumber}</td>
                         <td>{i.field ?? '—'}</td>
-                        <td>{i.code}</td>
+                        <td className="code">{i.code}</td>
                         <td>{i.message}</td>
                       </tr>
                     ))}
@@ -160,32 +164,38 @@ export function ImportPanel({
           )}
 
           {preview.status === 'PREVIEW_VALID' && canCommit && (
-            <form id={`${formId}-commit`} onSubmit={onCommit} noValidate>
-              {preview.freshness === 'UNKNOWN' && (
-                <div className="field">
-                  <label className="row" style={{ fontWeight: 400 }}>
-                    <input type="checkbox" name="ack" /> {L('أفهم أن تاريخ الملف غير معروف وأقبل اعتماده.', 'I understand the file date is unknown and accept committing it.')}
-                  </label>
-                </div>
-              )}
-              {staleNeedsOverride && (
-                <div className="field">
-                  {canOverride ? (
-                    <>
-                      <label htmlFor={`${formId}-override`}>{L('سبب اعتماد ملف قديم (مدير)', 'Reason for committing a stale file (manager)')} *</label>
-                      <textarea id={`${formId}-override`} name="overrideReason" required minLength={3} maxLength={500} />
-                    </>
-                  ) : (
-                    <div className="alert alert-warn" role="status">
-                      {L('هذا الملف قديم. يتطلب اعتماده صلاحية تجاوز الحداثة (import.override_stale).', 'This file is stale. Committing it requires the stale-override permission (import.override_stale).')}
-                    </div>
-                  )}
-                </div>
-              )}
-              <button type="submit" className="btn btn-primary" disabled={busy || !canSubmitStale}>
-                {busy ? L('جارٍ الاعتماد…', 'Committing…') : L('اعتماد الاستيراد', 'Commit import')}
-              </button>
-            </form>
+            <details className="adm-confirm imp-commit">
+              <summary>{L('اعتماد الاستيراد…', 'Commit import…')}</summary>
+              <p className="imp-consequence">
+                {L('الاعتماد يطبّق الملف كاملاً في خطوة واحدة (الكل أو لا شيء). لا تُعتمد الصفوف بشكل جزئي.', 'Committing applies the whole file in one step (all or nothing). Rows are never committed partially.')}
+              </p>
+              <form id={`${formId}-commit`} onSubmit={onCommit} noValidate>
+                {preview.freshness === 'UNKNOWN' && (
+                  <div className="field">
+                    <label className="row" style={{ fontWeight: 400 }}>
+                      <input type="checkbox" name="ack" /> {L('أفهم أن تاريخ الملف غير معروف وأقبل اعتماده.', 'I understand the file date is unknown and accept committing it.')}
+                    </label>
+                  </div>
+                )}
+                {staleNeedsOverride && (
+                  <div className="field">
+                    {canOverride ? (
+                      <>
+                        <label htmlFor={`${formId}-override`}>{L('سبب اعتماد ملف قديم (مدير)', 'Reason for committing a stale file (manager)')} *</label>
+                        <textarea id={`${formId}-override`} name="overrideReason" required minLength={3} maxLength={500} />
+                      </>
+                    ) : (
+                      <div className="alert alert-warn" role="status">
+                        {L('هذا الملف قديم. يتطلب اعتماده صلاحية تجاوز الحداثة (import.override_stale).', 'This file is stale. Committing it requires the stale-override permission (import.override_stale).')}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <button type="submit" className="btn btn-primary" disabled={busy || !canSubmitStale}>
+                  {busy ? L('جارٍ الاعتماد…', 'Committing…') : L('اعتماد الاستيراد', 'Commit import')}
+                </button>
+              </form>
+            </details>
           )}
           {preview.status === 'PREVIEW_INVALID' && (
             <p className="muted">{L('لا يمكن اعتماد ملف فيه أخطاء. صحّح الملف وأعد رفعه.', 'A file with errors cannot be committed. Fix the file and upload again.')}</p>

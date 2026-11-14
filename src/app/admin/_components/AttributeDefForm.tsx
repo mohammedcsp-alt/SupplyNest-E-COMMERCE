@@ -47,10 +47,10 @@ export function AttributeDefForm({ categoryId, locale }: { categoryId: string; l
   }
 
   return (
-    <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
-      {error && <div className="alert alert-error" role="alert">{error.message}</div>}
-      {ok && <div className="alert alert-ok" role="status">{ok}</div>}
-      <div className="form-row">
+    <div className="cat-form-grid">
+      <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
+        {error && <div className="alert alert-error" role="alert">{error.message}</div>}
+        {ok && <div className="alert alert-ok" role="status">{ok}</div>}
         <div className="field">
           <label htmlFor={`${formId}-key`}>{L('المفتاح (snake_case)', 'Key (snake_case)')} *</label>
           <input id={`${formId}-key`} name="key" required pattern="[a-z][a-z0-9_]{1,59}" placeholder="size_mm" />
@@ -84,15 +84,15 @@ export function AttributeDefForm({ categoryId, locale }: { categoryId: string; l
           <label htmlFor={`${formId}-sort`}>{L('الترتيب', 'Sort order')}</label>
           <input id={`${formId}-sort`} name="sortOrder" type="number" min={0} max={1000} defaultValue={0} />
         </div>
-      </div>
-      <div className="field">
-        <label className="row" style={{ fontWeight: 400 }}>
-          <input type="checkbox" name="filterable" /> {L('قابلة للتصفية', 'Filterable')}
-        </label>
-      </div>
-      <button type="submit" className="btn" disabled={busy}>
-        {busy ? L('جارٍ الحفظ…', 'Saving…') : L('حفظ الخاصية', 'Save attribute')}
-      </button>
-    </form>
+        <div className="field">
+          <label className="row" style={{ fontWeight: 400 }}>
+            <input type="checkbox" name="filterable" /> {L('قابلة للتصفية', 'Filterable')}
+          </label>
+        </div>
+        <button type="submit" className="btn" disabled={busy}>
+          {busy ? L('جارٍ الحفظ…', 'Saving…') : L('حفظ الخاصية', 'Save attribute')}
+        </button>
+      </form>
+    </div>
   );
 }

@@ -29,6 +29,7 @@
 .adm-table th { white-space: nowrap; }
 .adm-table td { vertical-align: middle; }
 .adm-table tbody tr:hover { background: var(--c-surface-2); }
+.adm-table .badge { white-space: normal; }
 .adm-table .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .adm-table .code { font-family: ui-monospace, Consolas, monospace; direction: ltr; text-align: start; white-space: nowrap; }
 .adm-row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }

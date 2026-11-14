@@ -1,0 +1,154 @@
+/* Catalog, categories, imports and merchandising administration (AD-03, AD-04, AD-06, AD-08).
+   Shared primitives (.adm-*) live in src/app/admin/admin.css. Logical properties only (RTL safe). */
+
+/* Two-column section grid that collapses to one column on phones. */
+.cat-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); margin-block-end: 16px; }
+.cat-grid > .adm-section { margin-block-end: 0; min-inline-size: 0; }
+
+/* Muted helper line under a section title. */
+.cat-lede { color: var(--c-muted); font-size: 0.92rem; margin: 0 0 12px; }
+
+/* Back link above a detail page header. */
+.cat-back { display: inline-block; margin-block-end: 8px; font-size: 0.9rem; }
+
+/* Code and identifier text is always left-to-right. */
+.cat-code { font-family: ui-monospace, Consolas, monospace; direction: ltr; unicode-bidi: isolate; white-space: nowrap; }
+
+/* Name cell: English primary, Arabic secondary. */
+.cat-name { display: grid; gap: 2px; min-inline-size: 0; }
+.cat-name small { color: var(--c-muted); font-size: 0.85rem; }
+
+/* Badges used as status markers inside tables and headers. */
+.cat-status { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- Products list (AD-03) ---------- */
+.cat-list-pager > nav { margin-block: 0 !important; }
+.cat-list-pager .muted { font-size: 0.9rem; }
+
+/* ---------- Product editor (AD-03) ---------- */
+.cat-kpis { margin-block-end: 0; }
+.adm-kpi dt { color: var(--c-muted); font-size: 0.86rem; }
+.adm-kpi dd { margin: 0; font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cat-kpi-meta { font-size: 0.9rem; }
+
+.cat-images { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); margin-block-end: 12px; }
+.cat-image-tile { margin: 0; display: grid; gap: 6px; align-content: start; padding: 8px; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface-2); min-inline-size: 0; }
+.cat-image-tile img { inline-size: 100%; block-size: auto; border-radius: var(--radius); display: block; }
+.cat-image-preview { display: grid; place-items: center; min-block-size: 120px; padding: 10px; text-align: center; border: 1px dashed var(--c-border-strong); border-radius: var(--radius); color: var(--c-muted); font-size: 0.86rem; }
+.cat-image-tile figcaption { font-size: 0.85rem; color: var(--c-muted); overflow-wrap: anywhere; }
+
+/* Multi-column form wrapper: fields flow in a grid; long fields, alerts and the submit button span the row. */
+.cat-form-grid form { display: grid; gap: 0 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); align-items: start; }
+.cat-form-grid form > .field { margin-block-end: 10px; min-inline-size: 0; }
+.cat-form-grid form > .field:has(textarea) { grid-column: 1 / -1; }
+.cat-form-grid form > .alert,
+.cat-form-grid form > p { grid-column: 1 / -1; }
+.cat-form-grid form > button { grid-column: 1 / -1; justify-self: start; }
+.cat-form-grid .field label { font-size: 0.9rem; }
+
+/* Tier price rows: level, current price, then an inline update form. */
+.cat-tier-level { display: grid; gap: 2px; }
+.cat-tier-level small { color: var(--c-muted); font-size: 0.85rem; }
+.cat-tier-form form { display: grid; gap: 8px 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); align-items: end; min-inline-size: 240px; }
+.cat-tier-form form > .field { margin: 0; }
+.cat-tier-form form > .field .field-help { display: none; }
+.cat-tier-form form > .alert,
+.cat-tier-form form > .field-error { grid-column: 1 / -1; margin: 0; }
+.cat-tier-form form > .btn { justify-self: start; }
+.cat-tier-form .field label { font-size: 0.82rem; color: var(--c-muted); }
+.cat-tier-form .field input { min-block-size: 36px; }
+.cat-subhead { font-size: 0.98rem; margin: 18px 0 8px; }
+
+/* Stock adjustment and movement blocks inside the stock section. */
+.cat-subsection { margin-block-start: 18px; padding-block-start: 14px; border-block-start: 1px solid var(--c-border); }
+.cat-subsection > h3 { margin: 0 0 10px; font-size: 1rem; }
+
+/* ---------- Categories, brands, qualities (AD-04) ---------- */
+.cat-tree { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cat-tree ul { list-style: none; margin: 10px 0 0; padding: 0; padding-inline-start: 14px; display: grid; gap: 10px; border-inline-start: 2px solid var(--c-border); }
+.cat-node { border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface); padding: 10px 12px; min-inline-size: 0; }
+.cat-node-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.cat-node-head strong { font-size: 0.98rem; }
+.cat-node-meta { color: var(--c-muted); font-size: 0.86rem; }
+.cat-node details + details { margin-block-start: 6px; }
+.cat-node details > summary { cursor: pointer; color: var(--c-muted); font-size: 0.9rem; font-weight: 600; padding-block: 4px; }
+.cat-node details[open] > summary { color: var(--c-text); }
+.cat-node-body { display: grid; gap: 14px; padding-block: 10px 4px; }
+
+.cat-attr-list { display: grid; gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
+.cat-attr-list li { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface-2); font-size: 0.9rem; }
+.cat-attr-list li code { font-size: 0.85rem; }
+.cat-attr-list .muted { font-size: 0.85rem; }
+
+.cat-owner-image { display: grid; gap: 6px; }
+.cat-owner-image > summary { cursor: pointer; }
+
+.cat-simple-list { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+.cat-simple-list li { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; justify-content: space-between; }
+
+.cat-brand-list { display: grid; gap: 8px; margin-block-end: 14px; }
+.cat-brand-list details { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 8px 10px; background: var(--c-surface); }
+.cat-brand-list summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-weight: 600; }
+.cat-brand-list details > div { padding-block-start: 10px; }
+
+.cat-form-block { border-block-start: 1px solid var(--c-border); padding-block-start: 14px; margin-block-start: 14px; }
+.cat-form-block h3 { margin: 0 0 10px; font-size: 0.98rem; }
+
+/* ---------- Owner image (category, brand) ---------- */
+.owner-image { display: grid; gap: 12px; grid-template-columns: minmax(0, 132px) minmax(0, 1fr); align-items: start; }
+.owner-image-preview { inline-size: 132px; block-size: 96px; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface-2); display: grid; place-items: center; overflow: hidden; }
+.owner-image-preview img { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.owner-image-preview .muted { font-size: 0.8rem; }
+.owner-image-controls { display: grid; gap: 6px; justify-items: start; min-inline-size: 0; }
+.owner-image-form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-inline-size: 100%; }
+.owner-image-form input[type="file"] { max-inline-size: 100%; font-size: 0.85rem; }
+.owner-image .field-help { font-size: 0.82rem; }
+
+/* ---------- Imports (AD-08) ---------- */
+.imp-required { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; }
+.imp-required li { font-family: ui-monospace, Consolas, monospace; direction: ltr; font-size: 0.8rem; padding: 2px 8px; border-radius: 4px; background: #eef2f7; color: #334155; }
+
+.imp-upload { display: grid; gap: 10px; padding: 14px; border: 1px dashed var(--c-border-strong); border-radius: var(--radius-lg); background: var(--c-surface-2); }
+.imp-upload .field { margin: 0; }
+.imp-upload input[type="file"] { max-inline-size: 100%; }
+.imp-upload .btn { justify-self: start; }
+
+.imp-result { display: grid; gap: 12px; margin-block-start: 16px; }
+.imp-result-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.imp-result-head p { margin: 0; }
+.imp-summary { margin: 0; }
+.imp-summary .adm-kpi dt { font-family: ui-monospace, Consolas, monospace; direction: ltr; text-align: start; overflow-wrap: anywhere; }
+.imp-summary .adm-kpi dd { margin: 0; font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.imp-commit { border-radius: var(--radius-lg); }
+.imp-commit > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.imp-commit .imp-consequence { margin: 0 0 10px; font-size: 0.92rem; color: var(--c-muted); }
+.imp-commit form { display: grid; gap: 10px; }
+.imp-commit form .btn { justify-self: start; }
+
+.imp-meta dl { display: grid; gap: 10px; margin: 0; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.imp-meta dl > div { min-inline-size: 0; }
+.imp-meta dt { color: var(--c-muted); font-size: 0.86rem; }
+.imp-meta dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.imp-checksum { font-family: ui-monospace, Consolas, monospace; direction: ltr; font-size: 0.8rem; word-break: break-all; }
+.imp-summary-json { margin: 0; padding: 12px; background: var(--c-surface-2); border: 1px solid var(--c-border); border-radius: var(--radius); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.85rem; max-block-size: 360px; overflow: auto; }
+
+/* ---------- Merchandising (featured products) ---------- */
+.adm-filters .mer-toggle { color: var(--c-text); font-size: 0.95rem; min-block-size: 40px; }
+.mer-toggle { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-weight: 400; cursor: pointer; }
+.mer-toggle input { inline-size: 18px; block-size: 18px; margin: 0; }
+.mer-order { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.mer-order input[type="number"] { inline-size: 96px; text-align: end; font-variant-numeric: tabular-nums; }
+.mer-order-error { margin: 4px 0 0; font-size: 0.85rem; }
+
+/* ---------- Phones: toolbars stack, tables scroll inside their wrapper only ---------- */
+@media (max-width: 640px) {
+  .cat-grid { grid-template-columns: minmax(0, 1fr); }
+  .cat-tree ul { padding-inline-start: 10px; }
+  .cat-form-grid form { grid-template-columns: minmax(0, 1fr); }
+  .cat-tier-form form { grid-template-columns: minmax(0, 1fr); min-inline-size: 0; }
+  .cat-images { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .imp-meta dl { grid-template-columns: minmax(0, 1fr); }
+  .owner-image { grid-template-columns: minmax(0, 1fr); }
+  .mer-order input[type="number"] { inline-size: 84px; }
+}

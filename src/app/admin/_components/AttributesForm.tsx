@@ -57,7 +57,8 @@ export function AttributesForm({ skuId, attributes, locale }: { skuId: string; a
   }
 
   return (
-    <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
+    <div className="cat-form-grid">
+      <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
       {error && <div className="alert alert-error" role="alert">{error.message}</div>}
       {ok && <div className="alert alert-ok" role="status">{L('تم حفظ الخصائص.', 'Attributes saved.')}</div>}
       {attributes.map((a) => {
@@ -98,5 +99,6 @@ export function AttributesForm({ skuId, attributes, locale }: { skuId: string; a
         {busy ? L('جارٍ الحفظ…', 'Saving…') : L('حفظ الخصائص', 'Save attributes')}
       </button>
     </form>
+    </div>
   );
 }

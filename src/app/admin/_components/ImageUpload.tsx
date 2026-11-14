@@ -37,7 +37,8 @@ export function ImageUpload({ skuId, count, locale }: { skuId: string; count: nu
   }
 
   return (
-    <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
+    <div className="cat-form-grid">
+      <form id={formId} onSubmit={onSubmit} noValidate aria-busy={busy}>
       <p className="muted" aria-live="polite">
         {L(`الصور: ${count} من ${SKU_IMAGE_LIMIT}`, `Images: ${count} of ${SKU_IMAGE_LIMIT}`)}
       </p>
@@ -54,5 +55,6 @@ export function ImageUpload({ skuId, count, locale }: { skuId: string; count: nu
         {full ? L('بلغ الحد الأقصى', 'Limit reached') : busy ? L('جارٍ الرفع…', 'Uploading…') : L('رفع الصورة', 'Upload image')}
       </button>
     </form>
+    </div>
   );
 }

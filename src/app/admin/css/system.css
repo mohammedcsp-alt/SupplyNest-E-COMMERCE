@@ -1,0 +1,172 @@
+/* Administration module styles: CMS (AD-11), reports (AD-12), roles, audit, settings, backup, integrations, shipping (AD-13).
+   Shared primitives (.adm-head, .adm-section, .adm-filters, .adm-kpis, .adm-table, .adm-confirm, ...) live in ../admin.css.
+   Logical properties only, so the layout mirrors correctly for Arabic (RTL) and English (LTR). */
+
+/* ---------- Form layout (ApiForm renders <form> with .field children) ---------- */
+.adm-form-grid > form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  column-gap: 14px;
+  align-items: start;
+}
+.adm-form-grid > form > .field { min-inline-size: 0; }
+.adm-form-grid > form > .field:has(textarea) { grid-column: 1 / -1; }
+.adm-form-grid > form > :not(.field) { grid-column: 1 / -1; }
+.adm-form-grid > form > button[type="submit"] { justify-self: start; }
+
+.adm-form-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  column-gap: 14px;
+  align-items: start;
+}
+.adm-form-fields > .field { min-inline-size: 0; }
+.adm-form-fields > .field:has(textarea) { grid-column: 1 / -1; }
+
+.adm-subhead { border-block-start: 1px solid var(--c-border); margin-block-start: 18px; padding-block-start: 14px; }
+.adm-subhead h3 { margin: 0 0 10px; font-size: 1rem; }
+
+/* Checkbox "chips" (role picker on staff form). */
+.adm-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.adm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: 999px;
+  background: var(--c-surface);
+  font-weight: 500;
+  cursor: pointer;
+}
+.adm-chip:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+
+/* ---------- Shared list helpers ---------- */
+.adm-code-cell { font-family: ui-monospace, Consolas, monospace; direction: ltr; text-align: start; overflow-wrap: anywhere; font-size: 0.84rem; }
+.adm-muted-small { color: var(--c-muted); font-size: 0.82rem; }
+.adm-note { color: var(--c-muted); font-size: 0.9rem; margin: 0 0 12px; }
+.adm-consequence { margin: 0 0 10px; font-size: 0.9rem; color: var(--c-warn); }
+
+/* Collapsible rows used for editing one record (CMS pages and banners). */
+.adm-item { border: 1px solid var(--c-border); border-radius: var(--radius-lg); background: var(--c-surface); margin-block-end: 10px; }
+.adm-item > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.adm-item > summary::-webkit-details-marker { display: none; }
+.adm-item > summary::after {
+  content: "+";
+  margin-inline-start: auto;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--c-muted);
+}
+.adm-item[open] > summary::after { content: "\2212"; }
+.adm-item[open] > summary { border-block-end: 1px solid var(--c-border); }
+.adm-item-title { flex: 1 1 200px; min-inline-size: 0; font-weight: 600; overflow-wrap: anywhere; }
+.adm-item-meta { color: var(--c-muted); font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+.adm-item-body { padding: 14px; }
+
+/* ---------- CMS (AD-11) ---------- */
+.cms-banner-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.cms-banner-media { min-inline-size: 0; }
+@media (min-width: 900px) {
+  .cms-banner-body { grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); }
+}
+
+/* ---------- Roles (AD-13) ---------- */
+.adm-perm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+.adm-perm {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+  font-weight: 400;
+  cursor: pointer;
+}
+.adm-perm:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+.adm-perm input { margin-block-start: 3px; flex: 0 0 auto; }
+.adm-perm code { font-size: 0.84rem; direction: ltr; unicode-bidi: isolate; overflow-wrap: anywhere; }
+.adm-perm-desc { display: block; color: var(--c-muted); font-size: 0.86rem; margin-block-start: 2px; }
+.adm-fieldset { border: 0; padding: 0; margin: 0; min-inline-size: 0; }
+.adm-kpi strong.adm-kpi-text { font-size: 1.05rem; line-height: 1.3; overflow-wrap: anywhere; }
+.ship-forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 16px; }
+.adm-role-legend { font-weight: 600; margin-block-end: 8px; }
+.adm-role-footer { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-block-start: 12px; }
+
+/* ---------- Audit (AD-13) ---------- */
+.adm-json-label { margin: 8px 0 4px; font-size: 0.8rem; font-weight: 600; color: var(--c-muted); }
+.adm-json {
+  margin: 0;
+  padding: 8px;
+  max-block-size: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+  direction: ltr;
+  text-align: start;
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+}
+.adm-disclose > summary { cursor: pointer; color: var(--brand); font-weight: 600; white-space: nowrap; }
+.adm-disclose[open] > summary { margin-block-end: 6px; }
+
+/* ---------- Settings (AD-13) ---------- */
+.set-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-block-end: 16px; }
+.set-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 14px 16px; box-shadow: var(--shadow); display: grid; gap: 10px; align-content: start; }
+.set-card-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.set-key { font-size: 0.9rem; direction: ltr; overflow-wrap: anywhere; }
+.set-value { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.set-card .field { margin-block-end: 0; }
+
+/* ---------- Backup (AD-13) ---------- */
+.bkp-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+.bkp-actions > .adm-confirm { min-inline-size: 0; max-inline-size: 100%; }
+.bkp-artifact { overflow-wrap: anywhere; font-size: 0.84rem; direction: ltr; text-align: start; }
+.bkp-checksum { overflow-wrap: anywhere; font-size: 0.78rem; direction: ltr; text-align: start; font-family: ui-monospace, Consolas, monospace; }
+
+/* ---------- Integrations (AD-13) ---------- */
+.int-count { font-size: 2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+
+/* ---------- Shipping ---------- */
+.ship-tree { list-style: none; margin: 0; padding: 0; }
+.ship-gov { padding-block: 12px; border-block-end: 1px solid var(--c-border); }
+.ship-gov:last-child { border-block-end: 0; }
+.ship-gov-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.ship-gov-name { font-weight: 600; }
+.ship-areas { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.ship-areas li { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border: 1px solid var(--c-border); border-radius: 999px; background: var(--c-surface-2); font-size: 0.88rem; }
+.ship-gov details { margin-block-start: 8px; }
+.ship-gov details > summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.ship-gov details[open] > summary { margin-block-end: 8px; }
+.ship-gov details .adm-form-grid > form { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+/* ---------- Mobile (390px): single column forms, no page overflow ---------- */
+@media (max-width: 640px) {
+  .adm-form-grid > form,
+  .adm-form-fields,
+  .set-grid { grid-template-columns: minmax(0, 1fr); }
+  .adm-perm-grid { grid-template-columns: minmax(0, 1fr); }
+  .adm-item > summary { padding: 10px 12px; }
+  .adm-item-body { padding: 12px; }
+  .adm-section { padding: 12px; }
+  .adm-json { max-inline-size: 100%; }
+  .bkp-actions > .btn,
+  .bkp-actions > .adm-confirm { flex: 1 1 100%; }
+}
+
+/* Collapsible permission matrix per role (roles page). */
+.adm-disclose-block { margin-block-end: 12px; }
+.adm-disclose-block > summary { cursor: pointer; color: var(--brand); font-weight: 600; margin-block-end: 10px; }
+.adm-disclose-block[open] > summary { margin-block-end: 10px; }

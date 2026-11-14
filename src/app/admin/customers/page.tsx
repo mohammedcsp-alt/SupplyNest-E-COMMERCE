@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { PageHeader, StatusBadge, EmptyState, Pagination } from '@/components/ui';
+import { PageHeader, StatusBadge, Pagination } from '@/components/ui';
 import { formatDateTime } from '@/lib/time';
 import { PERMISSIONS } from '@/lib/rbac';
 import { db } from '@/lib/db';
 import { ACCOUNT_STATUSES_LIST } from '@/modules/admin/constants';
 import { gatePage } from '../_lib/gate';
+import '../css/operations.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,11 +34,20 @@ export default async function AdminCustomers({ searchParams }: { searchParams: P
     }),
     db.user.count({ where }),
   ]);
+  const filtered = Boolean(status || q);
 
   return (
-    <>
+    <div className="ops ops-customers">
       <PageHeader title={L('العملاء', 'Customers')} subtitle={L('الموافقة على التسجيلات وإدارة الحسابات.', 'Approve registrations and manage accounts.')} />
-      <form method="GET" className="form-row" role="search" style={{ marginBlockEnd: 16 }}>
+
+      <div className="adm-kpis">
+        <div className="adm-kpi">
+          <span>{filtered ? L('النتائج المطابقة', 'Matching customers') : L('إجمالي العملاء', 'Total customers')}</span>
+          <strong>{total}</strong>
+        </div>
+      </div>
+
+      <form method="GET" className="adm-filters" role="search">
         <div className="field">
           <label htmlFor="cust-status">{L('الحالة', 'Status')}</label>
           <select id="cust-status" name="status" defaultValue={status ?? ''}>
@@ -53,15 +63,20 @@ export default async function AdminCustomers({ searchParams }: { searchParams: P
           <label htmlFor="cust-q">{L('بحث بالهاتف أو الاسم', 'Search by phone or name')}</label>
           <input id="cust-q" name="q" type="search" defaultValue={q} maxLength={80} />
         </div>
-        <div className="field">
+        <div className="adm-filter-actions">
           <button type="submit" className="btn btn-primary">{L('تصفية', 'Filter')}</button>
+          {filtered && (
+            <Link className="btn" href="/admin/customers">
+              {L('مسح', 'Clear')}
+            </Link>
+          )}
         </div>
       </form>
 
       {rows.length === 0 ? (
-        <EmptyState>{L('لا توجد نتائج.', 'No matching customers.')}</EmptyState>
+        <div className="adm-empty">{L('لا توجد نتائج.', 'No matching customers.')}</div>
       ) : (
-        <div className="table-wrap">
+        <div className="table-wrap adm-table">
           <table>
             <thead>
               <tr>
@@ -70,21 +85,27 @@ export default async function AdminCustomers({ searchParams }: { searchParams: P
                 <th>{L('الحالة', 'Status')}</th>
                 <th>{L('مستوى السعر', 'Price level')}</th>
                 <th>{L('تاريخ التسجيل', 'Registered')}</th>
-                <th>{L('إجراءات', 'Actions')}</th>
+                <th>
+                  <span className="sr-only">{L('إجراءات', 'Actions')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((u) => (
                 <tr key={u.id}>
-                  <td dir="ltr">{u.phone}</td>
+                  <td className="code">{u.phone}</td>
                   <td>{u.customerProfile?.displayName ?? '—'}</td>
                   <td>
                     <StatusBadge status={u.status} />
                   </td>
-                  <td>{u.customerProfile?.priceLevel?.code ?? '—'}</td>
+                  <td className="code">{u.customerProfile?.priceLevel?.code ?? '—'}</td>
                   <td>{formatDateTime(u.createdAt, locale)}</td>
                   <td>
-                    <Link href={`/admin/customers/${u.id}`}>{L('فتح', 'Open')}</Link>
+                    <div className="adm-row-actions">
+                      <Link className="btn btn-small" href={`/admin/customers/${u.id}`}>
+                        {L('فتح', 'Open')}
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -100,6 +121,6 @@ export default async function AdminCustomers({ searchParams }: { searchParams: P
         params={{ status, q }}
         labels={{ prev: L('السابق', 'Previous'), next: L('التالي', 'Next'), of: 'of' }}
       />
-    </>
+    </div>
   );
 }

@@ -1,0 +1,85 @@
+/* Operations pages: customers, inventory, reservations, orders.
+   Everything is scoped under .ops so nothing leaks into other administration modules.
+   Shared primitives (.adm-head, .adm-filters, .adm-kpi, .adm-table, .adm-confirm, ...) come from ../admin.css.
+   Logical properties only (RTL safe). */
+
+.ops .page-head { align-items: flex-start; padding-block-end: 12px; margin-block-end: 14px; border-block-end: 1px solid var(--c-border); }
+.ops .page-head h1 { font-size: 1.5rem; letter-spacing: -0.01em; }
+.ops .page-head .muted { margin-block-start: 4px; max-inline-size: 70ch; }
+.ops .page-head > .row { justify-content: flex-end; }
+
+.ops-back { margin-block-end: 6px; font-size: 0.9rem; }
+.ops-back a { color: var(--c-muted); text-decoration: none; }
+.ops-back a:hover { text-decoration: underline; }
+
+/* Secondary text under a value (names, timestamps, quality, expiry). */
+.ops-sub { color: var(--c-muted); font-size: 0.82rem; margin-block-start: 2px; }
+.ops-flag { color: var(--c-warn, #b7791f); font-size: 0.82rem; font-weight: 600; margin-block-start: 4px; }
+.ops-badges { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ops-note { color: var(--c-muted); font-size: 0.9rem; margin: 12px 0 0; }
+
+/* Filter checkbox aligned with the inputs next to it. */
+.ops-check { align-self: flex-end; }
+.ops-check label { display: inline-flex; align-items: center; gap: 8px; min-block-size: 40px; margin: 0; font-weight: 400; }
+
+/* Table polish on top of .adm-table. */
+.ops .adm-table th { background: var(--c-surface-2); color: var(--c-muted); font-size: 0.8rem; font-weight: 600; padding-block: 10px; }
+.ops .adm-table td { padding-block: 10px; }
+.ops .adm-table tbody tr:last-child td { border-block-end: 0; }
+.ops .ops-row-conflict > td:first-child { border-inline-start: 3px solid var(--c-danger, #b42318); }
+
+/* Two-column layout that collapses to one column on phones. */
+.ops-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; align-items: start; margin-block-end: 16px; }
+.ops-grid > .adm-section { margin-block-end: 0; }
+.ops > .adm-section { margin-block-end: 16px; }
+
+/* Definition lists for record facts. */
+.ops-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 12px 16px; margin: 0; }
+.ops-facts > div { border-block-start: 1px solid var(--c-border); padding-block-start: 8px; min-inline-size: 0; }
+.ops-facts dt { color: var(--c-muted); font-size: 0.82rem; margin: 0 0 2px; }
+.ops-facts dd { margin: 0; font-weight: 500; overflow-wrap: anywhere; }
+
+/* Action blocks inside a section. */
+.ops-stack { display: grid; gap: 12px; }
+.ops-action { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 12px; background: var(--c-surface); min-inline-size: 0; }
+.ops-action h3 { margin: 0 0 8px; font-size: 0.95rem; }
+.ops-action form { margin-block-end: 0; }
+.ops-reason { margin: 0 0 10px; padding: 8px 12px; border-inline-start: 3px solid var(--c-border); background: var(--c-surface-2); border-radius: var(--radius); font-size: 0.92rem; overflow-wrap: anywhere; }
+.ops-decision { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+
+/* Consequence disclosures for irreversible actions. */
+.ops .adm-confirm { background: var(--c-surface-2); min-inline-size: 0; }
+.ops .adm-confirm > summary { font-size: 0.92rem; }
+.ops .adm-confirm > p { margin: 0 0 10px; font-size: 0.9rem; }
+.ops .adm-confirm[open] { border-color: var(--c-border); }
+.ops-action > .adm-confirm { margin-block-start: 0; }
+
+/* Non-destructive disclosure (extend). */
+.ops-disclosure { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 6px 10px; background: var(--c-surface); min-inline-size: 0; }
+.ops-disclosure > summary { cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.ops-disclosure[open] > summary { margin-block-end: 8px; }
+
+/* Row actions in reservations: extend and release stacked. */
+.ops-res-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-inline-size: 200px; }
+
+/* Plain lists (reservations and invoices on order detail). */
+.ops-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.ops-list > li { border-block-end: 1px solid var(--c-border); padding-block-end: 8px; overflow-wrap: anywhere; }
+.ops-list > li:last-child { border-block-end: 0; padding-block-end: 0; }
+
+/* Order totals sit under the items table, right-aligned. */
+.ops-totals { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: flex-end; margin: 12px 0 0; padding-block-start: 12px; border-block-start: 1px solid var(--c-border); }
+.ops-totals > div { display: flex; gap: 8px; align-items: baseline; }
+.ops-totals dt { color: var(--c-muted); font-size: 0.9rem; }
+.ops-totals dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Mobile: headers stack, tables keep a readable width and scroll inside .table-wrap. */
+@media (max-width: 640px) {
+  .ops .page-head { flex-direction: column; }
+  .ops .page-head > .row { justify-content: flex-start; }
+  .ops .adm-table table { min-inline-size: 520px; }
+  .ops-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ops-decision > * { flex: 1 1 100%; }
+  .ops-decision .btn { inline-size: 100%; }
+  .ops-res-actions { min-inline-size: 0; }
+}
