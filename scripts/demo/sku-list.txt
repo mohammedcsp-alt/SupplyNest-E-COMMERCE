@@ -1,0 +1,33 @@
+DEV-BAT-1|Batteries|Battery pack 1
+DEV-BAT-2|Batteries|Battery pack 2
+DEV-BAT-3|Batteries|Battery pack 3
+DEV-BAT-4|Batteries|Battery pack 4
+DEV-BAT-5|Batteries|Battery pack 5
+DEV-BAT-6|Batteries|Battery pack 6
+DEV-HT-1|Hand tools|Hand tool set 1
+DEV-HT-2|Hand tools|Hand tool set 2
+DEV-HT-3|Hand tools|Hand tool set 3
+DEV-HT-4|Hand tools|Hand tool set 4
+DEV-HT-5|Hand tools|Hand tool set 5
+DEV-HT-6|Hand tools|Hand tool set 6
+DEV-OF-1|Office supplies|A4 paper ream 1
+DEV-OF-2|Office supplies|A4 paper ream 2
+DEV-OF-3|Office supplies|A4 paper ream 3
+DEV-OF-4|Office supplies|A4 paper ream 4
+DEV-SCR-11|Screens|Screen panel 6.1 (original)
+DEV-SCR-12|Screens|Screen panel 6.1 (oem)
+DEV-SCR-13|Screens|Screen panel 6.1 (high_copy)
+DEV-SCR-21|Screens|Screen panel 6.5 (original)
+DEV-SCR-22|Screens|Screen panel 6.5 (oem)
+DEV-SCR-23|Screens|Screen panel 6.5 (high_copy)
+DEV-SCR-31|Screens|Screen panel 5.8 (original)
+DEV-SCR-32|Screens|Screen panel 5.8 (oem)
+DEV-SCR-33|Screens|Screen panel 5.8 (high_copy)
+DEV-TS-L-BL|T-shirts|Cotton T-shirt L Black
+DEV-TS-L-WH|T-shirts|Cotton T-shirt L White
+DEV-TS-M-BL|T-shirts|Cotton T-shirt M Black
+DEV-TS-M-WH|T-shirts|Cotton T-shirt M White
+DEV-TS-S-BL|T-shirts|Cotton T-shirt S Black
+DEV-TS-S-WH|T-shirts|Cotton T-shirt S White
+DEV-TS-XL-BL|T-shirts|Cotton T-shirt XL Black
+DEV-TS-XL-WH|T-shirts|Cotton T-shirt XL White

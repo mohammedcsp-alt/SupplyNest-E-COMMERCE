@@ -7,6 +7,7 @@ import { listCmsBanners } from '@/modules/admin/cms';
 import { db } from '@/lib/db';
 import { EmptyState } from '@/components/ui';
 import { ProductCard, type CardItem } from '@/components/storefront/ProductCard';
+import { categoryImageSrc } from '@/lib/storefront-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +52,11 @@ export default async function HomePage() {
     <div>
       {/* Hero + promo tiles */}
       <section className="home-hero" aria-label={L('الواجهة الرئيسية', 'Featured')}>
-        <div className="hero-banner">
+        <div className={`hero-banner${banner ? ' has-image' : ''}`}>
+          {banner && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="hero-img" src={`/api/v1/cms/banners/${banner.id}/image`} alt="" aria-hidden="true" />
+          )}
           <h1>{banner ? localized(locale, banner.titleAr, banner.titleEn) : L('كتالوج الجملة للمنتجات المادية', 'Wholesale catalogue for physical goods')}</h1>
           <p>
             {L(
@@ -106,9 +111,14 @@ export default async function HomePage() {
               const name = localized(locale, c.nameAr, c.nameEn);
               return (
                 <Link key={c.id} href={`/catalog?categoryId=${c.id}`} className="category-card">
-                  <span className="cat-icon" aria-hidden="true">
-                    {name.trim().charAt(0).toUpperCase()}
-                  </span>
+                  {categoryImageSrc(c.slug) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="cat-img" src={categoryImageSrc(c.slug)!} alt="" loading="lazy" />
+                  ) : (
+                    <span className="cat-icon" aria-hidden="true">
+                      {name.trim().charAt(0).toUpperCase()}
+                    </span>
+                  )}
                   <strong>{name}</strong>
                   <span>{c.children.length > 0 ? L(`${c.children.length} فئات فرعية`, `${c.children.length} subcategories`) : L('تصفح المنتجات', 'Browse products')}</span>
                 </Link>

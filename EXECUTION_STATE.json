@@ -1,9 +1,33 @@
 {
   "project": "B2B-STORE V3.3 (storefront redesign)",
   "checkpoint": "pre-v3.3-redesign",
-  "currentPhase": "Phase 3 complete-ish; Phases 4-7 pending",
-  "completed": ["Phase 0", "Phase 1", "Phase 2 (header, homepage)", "Phase 3 (catalog)"],
-  "pending": ["Phase 4 product/cart/checkout/quick+bulk order", "Phase 5 customer UI", "Phase 6 admin UI", "Phase 7 fulfillment+accounting UI", "Playwright E2E", "production build", "1024/768/1920 captures", "Arabic captures of all pages"],
-  "lastVerified": { "tsc": "clean", "vitest": "231 passed", "date": "2026-11-14" },
-  "nextAction": "Redesign product details page using ProductCard/QuickAdd/FavoriteButton patterns, then cart and checkout."
+  "previousCommit": "fbf4394",
+  "completed": [
+    "Phase 0 safety",
+    "Phase 1 design tokens",
+    "Phase 2 header and homepage (with demo banner and category art)",
+    "Phase 3 catalog (3 views, filters)",
+    "Product details page (gallery, specs, qualities, related)",
+    "Demo content: 33 product images, 8 category images, 3 banners (DEV SKUs only)",
+    "V1 docs archived to docs/history/v1"
+  ],
+  "pending": [
+    "Cart",
+    "Checkout",
+    "Quick order",
+    "Bulk order",
+    "Excel upload page",
+    "Customer account, profile, orders, order details, favourites, recent, registration, login, OTP, recovery, cancellation, reorder",
+    "Admin dashboard and all admin modules",
+    "Fulfillment module (all pages)",
+    "Accounting module (all pages)",
+    "Responsive captures at 1920/1024/768 and Arabic for all pages",
+    "Playwright E2E suite run",
+    "Production build"
+  ],
+  "lastVerified": {
+    "tsc": "clean (this checkpoint)",
+    "vitest": "231 passed at fbf4394; re-run pending for demo/product changes"
+  },
+  "nextAction": "Redesign cart and checkout, then customer pages, then admin, fulfillment, accounting"
 }

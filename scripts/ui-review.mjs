@@ -26,6 +26,8 @@ const PAGES = {
   login: '/login',
   register: '/register',
   search: '/search?q=a',
+  product: '/products/DEV-BAT-1',
+  'product-tshirt': '/products/DEV-TS-L-BL',
 };
 const selected = (args.pages ?? Object.keys(PAGES).join(',')).split(',');
 

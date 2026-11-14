@@ -20,7 +20,8 @@
     "jobs:sweep": "dotenv -e .env -- tsx --conditions=react-server scripts/jobs-sweep.ts",
     "backup:job": "dotenv -e .env -- tsx --conditions=react-server scripts/backup-job.ts",
     "restore:test": "dotenv -e .env -- tsx --conditions=react-server scripts/restore-test.ts",
-    "test:e2e:api": "npm run test:e2e -- --project=api"
+    "test:e2e:api": "npm run test:e2e -- --project=api",
+    "demo:content": "dotenv -e .env -- tsx --conditions=react-server scripts/demo/seed-demo-content.ts"
   },
   "engines": {
     "node": ">=20.9"

@@ -2,17 +2,17 @@
   {
     "page": "home",
     "locale": "en",
-    "width": 390,
+    "width": 1440,
     "status": 200,
     "horizontalOverflowPx": 0,
-    "file": "docs\\ui-review\\home__en__390.png"
+    "file": "docs\\ui-review\\home__en__1440.png"
   },
   {
-    "page": "catalog-grid",
+    "page": "product",
     "locale": "en",
-    "width": 390,
+    "width": 1440,
     "status": 200,
     "horizontalOverflowPx": 0,
-    "file": "docs\\ui-review\\catalog-grid__en__390.png"
+    "file": "docs\\ui-review\\product__en__1440.png"
   }
 ]
