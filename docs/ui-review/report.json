@@ -1,18 +1,66 @@
 [
   {
-    "page": "home",
+    "page": "verify",
     "locale": "en",
     "width": 1440,
     "status": 200,
     "horizontalOverflowPx": 0,
-    "file": "docs\\ui-review\\home__en__1440.png"
+    "file": "docs\\ui-review\\verify__en__1440.png"
   },
   {
-    "page": "product",
+    "page": "recover",
     "locale": "en",
     "width": 1440,
     "status": 200,
     "horizontalOverflowPx": 0,
-    "file": "docs\\ui-review\\product__en__1440.png"
+    "file": "docs\\ui-review\\recover__en__1440.png"
+  },
+  {
+    "page": "verify",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__en__390.png"
+  },
+  {
+    "page": "recover",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__en__390.png"
+  },
+  {
+    "page": "verify",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__ar__1440.png"
+  },
+  {
+    "page": "recover",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__ar__1440.png"
+  },
+  {
+    "page": "verify",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__ar__390.png"
+  },
+  {
+    "page": "recover",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__ar__390.png"
   }
 ]

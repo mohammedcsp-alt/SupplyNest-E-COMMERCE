@@ -25,6 +25,8 @@ const PAGES = {
   'catalog-filtered': '/catalog?sort=newest',
   login: '/login',
   register: '/register',
+  verify: '/verify',
+  recover: '/recover',
   search: '/search?q=a',
   product: '/products/DEV-BAT-1',
   'product-tshirt': '/products/DEV-TS-L-BL',

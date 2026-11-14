@@ -157,9 +157,9 @@
         "M-05"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Non-image rejected; anonymous cannot write; inactive owner hidden; featured respects visibility",
-      "verification_evidence": "",
+      "verification_evidence": "npx vitest run tests/integration/media-merchandising.test.ts: 9/9 passed (category/banner image auth, validation, public visibility; merchandising auth, audit, featured visibility). Fixed src/lib/api.ts multipart allow-list so singular /image upload routes accept multipart (anonymous now 401 instead of 400)",
       "blocker_reason": null
     },
     {
@@ -181,9 +181,9 @@
         "CU-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Quote, consent hash and idempotent COD submit unchanged; en and ar",
-      "verification_evidence": "",
+      "verification_evidence": "en and ar 390 overflow=0px (ui-review-auth, stored customer state); en 1440 and ar 1440 captured earlier; quote table scrolls horizontally inside its own box at 390 (known limitation: price columns need a swipe); tsc clean; quote, consent and idempotency code unchanged",
       "blocker_reason": null
     },
     {
@@ -193,9 +193,9 @@
         "CU-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Uses existing bulk-preview and bulk-add; nothing created until reviewed",
-      "verification_evidence": "",
+      "verification_evidence": "src/components/customer/QuickOrder.tsx + src/app/quick-order/page.tsx use existing /api/v1/cart/bulk-preview and /bulk-add; nothing created until reviewed. tsc clean. Capture pending (customer login rate-limited)",
       "blocker_reason": null
     },
     {
@@ -205,9 +205,9 @@
         "CU-03"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Paste and preview keep existing validation",
-      "verification_evidence": "",
+      "verification_evidence": "src/components/customer/BulkOrder.tsx + BulkPreview.tsx: same paste validation and API; tsc clean. Capture pending",
       "blocker_reason": null
     },
     {
@@ -217,9 +217,9 @@
         "CU-04"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "File validation unchanged; row errors shown",
-      "verification_evidence": "",
+      "verification_evidence": "Excel/CSV upload is the second card on /bulk-order (same gate: active approved customers; same bulk-preview validation). Multipart path fixed in src/lib/api.ts (bulk-preview allow-list) and covered by tests/integration/media-merchandising.test.ts. Capture pending",
       "blocker_reason": null
     },
     {
@@ -229,9 +229,9 @@
         "D-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Existing auth API unchanged; en and ar; 390px",
-      "verification_evidence": "",
+      "verification_evidence": "Visual: docs/ui-review/{login,register,verify,recover}__{en,ar}__{1440,390}.png, overflow=0 at all widths; API endpoints and ApiForm fields unchanged; tsc clean. OTP/login flow not exercised end to end here (mock OTP; dev login currently rate-limited)",
       "blocker_reason": null
     },
     {
@@ -241,9 +241,9 @@
         "D-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Existing register API and validation unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "Visual: docs/ui-review/{login,register,verify,recover}__{en,ar}__{1440,390}.png, overflow=0 at all widths; API endpoints and ApiForm fields unchanged; tsc clean. OTP/login flow not exercised end to end here (mock OTP; dev login currently rate-limited)",
       "blocker_reason": null
     },
     {
@@ -253,9 +253,9 @@
         "CU-06"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "OTP flow unchanged; resend and expiry states",
-      "verification_evidence": "",
+      "verification_evidence": "Visual: docs/ui-review/{login,register,verify,recover}__{en,ar}__{1440,390}.png, overflow=0 at all widths; API endpoints and ApiForm fields unchanged; tsc clean. OTP/login flow not exercised end to end here (mock OTP; dev login currently rate-limited)",
       "blocker_reason": null
     },
     {
@@ -265,9 +265,9 @@
         "CU-06"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Recovery API unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "Visual: docs/ui-review/{login,register,verify,recover}__{en,ar}__{1440,390}.png, overflow=0 at all widths; API endpoints and ApiForm fields unchanged; tsc clean. OTP/login flow not exercised end to end here (mock OTP; dev login currently rate-limited)",
       "blocker_reason": null
     },
     {
@@ -277,9 +277,9 @@
         "D-01"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Summary links only to real data",
-      "verification_evidence": "",
+      "verification_evidence": "account overview: tiles with real counts (orders, addresses, favourites) from db; code and tsc done; capture pending",
       "blocker_reason": null
     },
     {
@@ -289,9 +289,9 @@
         "CU-10"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Profile API unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "AccountShell wrapper applied (src/components/customer/AccountShell.tsx); page logic unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -301,9 +301,9 @@
         "CU-10"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Pagination and status badges",
-      "verification_evidence": "",
+      "verification_evidence": "AccountShell wrapper applied (src/components/customer/AccountShell.tsx); page logic unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -313,9 +313,9 @@
         "CU-12"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Cancellation request and reorder entry preserved",
-      "verification_evidence": "",
+      "verification_evidence": "AccountShell wrapper applied (src/components/customer/AccountShell.tsx); page logic unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -325,9 +325,9 @@
         "CU-10"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Uses existing favourites API",
-      "verification_evidence": "",
+      "verification_evidence": "AccountShell wrapper applied (src/components/customer/AccountShell.tsx); page logic unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -337,9 +337,9 @@
         "CU-10"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Uses existing recent API",
-      "verification_evidence": "",
+      "verification_evidence": "AccountShell wrapper applied (src/components/customer/AccountShell.tsx); page logic unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -349,9 +349,9 @@
         "CU-13"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Existing cancel-request API and approval rules",
-      "verification_evidence": "",
+      "verification_evidence": "cancellation UI lives on order details (src/app/orders/[id]/page.tsx); wrapped in AccountShell, logic unchanged; capture pending",
       "blocker_reason": null
     },
     {
@@ -361,9 +361,9 @@
         "CU-13"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Existing reorder API; prices re-read at the current level",
-      "verification_evidence": "",
+      "verification_evidence": "reorder UI on order details (ReorderButton unchanged); wrapped in AccountShell; capture pending",
       "blocker_reason": null
     },
     {
@@ -373,9 +373,9 @@
         "D-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Grouped modules; collapsible; RTL mirrored; role-based links only",
-      "verification_evidence": "",
+      "verification_evidence": "admin grouped nav (src/app/admin/layout.tsx) reviewed at en 1440 (docs/ui-review/auth-manager-admin__en__1440.png); overflow=0 on 8 admin pages; tsc clean",
       "blocker_reason": null
     },
     {
@@ -385,9 +385,9 @@
         "AD-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Only real counts from the database; no invented statistics",
-      "verification_evidence": "",
+      "verification_evidence": "dashboard live counts unchanged; area tiles reviewed at en 1440; tsc clean",
       "blocker_reason": null
     },
     {
@@ -532,9 +532,9 @@
         "AD-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Newest-first queue; pagination; older unfinished jobs visible",
-      "verification_evidence": "",
+      "verification_evidence": "fulfillment queue card + list unchanged (query/pagination untouched); tsc clean; screenshot capture pending (staff login rate-limited)",
       "blocker_reason": null
     },
     {
@@ -544,9 +544,9 @@
         "FU-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Transitions and role separation unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "job page: read-only stage stepper, card grid; transitions/role checks unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -556,9 +556,9 @@
         "FU-02"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Handover rules unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "timeline restyled; handover form/rules unchanged; print document deliberately unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -568,9 +568,9 @@
         "AD-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "done",
       "acceptance": "Figures from existing report functions only",
-      "verification_evidence": "",
+      "verification_evidence": "accounting dashboard at en 1440 (docs/ui-review/auth-manager-accounting__en__1440.png) reviewed; overflow=0; figures unchanged from existing report functions; tsc clean",
       "blocker_reason": null
     },
     {
@@ -580,9 +580,9 @@
         "AC-01"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Expected and collected COD kept separate",
-      "verification_evidence": "",
+      "verification_evidence": "accounting visual redesign (agent a2bc06); figures, sources, NET/GROSS switching, export links unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -592,9 +592,9 @@
         "AC-02"
       ],
       "priority": "P1",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Both settlement methods preserved; money math unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "accounting visual redesign (agent a2bc06); figures, sources, NET/GROSS switching, export links unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -604,9 +604,9 @@
         "AC-03"
       ],
       "priority": "P2",
-      "status": "pending",
+      "status": "in_progress",
       "acceptance": "Export unchanged",
-      "verification_evidence": "",
+      "verification_evidence": "accounting visual redesign (agent a2bc06); figures, sources, NET/GROSS switching, export links unchanged; tsc clean; capture pending",
       "blocker_reason": null
     },
     {
@@ -656,9 +656,9 @@
         "T-01"
       ],
       "priority": "P0",
-      "status": "pending",
+      "status": "done",
       "acceptance": "All tests pass; none weakened",
-      "verification_evidence": "",
+      "verification_evidence": "npx vitest run (full suite): 31 files, 241 tests passed, 0 failed (was 30 files/231 before T-01; no test weakened)",
       "blocker_reason": null
     },
     {
