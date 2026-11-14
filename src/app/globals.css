@@ -568,3 +568,39 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
 }
 .brand-tile:hover { border-color: var(--brand); }
 .brand-tile img { block-size: 56px; inline-size: 100%; object-fit: contain; }
+
+/* ---------- Cart ---------- */
+.cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+.cart-lines { display: grid; gap: 10px; }
+.cart-line {
+  display: grid; grid-template-columns: 84px minmax(0, 1.4fr) 150px 120px 160px; gap: 14px; align-items: center;
+  background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 12px;
+}
+.cart-thumb { inline-size: 84px; block-size: 84px; background: var(--c-surface-2); border-radius: var(--radius); display: grid; place-items: center; overflow: hidden; }
+.cart-thumb img { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.cart-info { display: grid; gap: 4px; min-width: 0; }
+.cart-name { color: var(--c-text); font-weight: 600; text-decoration: none; }
+.cart-name:hover { color: var(--brand); text-decoration: underline; }
+.cart-qty, .cart-price, .cart-total { display: grid; gap: 4px; justify-items: start; }
+.cart-total { justify-items: end; }
+.cart-total strong { font-variant-numeric: tabular-nums; }
+.cart-summary {
+  position: sticky; top: calc(var(--header-h) + 60px); display: grid; gap: 12px; background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg); padding: 16px;
+}
+.cart-summary .kpi { font-size: 1.5rem; }
+.btn.disabled, .btn[aria-disabled="true"] { opacity: 0.55; pointer-events: none; }
+@media (max-width: 1100px) {
+  .cart-line { grid-template-columns: 72px minmax(0, 1fr) 140px; }
+  .cart-line .cart-price, .cart-line .cart-total { grid-column: auto; }
+}
+@media (max-width: 900px) {
+  .cart-layout { grid-template-columns: 1fr; }
+  .cart-summary { position: static; }
+}
+@media (max-width: 640px) {
+  .cart-line { grid-template-columns: 64px minmax(0, 1fr); }
+  .cart-thumb { inline-size: 64px; block-size: 64px; }
+  .cart-qty, .cart-price, .cart-total { grid-column: 1 / -1; justify-items: stretch; grid-template-columns: auto 1fr; align-items: center; }
+  .cart-total { justify-items: stretch; }
+}

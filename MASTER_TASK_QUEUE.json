@@ -4,62 +4,700 @@
   "source": "EXECUTION_STATE.json and the V3.3 directive",
   "status_legend": "done | pending | in_progress | blocked",
   "tasks": [
-    { "id": "S-01", "title": "Safety baseline: checkpoint tag, isolated DB, WMS untouched", "dependencies": [], "priority": "P0", "status": "done", "acceptance": "Tag pre-v3.3-redesign exists; only b2b containers started", "verification_evidence": "tag pre-v3.3-redesign on 8312471; only b2b-store-postgres started", "blocker_reason": null },
-    { "id": "D-01", "title": "Design system tokens and components", "dependencies": ["S-01"], "priority": "P0", "status": "done", "acceptance": "Tokens, buttons, inputs, cards, tables, pagination, drawers, responsive rules", "verification_evidence": "commit fbf4394 (globals.css)", "blocker_reason": null },
-    { "id": "H-01", "title": "Storefront header: 3 tiers, search suggestions, mega menu, mobile menu", "dependencies": ["D-01"], "priority": "P0", "status": "done", "acceptance": "Header renders for guest and customer; mobile menu toggles", "verification_evidence": "commit fbf4394; docs/ui-review/home__*", "blocker_reason": null },
-    { "id": "H-02", "title": "Homepage: hero, categories, brands, featured, new arrivals, recently viewed, quick order, registration, footer", "dependencies": ["H-01"], "priority": "P0", "status": "done", "acceptance": "Sections render from DB/CMS; no invented claims", "verification_evidence": "commits fbf4394, 83f13d4", "blocker_reason": null },
-    { "id": "C-01", "title": "Catalog: grid, list, compact views; server-side filters; pagination; view memory", "dependencies": ["D-01"], "priority": "P0", "status": "done", "acceptance": "Three views; multi-select brand, quality and attribute filters; cookie remembers view", "verification_evidence": "commit fbf4394", "blocker_reason": null },
-    { "id": "P-01", "title": "Product details: gallery, specs, qualities, related, breadcrumb", "dependencies": ["C-01"], "priority": "P0", "status": "done", "acceptance": "Renders for DEV-BAT-1 and DEV-TS-L-BL at en 1440", "verification_evidence": "commit f886337; docs/ui-review/product__en__1440.png", "blocker_reason": null },
-    { "id": "M-01", "title": "Schema v33_storefront_media (additive)", "dependencies": [], "priority": "P0", "status": "done", "acceptance": "Migration applied; existing rows preserved", "verification_evidence": "prisma/migrations/20261114100120_v33_storefront_media", "blocker_reason": null },
-    { "id": "M-02", "title": "Category images: admin upload, replace, remove; storefront display; fallback", "dependencies": ["M-01"], "priority": "P1", "status": "done", "acceptance": "Upload audited; public image for active categories; letter fallback", "verification_evidence": "commit 83f13d4; admin/categories/[id]/image", "blocker_reason": null },
-    { "id": "M-03", "title": "Brand images: admin management and storefront display", "dependencies": ["M-01"], "priority": "P1", "status": "done", "acceptance": "Logo tiles on homepage; admin brand image control", "verification_evidence": "commit 83f13d4", "blocker_reason": null },
-    { "id": "M-04", "title": "Featured products: admin marking, ordering, homepage section", "dependencies": ["M-01"], "priority": "P1", "status": "done", "acceptance": "Admin toggles and order; homepage lists featured", "verification_evidence": "commit 83f13d4; docs/ui-review/auth-manager-admin_merchandising__en__1440.png", "blocker_reason": null },
-    { "id": "M-05", "title": "Banners: admin description, link label, image, schedule, order", "dependencies": ["M-01"], "priority": "P1", "status": "done", "acceptance": "Create and patch accept new fields; image upload per banner", "verification_evidence": "commit 83f13d4", "blocker_reason": null },
-    { "id": "M-06", "title": "Demo content (DEV-only): products, categories, brands, featured, banners", "dependencies": ["M-02", "M-03", "M-04", "M-05"], "priority": "P1", "status": "done", "acceptance": "Idempotent; DEMO tag on every image", "verification_evidence": "scripts/demo; npm run demo:content", "blocker_reason": null },
-    { "id": "T-01", "title": "Automated tests for media, merchandising and banner APIs (auth, validation, public visibility)", "dependencies": ["M-02", "M-03", "M-04", "M-05"], "priority": "P1", "status": "pending", "acceptance": "Non-image rejected; anonymous cannot write; inactive owner hidden; featured respects visibility", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-01", "title": "Cart page redesign (lines, qty, remove, totals, reorder entry)", "dependencies": ["D-01"], "priority": "P1", "status": "pending", "acceptance": "Empty and non-empty cart render; server rules unchanged; en and ar", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-02", "title": "Checkout redesign (address, shipping quote, consent, COD)", "dependencies": ["CU-01"], "priority": "P1", "status": "pending", "acceptance": "Quote, consent hash and idempotent COD submit unchanged; en and ar", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-03", "title": "Quick order page (SKU and qty entry, preview, add)", "dependencies": ["CU-01"], "priority": "P1", "status": "pending", "acceptance": "Uses existing bulk-preview and bulk-add; nothing created until reviewed", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-04", "title": "Bulk order page redesign", "dependencies": ["CU-03"], "priority": "P1", "status": "pending", "acceptance": "Paste and preview keep existing validation", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-05", "title": "Excel order upload UI (eligible customers)", "dependencies": ["CU-04"], "priority": "P1", "status": "pending", "acceptance": "File validation unchanged; row errors shown", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-06", "title": "Login page redesign", "dependencies": ["D-01"], "priority": "P1", "status": "pending", "acceptance": "Existing auth API unchanged; en and ar; 390px", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-07", "title": "Registration page redesign", "dependencies": ["D-01"], "priority": "P1", "status": "pending", "acceptance": "Existing register API and validation unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-08", "title": "OTP verification page redesign", "dependencies": ["CU-06"], "priority": "P1", "status": "pending", "acceptance": "OTP flow unchanged; resend and expiry states", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-09", "title": "Account recovery page redesign", "dependencies": ["CU-06"], "priority": "P2", "status": "pending", "acceptance": "Recovery API unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-10", "title": "Customer account dashboard", "dependencies": ["D-01"], "priority": "P2", "status": "pending", "acceptance": "Summary links only to real data", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-11", "title": "Customer profile page", "dependencies": ["CU-10"], "priority": "P2", "status": "pending", "acceptance": "Profile API unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-12", "title": "Order history page", "dependencies": ["CU-10"], "priority": "P2", "status": "pending", "acceptance": "Pagination and status badges", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-13", "title": "Order details page", "dependencies": ["CU-12"], "priority": "P2", "status": "pending", "acceptance": "Cancellation request and reorder entry preserved", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-14", "title": "Favourites page", "dependencies": ["CU-10"], "priority": "P2", "status": "pending", "acceptance": "Uses existing favourites API", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-15", "title": "Recently viewed page", "dependencies": ["CU-10"], "priority": "P2", "status": "pending", "acceptance": "Uses existing recent API", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-16", "title": "Cancellation request UI", "dependencies": ["CU-13"], "priority": "P2", "status": "pending", "acceptance": "Existing cancel-request API and approval rules", "verification_evidence": "", "blocker_reason": null },
-    { "id": "CU-17", "title": "Reorder UI", "dependencies": ["CU-13"], "priority": "P2", "status": "pending", "acceptance": "Existing reorder API; prices re-read at the current level", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-01", "title": "Admin shell: grouped collapsible sidebar and page layout", "dependencies": ["D-01"], "priority": "P1", "status": "pending", "acceptance": "Grouped modules; collapsible; RTL mirrored; role-based links only", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-02", "title": "Admin dashboard with real metrics", "dependencies": ["AD-01"], "priority": "P1", "status": "pending", "acceptance": "Only real counts from the database; no invented statistics", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-03", "title": "Admin products and SKU management redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Validation kept; server-side pagination", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-04", "title": "Admin categories, brands and attributes redesign", "dependencies": ["AD-01", "M-02", "M-03"], "priority": "P2", "status": "pending", "acceptance": "Attributes per category preserved", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-05", "title": "Admin customers and approvals redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Approve, suspend and reactivate unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-06", "title": "Admin price tiers redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Price history and rules unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-07", "title": "Admin inventory redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Adjustments audited; quantities shown to staff only", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-08", "title": "Admin imports redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Preview, commit and stale-file rules unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-09", "title": "Admin reservations redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Extend and release rules unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-10", "title": "Admin orders redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Hold, lock-prep and cancellation approval unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-11", "title": "Admin CMS pages and banners redesign", "dependencies": ["AD-01", "M-05"], "priority": "P2", "status": "pending", "acceptance": "Publish permission rules unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-12", "title": "Admin reports redesign", "dependencies": ["AD-01"], "priority": "P2", "status": "pending", "acceptance": "Export paths unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AD-13", "title": "Admin roles, audit log, settings, backup and integrations redesign", "dependencies": ["AD-01"], "priority": "P3", "status": "pending", "acceptance": "Permission checks unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "FU-01", "title": "Fulfillment queue and preparation invoices redesign", "dependencies": ["AD-01"], "priority": "P1", "status": "pending", "acceptance": "Newest-first queue; pagination; older unfinished jobs visible", "verification_evidence": "", "blocker_reason": null },
-    { "id": "FU-02", "title": "Picking, shortage, checking and packing redesign", "dependencies": ["FU-01"], "priority": "P1", "status": "pending", "acceptance": "Transitions and role separation unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "FU-03", "title": "Parcel, shipping label, courier handover and workflow history redesign", "dependencies": ["FU-02"], "priority": "P1", "status": "pending", "acceptance": "Handover rules unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AC-01", "title": "Accounting dashboard redesign", "dependencies": ["AD-01"], "priority": "P1", "status": "pending", "acceptance": "Figures from existing report functions only", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AC-02", "title": "Accounting: invoices, COD tracking, courier accounts and agreements", "dependencies": ["AC-01"], "priority": "P1", "status": "pending", "acceptance": "Expected and collected COD kept separate", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AC-03", "title": "Accounting: fees, transfers, partial settlements, balances, returns, adjustments, reversals", "dependencies": ["AC-02"], "priority": "P1", "status": "pending", "acceptance": "Both settlement methods preserved; money math unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "AC-04", "title": "Financial reports redesign", "dependencies": ["AC-03"], "priority": "P2", "status": "pending", "acceptance": "Export unchanged", "verification_evidence": "", "blocker_reason": null },
-    { "id": "V-01", "title": "Responsive and RTL visual verification: 1920, 1440, 1024, 768, 390; en and ar; all required pages", "dependencies": ["CU-02", "CU-13", "AD-02", "FU-03", "AC-04"], "priority": "P1", "status": "pending", "acceptance": "Screenshots in docs/ui-review; zero overflow; defects fixed and re-captured", "verification_evidence": "", "blocker_reason": null },
-    { "id": "V-02", "title": "Before/after baseline from pre-v3.3-redesign tag in an isolated worktree", "dependencies": ["V-01"], "priority": "P3", "status": "pending", "acceptance": "Captured only if it runs without touching the active DB or WMS", "verification_evidence": "", "blocker_reason": "Needs an isolated database; must not connect to the active one" },
-    { "id": "R-01", "title": "TypeScript validation", "dependencies": ["V-01"], "priority": "P0", "status": "pending", "acceptance": "tsc --noEmit exits 0", "verification_evidence": "", "blocker_reason": null },
-    { "id": "R-02", "title": "Vitest full suite", "dependencies": ["T-01"], "priority": "P0", "status": "pending", "acceptance": "All tests pass; none weakened", "verification_evidence": "", "blocker_reason": null },
-    { "id": "R-03", "title": "Playwright E2E full suite", "dependencies": ["V-01"], "priority": "P0", "status": "pending", "acceptance": "Runs on test server 3210 with the test database; failures investigated, not hidden", "verification_evidence": "", "blocker_reason": null },
-    { "id": "R-04", "title": "Production build", "dependencies": ["R-01"], "priority": "P0", "status": "pending", "acceptance": "npm run build exits 0", "verification_evidence": "", "blocker_reason": null },
-    { "id": "DOC-01", "title": "Final documentation set", "dependencies": ["R-02", "R-03", "R-04"], "priority": "P0", "status": "pending", "acceptance": "Documents reflect verified evidence only; V1 history kept under docs/history/v1", "verification_evidence": "", "blocker_reason": null }
+    {
+      "id": "S-01",
+      "title": "Safety baseline: checkpoint tag, isolated DB, WMS untouched",
+      "dependencies": [],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Tag pre-v3.3-redesign exists; only b2b containers started",
+      "verification_evidence": "tag pre-v3.3-redesign on 8312471; only b2b-store-postgres started",
+      "blocker_reason": null
+    },
+    {
+      "id": "D-01",
+      "title": "Design system tokens and components",
+      "dependencies": [
+        "S-01"
+      ],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Tokens, buttons, inputs, cards, tables, pagination, drawers, responsive rules",
+      "verification_evidence": "commit fbf4394 (globals.css)",
+      "blocker_reason": null
+    },
+    {
+      "id": "H-01",
+      "title": "Storefront header: 3 tiers, search suggestions, mega menu, mobile menu",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Header renders for guest and customer; mobile menu toggles",
+      "verification_evidence": "commit fbf4394; docs/ui-review/home__*",
+      "blocker_reason": null
+    },
+    {
+      "id": "H-02",
+      "title": "Homepage: hero, categories, brands, featured, new arrivals, recently viewed, quick order, registration, footer",
+      "dependencies": [
+        "H-01"
+      ],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Sections render from DB/CMS; no invented claims",
+      "verification_evidence": "commits fbf4394, 83f13d4",
+      "blocker_reason": null
+    },
+    {
+      "id": "C-01",
+      "title": "Catalog: grid, list, compact views; server-side filters; pagination; view memory",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Three views; multi-select brand, quality and attribute filters; cookie remembers view",
+      "verification_evidence": "commit fbf4394",
+      "blocker_reason": null
+    },
+    {
+      "id": "P-01",
+      "title": "Product details: gallery, specs, qualities, related, breadcrumb",
+      "dependencies": [
+        "C-01"
+      ],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Renders for DEV-BAT-1 and DEV-TS-L-BL at en 1440",
+      "verification_evidence": "commit f886337; docs/ui-review/product__en__1440.png",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-01",
+      "title": "Schema v33_storefront_media (additive)",
+      "dependencies": [],
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "Migration applied; existing rows preserved",
+      "verification_evidence": "prisma/migrations/20261114100120_v33_storefront_media",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-02",
+      "title": "Category images: admin upload, replace, remove; storefront display; fallback",
+      "dependencies": [
+        "M-01"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Upload audited; public image for active categories; letter fallback",
+      "verification_evidence": "commit 83f13d4; admin/categories/[id]/image",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-03",
+      "title": "Brand images: admin management and storefront display",
+      "dependencies": [
+        "M-01"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Logo tiles on homepage; admin brand image control",
+      "verification_evidence": "commit 83f13d4",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-04",
+      "title": "Featured products: admin marking, ordering, homepage section",
+      "dependencies": [
+        "M-01"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Admin toggles and order; homepage lists featured",
+      "verification_evidence": "commit 83f13d4; docs/ui-review/auth-manager-admin_merchandising__en__1440.png",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-05",
+      "title": "Banners: admin description, link label, image, schedule, order",
+      "dependencies": [
+        "M-01"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Create and patch accept new fields; image upload per banner",
+      "verification_evidence": "commit 83f13d4",
+      "blocker_reason": null
+    },
+    {
+      "id": "M-06",
+      "title": "Demo content (DEV-only): products, categories, brands, featured, banners",
+      "dependencies": [
+        "M-02",
+        "M-03",
+        "M-04",
+        "M-05"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Idempotent; DEMO tag on every image",
+      "verification_evidence": "scripts/demo; npm run demo:content",
+      "blocker_reason": null
+    },
+    {
+      "id": "T-01",
+      "title": "Automated tests for media, merchandising and banner APIs (auth, validation, public visibility)",
+      "dependencies": [
+        "M-02",
+        "M-03",
+        "M-04",
+        "M-05"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Non-image rejected; anonymous cannot write; inactive owner hidden; featured respects visibility",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-01",
+      "title": "Cart page redesign (lines, qty, remove, totals, reorder entry)",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "Empty and non-empty cart render; server rules unchanged; en and ar",
+      "verification_evidence": "docs/ui-review/auth-customer-cart__en__1440.png; auth-customer-cart__ar__390.png (no overflow); tsc clean",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-02",
+      "title": "Checkout redesign (address, shipping quote, consent, COD)",
+      "dependencies": [
+        "CU-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Quote, consent hash and idempotent COD submit unchanged; en and ar",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-03",
+      "title": "Quick order page (SKU and qty entry, preview, add)",
+      "dependencies": [
+        "CU-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Uses existing bulk-preview and bulk-add; nothing created until reviewed",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-04",
+      "title": "Bulk order page redesign",
+      "dependencies": [
+        "CU-03"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Paste and preview keep existing validation",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-05",
+      "title": "Excel order upload UI (eligible customers)",
+      "dependencies": [
+        "CU-04"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "File validation unchanged; row errors shown",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-06",
+      "title": "Login page redesign",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Existing auth API unchanged; en and ar; 390px",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-07",
+      "title": "Registration page redesign",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Existing register API and validation unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-08",
+      "title": "OTP verification page redesign",
+      "dependencies": [
+        "CU-06"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "OTP flow unchanged; resend and expiry states",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-09",
+      "title": "Account recovery page redesign",
+      "dependencies": [
+        "CU-06"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Recovery API unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-10",
+      "title": "Customer account dashboard",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Summary links only to real data",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-11",
+      "title": "Customer profile page",
+      "dependencies": [
+        "CU-10"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Profile API unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-12",
+      "title": "Order history page",
+      "dependencies": [
+        "CU-10"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Pagination and status badges",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-13",
+      "title": "Order details page",
+      "dependencies": [
+        "CU-12"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Cancellation request and reorder entry preserved",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-14",
+      "title": "Favourites page",
+      "dependencies": [
+        "CU-10"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Uses existing favourites API",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-15",
+      "title": "Recently viewed page",
+      "dependencies": [
+        "CU-10"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Uses existing recent API",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-16",
+      "title": "Cancellation request UI",
+      "dependencies": [
+        "CU-13"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Existing cancel-request API and approval rules",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "CU-17",
+      "title": "Reorder UI",
+      "dependencies": [
+        "CU-13"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Existing reorder API; prices re-read at the current level",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-01",
+      "title": "Admin shell: grouped collapsible sidebar and page layout",
+      "dependencies": [
+        "D-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Grouped modules; collapsible; RTL mirrored; role-based links only",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-02",
+      "title": "Admin dashboard with real metrics",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Only real counts from the database; no invented statistics",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-03",
+      "title": "Admin products and SKU management redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Validation kept; server-side pagination",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-04",
+      "title": "Admin categories, brands and attributes redesign",
+      "dependencies": [
+        "AD-01",
+        "M-02",
+        "M-03"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Attributes per category preserved",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-05",
+      "title": "Admin customers and approvals redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Approve, suspend and reactivate unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-06",
+      "title": "Admin price tiers redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Price history and rules unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-07",
+      "title": "Admin inventory redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Adjustments audited; quantities shown to staff only",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-08",
+      "title": "Admin imports redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Preview, commit and stale-file rules unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-09",
+      "title": "Admin reservations redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Extend and release rules unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-10",
+      "title": "Admin orders redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Hold, lock-prep and cancellation approval unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-11",
+      "title": "Admin CMS pages and banners redesign",
+      "dependencies": [
+        "AD-01",
+        "M-05"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Publish permission rules unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-12",
+      "title": "Admin reports redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Export paths unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AD-13",
+      "title": "Admin roles, audit log, settings, backup and integrations redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P3",
+      "status": "pending",
+      "acceptance": "Permission checks unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "FU-01",
+      "title": "Fulfillment queue and preparation invoices redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Newest-first queue; pagination; older unfinished jobs visible",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "FU-02",
+      "title": "Picking, shortage, checking and packing redesign",
+      "dependencies": [
+        "FU-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Transitions and role separation unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "FU-03",
+      "title": "Parcel, shipping label, courier handover and workflow history redesign",
+      "dependencies": [
+        "FU-02"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Handover rules unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AC-01",
+      "title": "Accounting dashboard redesign",
+      "dependencies": [
+        "AD-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Figures from existing report functions only",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AC-02",
+      "title": "Accounting: invoices, COD tracking, courier accounts and agreements",
+      "dependencies": [
+        "AC-01"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Expected and collected COD kept separate",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AC-03",
+      "title": "Accounting: fees, transfers, partial settlements, balances, returns, adjustments, reversals",
+      "dependencies": [
+        "AC-02"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Both settlement methods preserved; money math unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "AC-04",
+      "title": "Financial reports redesign",
+      "dependencies": [
+        "AC-03"
+      ],
+      "priority": "P2",
+      "status": "pending",
+      "acceptance": "Export unchanged",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "V-01",
+      "title": "Responsive and RTL visual verification: 1920, 1440, 1024, 768, 390; en and ar; all required pages",
+      "dependencies": [
+        "CU-02",
+        "CU-13",
+        "AD-02",
+        "FU-03",
+        "AC-04"
+      ],
+      "priority": "P1",
+      "status": "pending",
+      "acceptance": "Screenshots in docs/ui-review; zero overflow; defects fixed and re-captured",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "V-02",
+      "title": "Before/after baseline from pre-v3.3-redesign tag in an isolated worktree",
+      "dependencies": [
+        "V-01"
+      ],
+      "priority": "P3",
+      "status": "pending",
+      "acceptance": "Captured only if it runs without touching the active DB or WMS",
+      "verification_evidence": "",
+      "blocker_reason": "Needs an isolated database; must not connect to the active one"
+    },
+    {
+      "id": "R-01",
+      "title": "TypeScript validation",
+      "dependencies": [
+        "V-01"
+      ],
+      "priority": "P0",
+      "status": "pending",
+      "acceptance": "tsc --noEmit exits 0",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "R-02",
+      "title": "Vitest full suite",
+      "dependencies": [
+        "T-01"
+      ],
+      "priority": "P0",
+      "status": "pending",
+      "acceptance": "All tests pass; none weakened",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "R-03",
+      "title": "Playwright E2E full suite",
+      "dependencies": [
+        "V-01"
+      ],
+      "priority": "P0",
+      "status": "pending",
+      "acceptance": "Runs on test server 3210 with the test database; failures investigated, not hidden",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "R-04",
+      "title": "Production build",
+      "dependencies": [
+        "R-01"
+      ],
+      "priority": "P0",
+      "status": "pending",
+      "acceptance": "npm run build exits 0",
+      "verification_evidence": "",
+      "blocker_reason": null
+    },
+    {
+      "id": "DOC-01",
+      "title": "Final documentation set",
+      "dependencies": [
+        "R-02",
+        "R-03",
+        "R-04"
+      ],
+      "priority": "P0",
+      "status": "pending",
+      "acceptance": "Documents reflect verified evidence only; V1 history kept under docs/history/v1",
+      "verification_evidence": "",
+      "blocker_reason": null
+    }
   ]
 }
