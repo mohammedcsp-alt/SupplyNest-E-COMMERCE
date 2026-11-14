@@ -115,7 +115,9 @@ function isMultipartAllowed(req: NextRequest): boolean {
   // Only the explicit file-upload endpoints accept multipart; they opt in via a path allow-list.
   const path = new URL(req.url).pathname;
   const contentType = (req.headers.get('content-type') ?? '').toLowerCase();
-  return contentType.startsWith('multipart/form-data') && /\/(imports|images|uploads)(\/|$)/.test(path);
+  // "image" (singular) covers the category, brand and banner image endpoints (V3.3 M-02, M-03, M-05).
+  // "bulk-preview" is the customer SKU,QTY file upload (CUS-08); it previews only and creates nothing.
+  return contentType.startsWith('multipart/form-data') && /\/(imports|images?|uploads|bulk-preview)(\/|$)/.test(path);
 }
 
 /** Parses and validates a JSON body with a Zod schema. Rejects oversized bodies. */
