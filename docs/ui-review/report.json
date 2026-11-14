@@ -1,0 +1,18 @@
+[
+  {
+    "page": "home",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__390.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__390.png"
+  }
+]

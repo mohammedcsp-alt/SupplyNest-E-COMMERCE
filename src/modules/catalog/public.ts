@@ -23,6 +23,11 @@ export type SkuListParams = {
   brandId?: string;
   modelId?: string;
   qualityId?: string;
+  /** Multi-select (V3.3). Each list is OR-ed inside, and the lists are AND-ed together. */
+  brandIds?: string[];
+  qualityIds?: string[];
+  /** Category-specific attribute filters: every entry must match one of its values. */
+  attributes?: Array<{ key: string; values: string[] }>;
   availableOnly?: boolean;
   priceMin?: string;
   priceMax?: string;
@@ -93,6 +98,15 @@ export async function listCatalog(params: SkuListParams, viewer: Viewer) {
   if (params.brandId) where.brandId = params.brandId;
   if (params.modelId) where.modelId = params.modelId;
   if (params.qualityId) where.qualityId = params.qualityId;
+  if (params.brandIds?.length) where.brandId = { in: params.brandIds.slice(0, 50) };
+  if (params.qualityIds?.length) where.qualityId = { in: params.qualityIds.slice(0, 50) };
+  for (const attr of (params.attributes ?? []).slice(0, 10)) {
+    if (!attr.values.length) continue;
+    where.AND = [
+      ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+      { attributeValues: { some: { definition: { key: attr.key }, value: { in: attr.values.slice(0, 50) } } } },
+    ];
+  }
   if (q) {
     where.OR = [
       { sku: { contains: q, mode: 'insensitive' } },
