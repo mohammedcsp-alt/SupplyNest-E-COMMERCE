@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
-import { Card, PageHeader } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { ApiForm } from '@/components/forms';
+import { AuthShell } from '@/components/auth-shell';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +10,19 @@ export default async function RegisterPage() {
   const locale = await currentLocale();
   const L = (ar: string, en: string) => localized(locale, ar, en);
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto' }}>
-      <PageHeader
-        title={L('تسجيل عميل جديد', 'Register as a customer')}
-        subtitle={L(
-          'بعد تأكيد الهاتف تراجع الإدارة الطلب وتحدد مستوى السعر. الأسعار لا تظهر قبل الموافقة.',
-          'After phone verification the administration reviews your request and assigns a price level. Prices are hidden until approval.',
-        )}
-      />
+    <AuthShell
+      title={L('تسجيل عميل جديد', 'Register as a customer')}
+      subtitle={L(
+        'بعد تأكيد الهاتف تراجع الإدارة الطلب وتحدد مستوى السعر. الأسعار لا تظهر قبل الموافقة.',
+        'After phone verification the administration reviews your request and assigns a price level. Prices are hidden until approval.',
+      )}
+      steps={{
+        ariaLabel: L('مراحل التسجيل', 'Registration steps'),
+        labels: [L('إنشاء الحساب', 'Create account'), L('تأكيد الهاتف', 'Verify phone'), L('موافقة الإدارة', 'Admin approval')],
+        current: 0,
+      }}
+      footer={<Link href="/login">{L('لدي حساب بالفعل', 'I already have an account')}</Link>}
+    >
       <Card>
         <ApiForm
           endpoint="/api/v1/auth/register"
@@ -32,9 +38,6 @@ export default async function RegisterPage() {
           ]}
         />
       </Card>
-      <p>
-        <Link href="/login">{L('لدي حساب بالفعل', 'I already have an account')}</Link>
-      </p>
-    </div>
+    </AuthShell>
   );
 }

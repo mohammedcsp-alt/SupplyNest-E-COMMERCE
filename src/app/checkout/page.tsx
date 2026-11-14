@@ -3,7 +3,7 @@ import { currentLocale, localized } from '@/lib/i18n';
 import { requireSignedIn } from '@/lib/page-guards';
 import { db } from '@/lib/db';
 import { getCart } from '@/modules/commerce/cart';
-import { Card, EmptyState, PageHeader } from '@/components/ui';
+import { PageHeader } from '@/components/ui';
 import { ApiForm } from '@/components/forms';
 import { orderingGate } from '@/components/customer/gate';
 import { CheckoutFlow, type CheckoutAddress } from '@/components/customer/CheckoutFlow';
@@ -39,16 +39,23 @@ export default async function CheckoutPage() {
 
   if (cart.items.length === 0) {
     return (
-      <section className="stack">
+      <section className="stack" style={{ marginBlockStart: 0 }}>
+        <nav className="crumbs" aria-label={L('مسار التصفح', 'Breadcrumb')}>
+          <Link href="/">{L('الرئيسية', 'Home')}</Link>
+          <span aria-hidden="true">›</span>
+          <Link href="/cart">{L('السلة', 'Cart')}</Link>
+          <span aria-hidden="true">›</span>
+          <span aria-current="page">{title}</span>
+        </nav>
         <PageHeader title={title} />
-        <Card>
-          <EmptyState>{L('سلتك فارغة، لا يوجد ما يُطلب.', 'Your cart is empty, so there is nothing to order.')}</EmptyState>
-          <div className="row">
+        <div className="empty-state">
+          <strong>{L('سلتك فارغة، لا يوجد ما يُطلب.', 'Your cart is empty, so there is nothing to order.')}</strong>
+          <div className="row" style={{ justifyContent: 'center', marginBlockStart: 10 }}>
             <Link className="btn btn-primary" href="/catalog">
-              {L('تصفح الكتالوج', 'Browse the catalog')}
+              {L('تصفح الكتالوج', 'Browse the catalogue')}
             </Link>
           </div>
-        </Card>
+        </div>
       </section>
     );
   }
@@ -82,7 +89,14 @@ export default async function CheckoutPage() {
   );
 
   return (
-    <section className="stack">
+    <section className="stack" style={{ marginBlockStart: 0 }}>
+      <nav className="crumbs" aria-label={L('مسار التصفح', 'Breadcrumb')}>
+        <Link href="/">{L('الرئيسية', 'Home')}</Link>
+        <span aria-hidden="true">›</span>
+        <Link href="/cart">{L('السلة', 'Cart')}</Link>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{title}</span>
+      </nav>
       <PageHeader title={title} subtitle={L(`${cart.count} صنف في السلة`, `${cart.count} item(s) in your cart`)} />
       <CheckoutFlow locale={locale} addresses={addresses}>
         {addressForm}

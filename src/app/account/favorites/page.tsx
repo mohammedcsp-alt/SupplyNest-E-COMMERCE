@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
+import { AccountShell } from '@/components/customer/AccountShell';
 import { requireSignedIn } from '@/lib/page-guards';
 import { canSeePrices, viewerOf } from '@/lib/session';
 import { db } from '@/lib/db';
@@ -33,7 +34,7 @@ export default async function FavoritesPage() {
   const priced = canSeePrices(user);
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="favorites" isCustomer={user.userType === 'CUSTOMER'}>
       <PageHeader title={title} subtitle={priced ? undefined : L('سجّل كعميل معتمد لعرض الأسعار.', 'Approved customers see prices here.')} />
       {items.length === 0 ? (
         <EmptyState>{L('لم تُضف أي صنف إلى المفضلة بعد.', 'You have not saved any items yet.')}</EmptyState>
@@ -82,6 +83,6 @@ export default async function FavoritesPage() {
           </table>
         </div>
       )}
-    </section>
+    </AccountShell>
   );
 }

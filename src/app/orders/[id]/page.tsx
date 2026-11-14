@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { currentLocale, localized } from '@/lib/i18n';
+import { AccountShell } from '@/components/customer/AccountShell';
 import { requireSignedIn } from '@/lib/page-guards';
 import { canOrder } from '@/lib/session';
 import { AppError } from '@/lib/errors';
@@ -47,7 +48,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const statusLabel = ORDER_STATUS_TEXT[order.status];
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="orders" isCustomer={user.userType === 'CUSTOMER'}>
       <p>
         <Link href="/orders">← {L('طلباتي', 'My orders')}</Link>
       </p>
@@ -207,6 +208,6 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           )}
         </aside>
       </div>
-    </section>
+    </AccountShell>
   );
 }

@@ -177,7 +177,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/bulk-order">{L('رفع ملف Excel', 'Excel order upload')}</Link>
                 )}
                 {isCustomer && (
-                  <Link href="/cart" className="quick">
+                  <Link href="/quick-order" className="quick">
                     {L('طلب سريع', 'Quick order')}
                   </Link>
                 )}

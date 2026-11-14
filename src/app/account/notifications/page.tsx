@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
+import { AccountShell } from '@/components/customer/AccountShell';
 import { requireSignedIn } from '@/lib/page-guards';
 import { listNotifications } from '@/modules/notifications/notify';
 import { EmptyState, PageHeader } from '@/components/ui';
@@ -26,12 +27,12 @@ export default async function NotificationsPage() {
   });
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="notifications" isCustomer={user.userType === 'CUSTOMER'}>
       <p>
         <Link href="/account">← {L('حسابي', 'My account')}</Link>
       </p>
       <PageHeader title={L('الإشعارات', 'Notifications')} subtitle={L('إشعارات داخل الموقع فقط.', 'In-site notifications only.')} />
       {items.length === 0 ? <EmptyState>{L('لا توجد إشعارات.', 'No notifications.')}</EmptyState> : <NotificationList items={items} locale={locale} />}
-    </section>
+    </AccountShell>
   );
 }

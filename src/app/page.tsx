@@ -199,7 +199,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="row">
-            <Link className="btn btn-primary" href="/bulk-order">
+            <Link className="btn btn-primary" href="/quick-order">
               {L('ابدأ الطلب', 'Start an order')}
             </Link>
           </div>

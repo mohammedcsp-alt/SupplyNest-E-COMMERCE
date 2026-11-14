@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
+import { AccountShell } from '@/components/customer/AccountShell';
 import { requireSignedIn } from '@/lib/page-guards';
 import { db } from '@/lib/db';
 import { Alert, Card, PageHeader } from '@/components/ui';
@@ -32,7 +33,7 @@ export default async function ProfilePage() {
   ];
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="profile" isCustomer={user.userType === 'CUSTOMER'}>
       <p>
         <Link href="/account">← {L('حسابي', 'My account')}</Link>
       </p>
@@ -60,6 +61,6 @@ export default async function ProfilePage() {
           fields={fields}
         />
       </Card>
-    </section>
+    </AccountShell>
   );
 }

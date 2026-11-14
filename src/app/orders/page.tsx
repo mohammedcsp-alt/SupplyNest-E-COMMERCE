@@ -5,6 +5,7 @@ import { requireSignedIn } from '@/lib/page-guards';
 import { listCustomerOrders } from '@/modules/commerce/orders';
 import { Alert, EmptyState, Money, Pagination, PageHeader, StatusBadge } from '@/components/ui';
 import { ORDER_STATUS_TEXT, fmtDate, pick } from '@/components/customer/shared';
+import { AccountShell } from '@/components/customer/AccountShell';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,7 +35,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   const { items, total } = await listCustomerOrders(user.id, { status, page, pageSize });
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="orders" isCustomer>
       <PageHeader
         title={title}
         subtitle={
@@ -106,6 +107,6 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
         params={{ status: status }}
         labels={{ prev: L('السابق', 'Previous'), next: L('التالي', 'Next'), of: 'of' }}
       />
-    </section>
+    </AccountShell>
   );
 }

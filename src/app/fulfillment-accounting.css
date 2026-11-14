@@ -1,0 +1,177 @@
+/*
+ * Staff screens for fulfillment and accounting. Visual layer only.
+ * Logical properties throughout so the layout mirrors correctly in Arabic (RTL).
+ * Colours come from the tokens defined in globals.css.
+ */
+
+/* Section navigation (accounting) */
+.fa-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-block: 4px;
+  border-block-end: 1px solid var(--c-border);
+  padding-block-end: 12px;
+}
+.fa-nav .btn-small[aria-current='page'] {
+  font-weight: 700;
+}
+
+/* Two-column workspace: main work on the start side, status and delivery on the end side */
+.fa-split {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  align-items: start;
+}
+.fa-split > .stack {
+  min-inline-size: 0;
+}
+@media (max-width: 900px) {
+  .fa-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Workflow stepper for a preparation job */
+.fa-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+.fa-stage {
+  border-block-start: 3px solid var(--c-border-strong);
+  padding-block-start: 6px;
+  font-size: 0.85rem;
+  color: var(--c-subtle);
+  overflow-wrap: anywhere;
+}
+.fa-stage.is-done {
+  border-block-start-color: var(--c-ok);
+  color: var(--c-muted);
+}
+.fa-stage.is-current {
+  border-block-start-color: var(--brand);
+  color: var(--c-text);
+  font-weight: 700;
+}
+.fa-stage-note {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+/* Metric tiles (dashboard, reconciliation, statements) */
+.fa-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-inline-size: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--c-border);
+  border-inline-start: 4px solid var(--c-border-strong);
+  border-radius: 10px;
+  background: var(--c-surface);
+  color: inherit;
+  text-decoration: none;
+}
+a.fa-metric:hover {
+  border-color: var(--brand);
+  border-inline-start-color: var(--brand);
+}
+.fa-metric.is-ok {
+  border-inline-start-color: var(--c-ok);
+}
+.fa-metric.is-warn {
+  border-inline-start-color: #b26a00;
+}
+.fa-metric.is-danger {
+  border-inline-start-color: var(--c-danger);
+}
+.fa-metric.is-info {
+  border-inline-start-color: var(--brand);
+}
+.fa-metric .kpi {
+  overflow-wrap: anywhere;
+}
+.fa-metric-hint {
+  font-size: 0.88rem;
+  color: var(--c-muted);
+}
+
+/* Grid of metric tiles */
+.fa-metric-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+/* Grouped money values: each group is a separate obligation and is labelled as such */
+.fa-group {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+.fa-group-title {
+  grid-column: 1 / -1;
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--c-muted);
+}
+.fa-group-title:first-child {
+  margin-block-start: 0;
+}
+
+/* Timeline (events, collection log) */
+.fa-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.fa-timeline > li {
+  padding-inline-start: 14px;
+  border-inline-start: 2px solid var(--c-border-strong);
+  overflow-wrap: anywhere;
+}
+
+/* Inputs inside tables */
+.fa-qty-input {
+  inline-size: 7.5rem;
+}
+.fa-amount-input {
+  inline-size: 9rem;
+}
+.fa-reason-input {
+  min-inline-size: 180px;
+}
+
+/* Nested compact table (agreements inside the courier list) */
+.fa-nested {
+  margin: 0;
+}
+
+/* Sticky-free summary bar for queue counts */
+.fa-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--c-muted);
+}
+
+@media (max-width: 600px) {
+  .fa-metric-grid,
+  .fa-group {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.fa-metric-title {
+  font-weight: 700;
+  color: var(--c-text);
+}

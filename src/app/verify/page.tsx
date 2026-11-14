@@ -1,6 +1,7 @@
 import { currentLocale, localized } from '@/lib/i18n';
-import { Card, PageHeader } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { ApiForm } from '@/components/forms';
+import { AuthShell } from '@/components/auth-shell';
 import { ResendOtp } from './ResendOtp';
 
 export const dynamic = 'force-dynamic';
@@ -9,8 +10,15 @@ export default async function VerifyPage() {
   const locale = await currentLocale();
   const L = (ar: string, en: string) => localized(locale, ar, en);
   return (
-    <div style={{ maxWidth: 480, margin: '0 auto' }}>
-      <PageHeader title={L('تأكيد رقم الهاتف', 'Verify your phone')} subtitle={L('أدخل الرمز المكوّن من 6 أرقام.', 'Enter the 6-digit code.')} />
+    <AuthShell
+      title={L('تأكيد رقم الهاتف', 'Verify your phone')}
+      subtitle={L('أدخل الرمز المكوّن من 6 أرقام المرسل إلى هاتفك.', 'Enter the 6-digit code sent to your phone.')}
+      steps={{
+        ariaLabel: L('مراحل التسجيل', 'Registration steps'),
+        labels: [L('إنشاء الحساب', 'Create account'), L('تأكيد الهاتف', 'Verify phone'), L('موافقة الإدارة', 'Admin approval')],
+        current: 1,
+      }}
+    >
       <Card>
         <ApiForm
           endpoint="/api/v1/auth/otp/verify"
@@ -24,6 +32,6 @@ export default async function VerifyPage() {
         />
       </Card>
       <ResendOtp locale={locale} />
-    </div>
+    </AuthShell>
   );
 }

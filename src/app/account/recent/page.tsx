@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
+import { AccountShell } from '@/components/customer/AccountShell';
 import { requireSignedIn } from '@/lib/page-guards';
 import { db } from '@/lib/db';
 import { Alert, EmptyState, PageHeader } from '@/components/ui';
@@ -32,7 +33,7 @@ export default async function RecentPage() {
   const visible = rows.filter((r) => r.sku.published && r.sku.active);
 
   return (
-    <section className="stack">
+    <AccountShell locale={locale} current="recent" isCustomer={user.userType === 'CUSTOMER'}>
       <PageHeader title={title} />
       {visible.length === 0 ? (
         <EmptyState>{L('لا توجد مشاهدات حديثة.', 'Nothing viewed recently.')}</EmptyState>
@@ -60,6 +61,6 @@ export default async function RecentPage() {
           </table>
         </div>
       )}
-    </section>
+    </AccountShell>
   );
 }

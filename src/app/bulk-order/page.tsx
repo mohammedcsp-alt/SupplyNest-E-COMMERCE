@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { currentLocale, localized } from '@/lib/i18n';
 import { requireSignedIn } from '@/lib/page-guards';
 import { PageHeader } from '@/components/ui';
@@ -22,7 +23,12 @@ export default async function BulkOrderPage() {
   }
 
   return (
-    <section className="stack">
+    <section className="stack" style={{ marginBlockStart: 0 }}>
+      <nav className="crumbs" aria-label={L('مسار التصفح', 'Breadcrumb')}>
+        <Link href="/">{L('الرئيسية', 'Home')}</Link>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{title}</span>
+      </nav>
       <PageHeader title={title} subtitle={L('أضف عدة أصناف إلى السلة دفعة واحدة بعد مراجعتها.', 'Add many items to your cart at once after reviewing them.')} />
       <BulkOrder locale={locale} />
     </section>

@@ -604,3 +604,97 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
   .cart-qty, .cart-price, .cart-total { grid-column: 1 / -1; justify-items: stretch; grid-template-columns: auto 1fr; align-items: center; }
   .cart-total { justify-items: stretch; }
 }
+
+/* ---------- Checkout ---------- */
+.checkout-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+.checkout-steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-inline-size: 0; }
+.checkout-step { margin-block-end: 0; }
+.step-title { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font-size: 1.05rem; }
+.step-num {
+  display: inline-grid; place-items: center; flex: none; inline-size: 26px; block-size: 26px; border-radius: 50%;
+  background: var(--brand); color: #fff; font-size: 0.85rem; font-weight: 700;
+}
+.address-option { display: block; cursor: pointer; margin-block-end: 0; }
+.address-option.is-selected { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.address-option-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.checkout-step textarea { inline-size: 100%; }
+.checkout-step .table-wrap table { min-inline-size: 520px; }
+
+/* ---------- Bulk order, Excel upload and quick order (CU-03 to CU-05) ---------- */
+.bulk-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.bulk-grid > .card { margin-block-end: 0; }
+.kv-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-block-end: 8px; }
+.kv-strip > div { background: var(--c-surface-2); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 8px 10px; display: grid; gap: 2px; }
+.quick-head, .quick-row { display: grid; grid-template-columns: minmax(0, 1fr) 120px 40px; gap: 8px; align-items: center; }
+.quick-head { font-size: 0.82rem; color: var(--c-muted); font-weight: 600; margin-block-end: 4px; }
+.quick-rows { display: grid; gap: 8px; }
+.quick-row input { inline-size: 100%; }
+@media (max-width: 900px) {
+  .bulk-grid { grid-template-columns: 1fr; }
+  .kv-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .quick-head { display: none; }
+  .quick-row { grid-template-columns: minmax(0, 1fr) 90px 40px; }
+}
+
+/* ---------- Sign-in, registration, verification and recovery (CU-06 to CU-09) ---------- */
+.auth-page { display: grid; justify-items: center; padding-block: 16px 40px; }
+.auth-panel { inline-size: min(480px, 100%); display: grid; gap: 14px; }
+.auth-panel > .card { margin-block-end: 0; }
+.auth-panel input:not([type="checkbox"]):not([type="radio"]), .auth-panel select, .auth-panel textarea { inline-size: 100%; }
+.auth-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 0; padding: 0; font-size: 0.82rem; }
+.auth-steps li { display: flex; align-items: center; gap: 6px; color: var(--c-muted); border-block-start: 3px solid var(--c-border); padding-block-start: 8px; min-inline-size: 0; }
+.auth-steps li.done { border-color: var(--brand); }
+.auth-steps li[aria-current="step"] { border-color: var(--brand); color: var(--c-text); font-weight: 700; }
+.auth-step-num {
+  display: inline-grid; place-items: center; flex: none; inline-size: 20px; block-size: 20px; border-radius: 50%;
+  border: 1px solid var(--c-border-strong); font-size: 0.72rem;
+}
+.auth-steps li.done .auth-step-num, .auth-steps li[aria-current="step"] .auth-step-num { background: var(--brand); border-color: var(--brand); color: #fff; }
+.auth-links { display: grid; gap: 6px; font-size: 0.92rem; }
+
+/* ---------- Customer account frame (CU-10 to CU-15) ---------- */
+.account-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; }
+.account-nav { display: grid; gap: 2px; position: sticky; top: calc(var(--header-h) + 60px); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 8px; }
+.account-nav-link { display: block; padding: 9px 10px; border-radius: var(--radius); color: var(--c-text); text-decoration: none; }
+.account-nav-link:hover { background: var(--c-surface-2); }
+.account-nav-link.is-current { background: var(--brand); color: #fff; font-weight: 600; }
+.account-main { min-inline-size: 0; }
+.account-tile { display: grid; gap: 4px; }
+/* ---------- Administration frame and grouped navigation (AD-01) ---------- */
+.admin-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
+.admin-nav {
+  position: sticky; top: calc(var(--header-h) + 60px); max-block-size: calc(100vh - var(--header-h) - 80px); overflow-y: auto;
+  display: grid; gap: 6px; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 10px;
+}
+.admin-nav-home { font-weight: 700; padding: 6px 8px; color: var(--c-text); text-decoration: none; }
+.admin-nav-group > summary {
+  cursor: pointer; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--c-muted);
+  padding: 8px 8px 4px; list-style: none;
+}
+.admin-nav-group > summary::-webkit-details-marker { display: none; }
+.admin-nav-group > summary::after { content: "−"; float: inline-end; }
+.admin-nav-group:not([open]) > summary::after { content: "+"; }
+.admin-nav-group ul { list-style: none; margin: 0; padding: 0 0 4px; display: grid; gap: 1px; }
+.admin-nav-group a { display: block; padding: 7px 8px; border-radius: var(--radius); color: var(--c-text); text-decoration: none; font-size: 0.93rem; }
+.admin-nav-group a:hover { background: var(--c-surface-2); }
+.admin-main { min-inline-size: 0; }
+.admin-area-tile, .account-tile { text-decoration: none; color: var(--c-text); }
+.admin-area-tile:hover, .account-tile:hover { border-color: var(--brand); }
+@media (max-width: 900px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-nav { position: static; max-block-size: none; }
+  .admin-nav-group ul { grid-template-columns: repeat(2, minmax(0, 1fr)); display: grid; }
+}
+
+@media (max-width: 900px) {
+  .account-layout { grid-template-columns: 1fr; }
+  .account-nav { position: static; display: flex; overflow-x: auto; gap: 4px; padding: 6px; }
+  .account-nav-link { white-space: nowrap; }
+}
+.checkout-summary { top: calc(var(--header-h) + 60px); }
+@media (max-width: 900px) {
+  .checkout-layout { grid-template-columns: minmax(0, 1fr); }
+  .checkout-summary { position: static; }
+}
