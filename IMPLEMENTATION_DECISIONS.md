@@ -20,3 +20,8 @@ Not yet redesigned: product details page, cart, checkout, account pages, admin, 
 - D-14 Prices and stock quantities are never sent to anonymous or unapproved viewers; the catalog API projection is unchanged.
 - D-15 listCatalog gained optional multi-select `brandIds`, `qualityIds` and `attributes` (backward compatible).
 - D-16 UUID-shaped ids only reach the database: malformed `brand`/`quality`/`categoryId` values are ignored (previously caused HTTP 500).
+
+## Execution continuity (V3.3, D-17 to D-19)
+- D-17 Work queue: `MASTER_TASK_QUEUE.json` lists every V3.3 task with dependencies, priority, status, acceptance, evidence and blocker reason. It is the source of truth for what remains.
+- D-18 Stop hook: `.claude/settings.json` (project scope only; no global settings changed) runs `.claude/hooks/stop-queue.cjs` when a turn ends. It blocks the stop while an executable pending task exists (all dependencies done), names the next task, and allows the stop when: nothing executable remains, the queue is unreadable, no progress was made since the last block, or only blocked tasks remain. A "done" task without verification evidence blocks the stop. Claude Code's own cap (8 consecutive continuations, `CLAUDE_CODE_STOP_HOOK_BLOCK_CAP`) also applies. Ctrl+C / Escape are not affected by Stop hooks.
+- D-19 Limits: the hook verifies the queue's bookkeeping, not the quality of the work. Evidence is still reviewed by the agent and the owner.

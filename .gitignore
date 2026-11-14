@@ -14,3 +14,7 @@ next-env.d.ts
 tests/e2e/.auth/
 .next*/
 DEV-CREDENTIALS.local.md
+
+# Stop-hook runtime state (V3.3 continuity)
+.claude/hooks/stop-queue.state.json
+.claude/settings.local.json
