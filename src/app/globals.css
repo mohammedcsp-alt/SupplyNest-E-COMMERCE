@@ -619,6 +619,18 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
 .address-option-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .checkout-step textarea { inline-size: 100%; }
 .checkout-step .table-wrap table { min-inline-size: 520px; }
+/* Quote lines: table on wider screens, stacked cards on phones (no horizontal swipe for prices). */
+.quote-cards { display: none; list-style: none; margin: 0; padding: 0; gap: 8px; }
+.quote-card { background: var(--c-surface-2); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 10px 12px; }
+.quote-card-name { font-weight: 600; overflow-wrap: anywhere; }
+.quote-card-grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 8px 0 0; font-size: 0.92rem; }
+.quote-card-grid dt { color: var(--c-muted); }
+.quote-card-grid dd { margin: 0; text-align: end; font-variant-numeric: tabular-nums; }
+.quote-card-total { font-weight: 700; }
+@media (max-width: 640px) {
+  .quote-table { display: none; }
+  .quote-cards { display: grid; }
+}
 
 /* ---------- Bulk order, Excel upload and quick order (CU-03 to CU-05) ---------- */
 .bulk-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }

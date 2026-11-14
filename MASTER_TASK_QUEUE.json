@@ -183,7 +183,7 @@
       "priority": "P1",
       "status": "done",
       "acceptance": "Quote, consent hash and idempotent COD submit unchanged; en and ar",
-      "verification_evidence": "en and ar 390 overflow=0px (ui-review-auth, stored customer state); en 1440 and ar 1440 captured earlier; quote table scrolls horizontally inside its own box at 390 (known limitation: price columns need a swipe); tsc clean; quote, consent and idempotency code unchanged",
+      "verification_evidence": "mobile quote cards (390 en/ar captured, no swipe); 1440 table unchanged; overflow=0 at all four captures; tsc clean; financial code unchanged",
       "blocker_reason": null
     },
     {

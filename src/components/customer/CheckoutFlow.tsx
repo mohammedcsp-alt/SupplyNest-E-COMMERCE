@@ -181,7 +181,7 @@ export function CheckoutFlow({ locale, addresses, children }: { locale: Loc; add
                   </ul>
                 </div>
               )}
-              <div className="table-wrap">
+              <div className="table-wrap quote-table">
                 <table>
                   <thead>
                     <tr>
@@ -205,6 +205,25 @@ export function CheckoutFlow({ locale, addresses, children }: { locale: Loc; add
                   </tbody>
                 </table>
               </div>
+              {/* Narrow screens: the same lines as stacked cards, so nothing needs a horizontal swipe. Hidden on wider screens by CSS. */}
+              <ul className="quote-cards" aria-label={L('أصناف الطلب', 'Order lines')}>
+                {quote.lines.map((l) => (
+                  <li key={l.skuId} className="quote-card">
+                    <div className="quote-card-name">{pick(locale, l.nameAr, l.nameEn)}</div>
+                    <div className="muted" dir="ltr" style={{ textAlign: 'start', fontSize: '0.85rem' }}>
+                      {l.sku}
+                    </div>
+                    <dl className="quote-card-grid">
+                      <dt>{L('الكمية', 'Qty')}</dt>
+                      <dd>{l.qty}</dd>
+                      <dt>{L('سعر الوحدة', 'Unit price')}</dt>
+                      <dd>{fmtIqd(l.unitPrice, locale)}</dd>
+                      <dt>{L('الإجمالي', 'Line total')}</dt>
+                      <dd className="quote-card-total">{fmtIqd(l.lineTotal, locale)}</dd>
+                    </dl>
+                  </li>
+                ))}
+              </ul>
             </>
           )}
         </section>
