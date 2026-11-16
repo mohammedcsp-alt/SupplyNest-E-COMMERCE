@@ -1,5 +1,157 @@
 [
   {
+    "page": "home",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__1920.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__1920.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__en__1920.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__en__1920.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__en__1920.png"
+  },
+  {
+    "page": "login",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__en__1920.png"
+  },
+  {
+    "page": "register",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__en__1920.png"
+  },
+  {
+    "page": "verify",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__en__1920.png"
+  },
+  {
+    "page": "recover",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__en__1920.png"
+  },
+  {
+    "page": "search",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__en__1920.png"
+  },
+  {
+    "page": "product",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__en__1920.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "en",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__en__1920.png"
+  },
+  {
+    "page": "home",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__1440.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__1440.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__en__1440.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__en__1440.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__en__1440.png"
+  },
+  {
+    "page": "login",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__en__1440.png"
+  },
+  {
+    "page": "register",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__en__1440.png"
+  },
+  {
     "page": "verify",
     "locale": "en",
     "width": 1440,
@@ -14,6 +166,278 @@
     "status": 200,
     "horizontalOverflowPx": 0,
     "file": "docs\\ui-review\\recover__en__1440.png"
+  },
+  {
+    "page": "search",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__en__1440.png"
+  },
+  {
+    "page": "product",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__en__1440.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "en",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__en__1440.png"
+  },
+  {
+    "page": "home",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__1024.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__1024.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__en__1024.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__en__1024.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__en__1024.png"
+  },
+  {
+    "page": "login",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__en__1024.png"
+  },
+  {
+    "page": "register",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__en__1024.png"
+  },
+  {
+    "page": "verify",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__en__1024.png"
+  },
+  {
+    "page": "recover",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__en__1024.png"
+  },
+  {
+    "page": "search",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__en__1024.png"
+  },
+  {
+    "page": "product",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__en__1024.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "en",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__en__1024.png"
+  },
+  {
+    "page": "home",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__768.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__768.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__en__768.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__en__768.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__en__768.png"
+  },
+  {
+    "page": "login",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__en__768.png"
+  },
+  {
+    "page": "register",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__en__768.png"
+  },
+  {
+    "page": "verify",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__en__768.png"
+  },
+  {
+    "page": "recover",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__en__768.png"
+  },
+  {
+    "page": "search",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__en__768.png"
+  },
+  {
+    "page": "product",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__en__768.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "en",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__en__768.png"
+  },
+  {
+    "page": "home",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__en__390.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__en__390.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__en__390.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__en__390.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__en__390.png"
+  },
+  {
+    "page": "login",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__en__390.png"
+  },
+  {
+    "page": "register",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__en__390.png"
   },
   {
     "page": "verify",
@@ -32,6 +456,182 @@
     "file": "docs\\ui-review\\recover__en__390.png"
   },
   {
+    "page": "search",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__en__390.png"
+  },
+  {
+    "page": "product",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__en__390.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "en",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__en__390.png"
+  },
+  {
+    "page": "home",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__ar__1920.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__ar__1920.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__ar__1920.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__ar__1920.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__ar__1920.png"
+  },
+  {
+    "page": "login",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__ar__1920.png"
+  },
+  {
+    "page": "register",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__ar__1920.png"
+  },
+  {
+    "page": "verify",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__ar__1920.png"
+  },
+  {
+    "page": "recover",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__ar__1920.png"
+  },
+  {
+    "page": "search",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__ar__1920.png"
+  },
+  {
+    "page": "product",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__ar__1920.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "ar",
+    "width": 1920,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__ar__1920.png"
+  },
+  {
+    "page": "home",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__ar__1440.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__ar__1440.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__ar__1440.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__ar__1440.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__ar__1440.png"
+  },
+  {
+    "page": "login",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__ar__1440.png"
+  },
+  {
+    "page": "register",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__ar__1440.png"
+  },
+  {
     "page": "verify",
     "locale": "ar",
     "width": 1440,
@@ -48,6 +648,278 @@
     "file": "docs\\ui-review\\recover__ar__1440.png"
   },
   {
+    "page": "search",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__ar__1440.png"
+  },
+  {
+    "page": "product",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__ar__1440.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "ar",
+    "width": 1440,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__ar__1440.png"
+  },
+  {
+    "page": "home",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__ar__1024.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__ar__1024.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__ar__1024.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__ar__1024.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__ar__1024.png"
+  },
+  {
+    "page": "login",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__ar__1024.png"
+  },
+  {
+    "page": "register",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__ar__1024.png"
+  },
+  {
+    "page": "verify",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__ar__1024.png"
+  },
+  {
+    "page": "recover",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__ar__1024.png"
+  },
+  {
+    "page": "search",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__ar__1024.png"
+  },
+  {
+    "page": "product",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__ar__1024.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "ar",
+    "width": 1024,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__ar__1024.png"
+  },
+  {
+    "page": "home",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__ar__768.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__ar__768.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__ar__768.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__ar__768.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__ar__768.png"
+  },
+  {
+    "page": "login",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__ar__768.png"
+  },
+  {
+    "page": "register",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__ar__768.png"
+  },
+  {
+    "page": "verify",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\verify__ar__768.png"
+  },
+  {
+    "page": "recover",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\recover__ar__768.png"
+  },
+  {
+    "page": "search",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__ar__768.png"
+  },
+  {
+    "page": "product",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__ar__768.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "ar",
+    "width": 768,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__ar__768.png"
+  },
+  {
+    "page": "home",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\home__ar__390.png"
+  },
+  {
+    "page": "catalog-grid",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-grid__ar__390.png"
+  },
+  {
+    "page": "catalog-list",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-list__ar__390.png"
+  },
+  {
+    "page": "catalog-compact",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-compact__ar__390.png"
+  },
+  {
+    "page": "catalog-filtered",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\catalog-filtered__ar__390.png"
+  },
+  {
+    "page": "login",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\login__ar__390.png"
+  },
+  {
+    "page": "register",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\register__ar__390.png"
+  },
+  {
     "page": "verify",
     "locale": "ar",
     "width": 390,
@@ -62,5 +934,29 @@
     "status": 200,
     "horizontalOverflowPx": 0,
     "file": "docs\\ui-review\\recover__ar__390.png"
+  },
+  {
+    "page": "search",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\search__ar__390.png"
+  },
+  {
+    "page": "product",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product__ar__390.png"
+  },
+  {
+    "page": "product-tshirt",
+    "locale": "ar",
+    "width": 390,
+    "status": 200,
+    "horizontalOverflowPx": 0,
+    "file": "docs\\ui-review\\product-tshirt__ar__390.png"
   }
 ]
