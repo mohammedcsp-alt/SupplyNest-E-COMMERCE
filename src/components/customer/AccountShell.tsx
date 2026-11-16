@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { Loc } from './shared';
 
-type NavKey = 'home' | 'profile' | 'addresses' | 'favorites' | 'recent' | 'orders' | 'notifications';
+type NavKey = 'home' | 'profile' | 'addresses' | 'favorites' | 'recent' | 'orders' | 'notifications' | 'password';
 
 const ITEMS: Array<{ key: NavKey; href: string; ar: string; en: string; customerOnly: boolean }> = [
   { key: 'home', href: '/account', ar: 'حسابي', en: 'Overview', customerOnly: false },
@@ -12,6 +12,7 @@ const ITEMS: Array<{ key: NavKey; href: string; ar: string; en: string; customer
   { key: 'favorites', href: '/account/favorites', ar: 'المفضلة', en: 'Favorites', customerOnly: true },
   { key: 'recent', href: '/account/recent', ar: 'تمت مشاهدتها مؤخرًا', en: 'Recently viewed', customerOnly: true },
   { key: 'notifications', href: '/account/notifications', ar: 'الإشعارات', en: 'Notifications', customerOnly: false },
+  { key: 'password', href: '/account/password', ar: 'تغيير كلمة المرور', en: 'Change password', customerOnly: false },
 ];
 
 /**

@@ -7,6 +7,7 @@ import { keyedHash, newOtpCode, safeEqual } from '@/lib/crypto';
 import { consumeRateLimit } from '@/lib/rate-limit';
 import { writeAudit } from '@/lib/audit';
 import { logger } from '@/lib/logger';
+import { revokeAllSessions } from '@/lib/session';
 import { normalizeIraqPhone } from './phone';
 import { deliverOtp, OTP_RULES, type OtpDelivery } from './otp';
 import { recordStatusChange } from './status';
@@ -191,4 +192,24 @@ export async function completeRecovery(input: { phone: string; code: string; new
     await tx.session.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
     await writeAudit(tx, { actorId: userId, action: 'auth.password_reset', entityType: 'user', entityId: userId });
   });
+}
+
+/**
+ * Signed-in password change (any account type). Requires the current password, applies the same policy as
+ * registration, is rate-limited per account, and signs out every session so the new password is used from now on.
+ */
+export async function changeOwnPassword(input: { userId: string; currentPassword: string; newPassword: string; ip: string | null }): Promise<void> {
+  await consumeRateLimit({ action: 'password_change', subject: input.userId, limit: 5, windowSeconds: 900 });
+  const user = await db.user.findUniqueOrThrow({ where: { id: input.userId }, select: { id: true, passwordHash: true } });
+  if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
+    throw errors.validation('The current password is incorrect');
+  }
+  if (input.newPassword === input.currentPassword) throw errors.validation('The new password must be different from the current password');
+  assertPasswordPolicy(input.newPassword);
+  const passwordHash = await hashPassword(input.newPassword);
+  await db.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: user.id }, data: { passwordHash } });
+    await writeAudit(tx, { actorId: user.id, action: 'auth.password_change', entityType: 'user', entityId: user.id, ip: input.ip });
+  });
+  await revokeAllSessions(user.id);
 }

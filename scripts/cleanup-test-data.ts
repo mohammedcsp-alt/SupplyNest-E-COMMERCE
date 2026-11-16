@@ -55,6 +55,8 @@ async function main() {
     const hands = await db.courierShipment.count({ where: { handedOverById: staff.id } });
     if (hist || hands) fail('QA staff account has history; not removing it');
     if (staff.userType !== 'STAFF') fail('QA phone belongs to a customer');
+    const ownerRow = await db.systemSetting.findUnique({ where: { key: 'owner.account' } });
+    if ((ownerRow?.valueJson as { userId?: string } | null)?.userId === staff.id) fail('QA phone belongs to the system owner; not removing it');
   }
 
   // 6. Backup runs created by the admin test run: rows plus their dump files inside storage/backups

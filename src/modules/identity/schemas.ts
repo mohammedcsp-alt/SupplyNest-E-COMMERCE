@@ -60,3 +60,8 @@ export const priceLevelCreateSchema = z.object({
   sortOrder: z.number().int().min(0).max(10000).default(0),
   active: z.boolean().default(true),
 });
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  newPassword: passwordSchema,
+});
