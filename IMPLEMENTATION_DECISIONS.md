@@ -34,3 +34,9 @@ Not yet redesigned: product details page, cart, checkout, account pages, admin, 
 - D-24 Customer account pages share `AccountShell` (breadcrumb and side navigation). The overview tiles show only real database counts.
 - D-25 Admin navigation is grouped (Operations, Catalogue, Customers, Content & reports, Administration) with native `<details>` groups. Links are still filtered by permission; pages still enforce it.
 - D-26 Authenticated development states: scripts/auth-states.mjs logs each role in once and stores the session cookie in storage/auth/<role>.json (gitignored via storage/). ui-review-auth.mjs reuses it. Rate limits are not bypassed; a 429 is reported, not retried in a loop.
+
+## Decisions taken during final verification (2026-11-16)
+- D-27 Interactive transaction time budgets: `sweepExpiredReservations` and the accounting `reconciliation` read run inside one atomic transaction. The default 5 s limit was exceeded once the shared test DB accumulated expired holds (827 ACTIVE reservations) and the accounting dashboard read up to 2,000 shipments. Both now declare `timeout: 60_000` (`maxWait: 10_000`). Atomicity and figures are unchanged.
+- D-28 E2E selectors follow the redesigned DOM without weakening assertions: "Added to cart" (no period), visitor hint "Sign in to order", admin sections `section` by heading instead of `section.card`, KPI tiles for import summary, statement rows `div.fa-metric`, layout-neutral checkout SKU checks (`filter({ visible: true })`). Sensitive actions (approve cancellation, extend, release, commit import) sit behind `<details>` confirmations; tests open them before acting.
+- D-29 Mobile grids use `minmax(0, 1fr)` for `.account-layout` and `.layout-split`, so content cannot widen the column past the viewport.
+- D-30 Mobile navigation: on phones the category bar sits behind `.mobile-nav-toggle`; the layout spec opens it before checking the navigation landmark.
