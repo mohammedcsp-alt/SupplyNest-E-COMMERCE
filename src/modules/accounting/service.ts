@@ -380,13 +380,18 @@ export async function reconciliation() {
   const shipments = await db.courierShipment.findMany({ select: { id: true, codCollected: true, order: { select: { orderNumber: true } }, courier: { select: { name: true } } }, take: 2000 });
   const variances: Array<{ shipmentId: string; orderNumber: string; courier: string; expected: string; collected: string; variance: string }> = [];
   const uncollected: Array<{ shipmentId: string; orderNumber: string; courier: string }> = [];
-  await db.$transaction(async (tx) => {
-    for (const s of shipments) {
-      const f = await financialsFor(tx, s.id);
-      if (f.codCollected === null) uncollected.push({ shipmentId: s.id, orderNumber: s.order.orderNumber, courier: s.courier.name });
-      else if (f.codVariance !== '0') variances.push({ shipmentId: s.id, orderNumber: s.order.orderNumber, courier: s.courier.name, expected: f.codExpected, collected: f.codCollected, variance: f.codVariance! });
-    }
-  });
+  // Read-only snapshot across up to 2,000 shipments. The default 5 s interactive timeout is too short for that many
+  // per-shipment reads (D-27); the time budget grows, the figures do not change.
+  await db.$transaction(
+    async (tx) => {
+      for (const s of shipments) {
+        const f = await financialsFor(tx, s.id);
+        if (f.codCollected === null) uncollected.push({ shipmentId: s.id, orderNumber: s.order.orderNumber, courier: s.courier.name });
+        else if (f.codVariance !== '0') variances.push({ shipmentId: s.id, orderNumber: s.order.orderNumber, courier: s.courier.name, expected: f.codExpected, collected: f.codCollected, variance: f.codVariance! });
+      }
+    },
+    { timeout: 60_000, maxWait: 10_000 },
+  );
   const openAdjustments = await db.financialAdjustment.count({ where: { reversesId: null } });
   return { unallocatedTransfers: unallocated, collectionVariances: variances, uncollectedShipments: uncollected, adjustmentsRecorded: openAdjustments };
 }

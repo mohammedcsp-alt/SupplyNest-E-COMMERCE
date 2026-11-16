@@ -273,19 +273,24 @@ export async function adjustPhysical(
  * (OPEN-01 / INV-01 / ACX-03). Returns the number of reservations moved to review.
  */
 export async function sweepExpiredReservations(now: Date = new Date()): Promise<number> {
-  return db.$transaction(async (tx) => {
-    const expired = await tx.inventoryReservation.findMany({
-      where: { status: { in: ['ACTIVE', 'EXTENDED'] }, expiresAt: { lte: now } },
-      select: { id: true, skuId: true },
-    });
-    if (expired.length === 0) return 0;
-    const res = await tx.inventoryReservation.updateMany({
-      where: { id: { in: expired.map((e) => e.id) }, status: { in: ['ACTIVE', 'EXTENDED'] } },
-      data: { status: 'REVIEW_REQUIRED' },
-    });
-    await syncAlerts(tx, [...new Set(expired.map((e) => e.skuId))]);
-    return res.count;
-  });
+  return db.$transaction(
+    async (tx) => {
+      const expired = await tx.inventoryReservation.findMany({
+        where: { status: { in: ['ACTIVE', 'EXTENDED'] }, expiresAt: { lte: now } },
+        select: { id: true, skuId: true },
+      });
+      if (expired.length === 0) return 0;
+      const res = await tx.inventoryReservation.updateMany({
+        where: { id: { in: expired.map((e) => e.id) }, status: { in: ['ACTIVE', 'EXTENDED'] } },
+        data: { status: 'REVIEW_REQUIRED' },
+      });
+      await syncAlerts(tx, [...new Set(expired.map((e) => e.skuId))]);
+      return res.count;
+    },
+    // One sweep covers every expired reservation in one atomic step; the default 5 s interactive timeout is too
+    // short once many SKUs have expired holds (D-27). Atomicity is kept; only the time budget grows.
+    { timeout: 60_000, maxWait: 10_000 },
+  );
 }
 
 /** Admin extends a reservation (new expiry, reason mandatory, audited). Only reservation.manage holders reach this. */

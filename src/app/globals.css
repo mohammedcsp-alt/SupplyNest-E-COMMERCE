@@ -478,7 +478,7 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
   .wholesale-cta { grid-template-columns: 1fr; }
   .wholesale-cta .row { justify-content: flex-start; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
-  .layout-split { grid-template-columns: 1fr; }
+  .layout-split { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: static; }
   h1 { font-size: 1.3rem; }
 }
@@ -701,7 +701,7 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; white-spac
 }
 
 @media (max-width: 900px) {
-  .account-layout { grid-template-columns: 1fr; }
+  .account-layout { grid-template-columns: minmax(0, 1fr); }
   .account-nav { position: static; display: flex; overflow-x: auto; gap: 4px; padding: 6px; }
   .account-nav-link { white-space: nowrap; }
 }
