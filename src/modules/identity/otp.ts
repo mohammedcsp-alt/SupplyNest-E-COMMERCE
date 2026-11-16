@@ -3,6 +3,7 @@ import { config } from '@/lib/config';
 import { logger } from '@/lib/logger';
 import { AppError } from '@/lib/errors';
 import { smsProviderFromConfig } from '@/integrations/sms/config';
+import { devOtpOutboxAllowed, writeDevOtp } from './dev-otp-outbox';
 
 /**
  * OTP delivery adapter (spec 19.1 / OPEN-07 / CUSTOMER-002).
@@ -29,6 +30,10 @@ export async function deliverOtp(phone: string, code: string): Promise<OtpDelive
   if (config.OTP_PROVIDER === 'mock') {
     // DEVELOPMENT MOCK: no SMS is sent. The code is returned to the caller only outside production.
     logger.info('otp_mock_delivery', { phoneMasked: `${phone.slice(0, 5)}••••${phone.slice(-2)}` });
+    // Development outbox (local operator file, never HTTP): lets the developer read the code for their own number.
+    if (devOtpOutboxAllowed({ isProduction: config.isProduction, enabled: config.DEV_OTP_OUTBOX, provider: config.OTP_PROVIDER })) {
+      await writeDevOtp(config.DEV_OTP_DIR, phone, code, OTP_RULES.validitySeconds);
+    }
     return {
       delivered: false,
       provider: 'mock',

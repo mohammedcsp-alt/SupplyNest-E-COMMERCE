@@ -18,6 +18,9 @@ const schema = z.object({
     .default('false')
     .transform((v) => v === 'true'),
   OTP_PROVIDER: z.enum(['mock', 'sms']).default('mock'),
+  /** Development outbox: the mock adapter records the latest code per phone in DEV_OTP_DIR. Optional; see devOtpOutboxEnabled. */
+  DEV_OTP_OUTBOX: z.enum(['true', 'false']).optional(),
+  DEV_OTP_DIR: z.string().default('./storage/dev-otp'),
   UPLOAD_DIR: z.string().default('./storage/uploads'),
   BACKUP_DIR: z.string().default('./storage/backups'),
   SESSION_HOURS: z.coerce.number().int().min(1).max(720).default(12),
@@ -39,6 +42,8 @@ if (!parsed.success) {
 export const config = Object.freeze({
   ...parsed.data,
   isProduction: parsed.data.NODE_ENV === 'production',
+  /** On by default only in development; never in production or test unless explicitly set to true outside production. */
+  DEV_OTP_OUTBOX: parsed.data.DEV_OTP_OUTBOX === undefined ? parsed.data.NODE_ENV === 'development' : parsed.data.DEV_OTP_OUTBOX === 'true',
   /** Mock OTP is only ever allowed outside production. */
   otpMockEnabled: parsed.data.OTP_PROVIDER === 'mock',
 });
@@ -49,6 +54,9 @@ export const config = Object.freeze({
  */
 export function assertProductionSafe(): void {
   if (!config.isProduction) return;
+  if (config.DEV_OTP_OUTBOX) {
+    throw new Error('Refusing to start in production with DEV_OTP_OUTBOX enabled.');
+  }
   if (config.otpMockEnabled) {
     throw new Error('Refusing to start in production with OTP_PROVIDER=mock. Configure a real SMS provider.');
   }
