@@ -1,6 +1,7 @@
 import 'server-only';
 import { db } from '@/lib/db';
-import { errors } from '@/lib/errors';
+import { AppError, errors } from '@/lib/errors';
+import { config } from '@/lib/config';
 import { hashPassword, verifyPassword } from '@/lib/passwords';
 import { keyedHash, newOtpCode, safeEqual } from '@/lib/crypto';
 import { consumeRateLimit } from '@/lib/rate-limit';
@@ -39,10 +40,17 @@ export async function registerCustomer(input: {
   assertPasswordPolicy(input.password);
   await consumeRateLimit({ action: 'register_ip', subject: input.ip, limit: 10, windowSeconds: 3600 });
 
-  const existing = await db.user.findUnique({ where: { phone }, select: { id: true } });
+  const existing = await db.user.findUnique({ where: { phone }, select: { id: true, status: true, phoneVerifiedAt: true } });
   if (existing) {
-    // Generic response shape; the same rate limit above bounds enumeration attempts.
-    throw errors.conflict('This phone number cannot be registered. Contact support if you already have an account.');
+    // The response has the same shape whatever the existing account's state, so registration cannot be used to
+    // learn which numbers have accounts. The only case that sends anything is an unverified self-registration:
+    // it is resumed with a fresh code to the same number. The password is NOT replaced (a stranger must not be able
+    // to set the password on someone else's unverified account); the customer keeps the original password.
+    if (existing.status === 'REGISTERED' && !existing.phoneVerifiedAt) {
+      const otp = await resumeRegistrationOtp(existing.id, phone);
+      return { status: 'REGISTERED', otp };
+    }
+    return { status: 'REGISTERED', otp: { delivered: false, provider: config.OTP_PROVIDER } };
   }
 
   const passwordHash = await hashPassword(input.password);
@@ -66,6 +74,22 @@ export async function registerCustomer(input: {
 
   const otp = await issueOtp(user.id, phone, REGISTRATION_PURPOSE);
   return { status: 'REGISTERED', otp };
+}
+
+/**
+ * Resumes an unverified self-registration with a fresh code. A cooldown or hourly quota stops the send, but the caller
+ * still gets the same response shape, so a throttled resume does not reveal anything about the account.
+ */
+async function resumeRegistrationOtp(userId: string, phone: string): Promise<OtpDelivery> {
+  try {
+    return await issueOtp(userId, phone, REGISTRATION_PURPOSE);
+  } catch (err) {
+    if (err instanceof AppError && err.code === 'RATE_LIMITED') {
+      logger.info('registration_resume_throttled', { userId });
+      return { delivered: false, provider: config.OTP_PROVIDER };
+    }
+    throw err;
+  }
 }
 
 /** Issues an OTP challenge with cooldown and hourly quota. Stores only a keyed hash of the code. */
