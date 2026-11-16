@@ -35,6 +35,9 @@ test.describe('language direction and layout', () => {
     const lang = langOf(info.project.name);
     await setLang(page, lang);
     await page.goto('/');
+    // On phones and tablets the category bar sits behind the menu toggle; open it first, as a visitor would.
+    const toggle = page.locator('.mobile-nav-toggle');
+    if (await toggle.isVisible()) await toggle.click();
     await expect(page.getByRole('navigation', { name: lang === 'ar' ? 'التنقل الرئيسي' : 'Main navigation' })).toBeVisible();
     await expect(page.getByRole('link', { name: lang === 'ar' ? 'الكتالوج' : 'Catalog' }).first()).toBeVisible();
   });

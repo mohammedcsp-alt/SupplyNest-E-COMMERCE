@@ -109,7 +109,7 @@ test.describe('admin catalog', () => {
     const id = ((await created.json()) as { data: { id: string } }).data.id;
 
     await page.goto(`/admin/catalog/${id}`);
-    const section = page.locator('section.card', { has: page.getByRole('heading', { name: t.imagesHeading, exact: true }) });
+    const section = page.locator('section', { has: page.getByRole('heading', { name: t.imagesHeading, exact: true }) });
     await expect(section.getByText(t.imageCount(0), { exact: true })).toBeVisible();
 
     const alt = `E2E pixel ${code}`;

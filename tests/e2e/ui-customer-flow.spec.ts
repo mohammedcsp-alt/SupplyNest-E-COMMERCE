@@ -14,7 +14,7 @@ test.describe('visitor', () => {
     const lang = langOf(info.project.name);
     await setLang(page, lang);
     await page.goto(`/products/${SKU_IN_STOCK}`);
-    const hint = lang === 'ar' ? 'سجّل الدخول كعميل معتمد' : 'Sign in as an approved customer';
+    const hint = lang === 'ar' ? 'سجّل الدخول للطلب' : 'Sign in to order';
     await expect(page.getByText(new RegExp(hint))).toBeVisible();
     await expect(page.getByText(/IQD|د\.ع/)).toHaveCount(0);
   });
@@ -32,11 +32,12 @@ test.describe('approved customer', () => {
     await expect(page.getByText(/IQD|د\.ع/).first()).toBeVisible();
 
     await page.getByRole('button', { name: lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart' }).click();
-    await expect(page.getByText(lang === 'ar' ? 'أُضيف إلى السلة.' : 'Added to cart.')).toBeVisible();
+    await expect(page.getByText(lang === 'ar' ? 'أُضيف إلى السلة' : 'Added to cart')).toBeVisible();
 
     await page.goto('/checkout');
     await page.locator('input[type=radio][name=address]').first().check();
-    await expect(page.getByRole('table').first()).toContainText(SKU_IN_STOCK, { timeout: 20000 });
+    // the checkout lines are a table on desktop and stacked cards on phones; the SKU must be visible in either
+    await expect(page.getByText(SKU_IN_STOCK).filter({ visible: true }).first()).toBeVisible({ timeout: 20000 });
 
     await page.getByRole('checkbox').first().check();
     await page.getByRole('button', { name: lang === 'ar' ? 'تأكيد الطلب' : 'Place order' }).click();

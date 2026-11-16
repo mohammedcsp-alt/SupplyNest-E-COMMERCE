@@ -49,11 +49,12 @@ export async function placeOrderViaUi(page: Page, lang: Lang, qty = 1): Promise<
     await page.getByLabel(lang === 'ar' ? 'الكمية' : 'Quantity').fill(String(qty));
   }
   await page.getByRole('button', { name: lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart' }).click();
-  await expect(page.getByText(lang === 'ar' ? 'أُضيف إلى السلة.' : 'Added to cart.')).toBeVisible();
+  await expect(page.getByText(lang === 'ar' ? 'أُضيف إلى السلة' : 'Added to cart')).toBeVisible();
 
   await page.goto('/checkout');
   await page.locator('input[type=radio][name=address]').first().check();
-  await expect(page.getByRole('table').first()).toContainText(SKU_IN_STOCK, { timeout: 20000 });
+  // the checkout lines are a table on desktop and stacked cards on phones; the SKU must be visible in either
+    await expect(page.getByText(SKU_IN_STOCK).filter({ visible: true }).first()).toBeVisible({ timeout: 20000 });
   await page.getByRole('checkbox').first().check();
   await page.getByRole('button', { name: lang === 'ar' ? 'تأكيد الطلب' : 'Place order' }).click();
   await page.waitForURL(/\/orders\/[0-9a-f-]{36}/, { timeout: 30000 });

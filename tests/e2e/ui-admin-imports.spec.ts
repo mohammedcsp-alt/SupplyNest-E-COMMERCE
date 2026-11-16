@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page, type Locator } from '@playwright/test';
 import { langOf, setLang, type Lang } from './helpers';
 import { MANAGER_STATE, adminApi, findSkuByApi, firstCategory, uniq } from './admin-helpers';
 
@@ -26,7 +26,15 @@ const T = {
 
 /** The "Product import" card. Price import is a separate card and is never touched by these tests. */
 function productSection(page: Page, lang: Lang) {
-  return page.locator('section.card', { has: page.getByRole('heading', { name: T[lang].section, exact: true }) });
+  return page.locator('section', { has: page.getByRole('heading', { name: T[lang].section, exact: true }) });
+}
+
+/** Commit sits behind a "Commit import…" disclosure. Opens it once; never collapses an already-open one. */
+async function openCommit(section: Locator, lang: Lang) {
+  const details = section.locator('details.imp-commit');
+  if (!(await details.evaluate((el) => (el as HTMLDetailsElement).open))) {
+    await details.locator('summary', { hasText: T[lang].commit }).click();
+  }
 }
 
 /** Upload a CSV into the product panel and click Preview. Waits for the preview response. */
@@ -54,9 +62,11 @@ test.describe('product import', () => {
     // preview shows the trusted freshness and the summary (one create, no row errors)
     await expect(section.getByText(/PREVIEW VALID/)).toBeVisible();
     await expect(section.getByText(/FRESH/).first()).toBeVisible();
-    await expect(section.locator('dl dt', { hasText: 'creates' }).locator('xpath=following-sibling::dd')).toHaveText('1');
+    // The summary is rendered as KPI tiles (label span + value strong), not a definition list.
+    await expect(section.locator('.adm-kpi').filter({ has: page.locator('span', { hasText: /^creates$/ }) }).locator('strong')).toHaveText('1');
 
     const commit = page.waitForResponse((r) => r.url().includes('/api/v1/admin/imports/products/') && r.url().endsWith('/commit'));
+    await openCommit(section, lang);
     await section.getByRole('button', { name: T[lang].commit, exact: true }).click();
     expect((await commit).status()).toBe(200);
     await expect(section.getByRole('status').filter({ hasText: T[lang].committed })).toBeVisible();
@@ -101,6 +111,7 @@ test.describe('product import', () => {
     let section = await uploadPreview(page, lang, `newer-${sku}.csv`, productCsv(sku, cat.nameEn, 5, '2030-06-01T10:00:00Z'));
     await expect(section.getByText(/PREVIEW VALID/)).toBeVisible();
     const firstCommit = page.waitForResponse((r) => r.url().endsWith('/commit'));
+    await openCommit(section, lang);
     await section.getByRole('button', { name: T[lang].commit, exact: true }).click();
     expect((await firstCommit).status()).toBe(200);
     await expect(section.getByRole('status').filter({ hasText: T[lang].committed })).toBeVisible();
@@ -110,10 +121,12 @@ test.describe('product import', () => {
     section = await uploadPreview(page, lang, `older-${sku}.csv`, productCsv(sku, cat.nameEn, 7, '2030-06-01T09:00:00Z'));
     await expect(section.getByText(/STALE/).first()).toBeVisible();
     const reasonBox = section.getByLabel(T[lang].overrideLabel);
+    await openCommit(section, lang); // the override reason is inside the commit disclosure
     await expect(reasonBox).toBeVisible();
 
     // 2a. commit without a reason is refused by the server; stock is unchanged
     const refused = page.waitForResponse((r) => r.url().endsWith('/commit'));
+    await openCommit(section, lang);
     await section.getByRole('button', { name: T[lang].commit, exact: true }).click();
     expect((await refused).status()).toBeGreaterThanOrEqual(400);
     await expect(section.getByRole('alert')).toContainText(/older than data already applied|manager/i);
@@ -122,6 +135,7 @@ test.describe('product import', () => {
     // 2b. with a reason (>= 3 characters) the commit succeeds and the older values are applied
     await reasonBox.fill('E2E manager override');
     const accepted = page.waitForResponse((r) => r.url().endsWith('/commit'));
+    await openCommit(section, lang);
     await section.getByRole('button', { name: T[lang].commit, exact: true }).click();
     expect((await accepted).status()).toBe(200);
     await expect(section.getByRole('status').filter({ hasText: T[lang].committed })).toBeVisible();

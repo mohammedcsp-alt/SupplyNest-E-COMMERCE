@@ -104,7 +104,8 @@ async function iqd(loc: Locator): Promise<number> {
 
 /** The dd of a KPI tile on the shipment or statement pages, found by its label. */
 function kpi(page: Page, label: string): Locator {
-  return page.locator('div.kpi').filter({ has: page.locator('dt', { hasText: label }) }).locator('dd').first();
+  // Statement figures are rows (div.fa-metric) holding a label (dt) and a value (dd.kpi).
+  return page.locator('div.fa-metric').filter({ has: page.locator('dt', { hasText: label }) }).locator('dd').first();
 }
 
 /** The form that contains the submit button with this exact name (ApiForm and FulfillmentLinesForm forms). */

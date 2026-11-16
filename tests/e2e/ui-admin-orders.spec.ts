@@ -36,6 +36,8 @@ test.describe('admin orders', () => {
     await expect(page.getByText('CANCELLATION REQUESTED', { exact: true }).first()).toBeVisible();
     await expect(page.getByRole('heading', { name: ar ? 'طلب إلغاء من العميل' : 'Customer cancellation request', exact: true })).toBeVisible();
     await expect(page.getByText(reason, { exact: false }).first()).toBeVisible();
+    // approval sits behind a deliberate confirmation disclosure; open it before checking the button
+    await page.locator('summary', { hasText: ar ? 'الموافقة على الإلغاء' : 'Approve cancellation' }).click();
     await expect(page.getByRole('button', { name: ar ? 'الموافقة على الإلغاء' : 'Approve cancellation', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: ar ? 'رفض الإلغاء' : 'Reject cancellation', exact: true })).toBeVisible();
   });

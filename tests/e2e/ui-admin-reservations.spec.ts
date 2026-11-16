@@ -29,7 +29,7 @@ test.describe('inventory reservations', () => {
     await expect(row(stale).getByText('ACTIVE', { exact: true })).toBeVisible();
 
     // 2. extend by 2 hours with a reason
-    await row().locator('summary').click();
+    await row().locator('summary', { hasText: ar ? 'تمديد' : 'Extend' }).click();
     await row().getByLabel(ar ? /ساعات إضافية/ : /Extra hours/).fill('2');
     await row().getByLabel(ar ? /^السبب \*$/ : /^Reason \*$/).fill('E2E extension reason');
     const extend = page.waitForResponse((r) => r.url().includes('/extend') && r.request().method() === 'POST');
@@ -43,6 +43,7 @@ test.describe('inventory reservations', () => {
 
     // 3. release with a reason (confirm + prompt handled by answerDialogs)
     const release = page.waitForResponse((r) => r.url().includes('/release') && r.request().method() === 'POST');
+    await row().locator('summary', { hasText: ar ? 'إفراج' : 'Release' }).click();
     await row().getByRole('button', { name: ar ? 'إفراج' : 'Release', exact: true }).click();
     expect((await release).status()).toBe(200);
     await expect(row().getByText('RELEASED', { exact: true })).toBeVisible();
@@ -57,6 +58,7 @@ test.describe('inventory reservations', () => {
 
     // 4. releasing again from the stale tab is refused and the error is shown in that row
     const second = stale.waitForResponse((r) => r.url().includes('/release') && r.request().method() === 'POST');
+    await row(stale).locator('summary', { hasText: ar ? 'إفراج' : 'Release' }).click();
     await row(stale).getByRole('button', { name: ar ? 'إفراج' : 'Release', exact: true }).click();
     expect((await second).status()).toBeGreaterThanOrEqual(400);
     await expect(row(stale).getByRole('alert')).toBeVisible();
