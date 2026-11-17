@@ -131,7 +131,7 @@ export function LoginRequired({ locale, next }: { locale: Locale; next: string }
   return (
     <Card>
       <p>{locale === 'ar' ? 'يلزم تسجيل الدخول للمتابعة.' : 'Please sign in to continue.'}</p>
-      <Link className="btn btn-primary" href={`/login?next=${encodeURIComponent(next)}`}>
+      <Link className="btn btn-primary" href={next.startsWith('/admin') ? `/login?portal=admin&next=${encodeURIComponent(next)}` : `/login?next=${encodeURIComponent(next)}`}>
         {locale === 'ar' ? 'تسجيل الدخول' : 'Sign in'}
       </Link>
     </Card>

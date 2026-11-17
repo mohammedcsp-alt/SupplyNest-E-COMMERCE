@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export const POST = apiRoute(async (req, _ctx, requestId) => {
   const body = await readJson(req, loginSchema);
   const ip = clientIp(req);
-  const user = await authenticate({ phone: body.phone, password: body.password, ip });
+  const user = await authenticate({ phone: body.phone, password: body.password, ip, portal: body.portal });
 
   const { token, expiresAt } = await createSession(user.id, req.headers.get('user-agent'));
   (await cookies()).set(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));

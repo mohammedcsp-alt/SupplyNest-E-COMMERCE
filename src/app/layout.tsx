@@ -241,7 +241,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <span>
                 © {year} {companyName}. {L('جميع الحقوق محفوظة.', 'All rights reserved.')}
               </span>
-              <span>{L('نسخة تطوير محلية — V3.3', 'Local development build — V3.3')}</span>
+              <span className="footer-bottom-links">
+                <Link href="/login?portal=admin">{L('بوابة الإدارة', 'Admin Portal')}</Link>
+                <span>{L('نسخة تطوير محلية — V3.3', 'Local development build — V3.3')}</span>
+              </span>
             </div>
           </div>
         </footer>

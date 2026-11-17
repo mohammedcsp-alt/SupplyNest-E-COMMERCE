@@ -7,11 +7,12 @@ import { MANAGER_STATE } from './admin-helpers';
  * file so the login rate limit (5 attempts / 15 min per phone) is not exhausted.
  */
 setup('sign in manager', async ({ page }) => {
-  await page.goto('/login?next=/admin');
-  await page.getByLabel(/رقم الهاتف|Phone number/).fill(MANAGER.phone);
-  await page.getByLabel(/كلمة المرور|Password/).fill(MANAGER.password);
+  await page.goto('/login?portal=admin&next=/admin');
+  const panel = page.locator('#admin-login');
+  await panel.getByLabel(/رقم هاتف|رقم الهاتف|phone number/i).fill(MANAGER.phone);
+  await panel.getByLabel(/كلمة المرور|Password/).fill(MANAGER.password);
   const loginResponse = page.waitForResponse((r) => r.url().includes('/api/v1/auth/login'));
-  await page.getByRole('button', { name: /^(دخول|Sign in)$/ }).click();
+  await panel.locator('button[type="submit"]').click();
   const res = await loginResponse;
   expect(res.status()).toBe(200);
   await page.waitForURL((u) => u.pathname === '/admin', { timeout: 30000 });

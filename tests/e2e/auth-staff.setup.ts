@@ -15,11 +15,12 @@ const STAFF = [
 
 for (const acc of STAFF) {
   setup(`sign in ${acc.role}`, async ({ page }) => {
-    await page.goto(`/login?next=${encodeURIComponent(acc.next)}`);
-    await page.getByLabel(/رقم الهاتف|Phone number/).fill(acc.phone);
-    await page.getByLabel(/كلمة المرور|Password/).fill(devPassword());
+    await page.goto(`/login?portal=admin&next=${encodeURIComponent(acc.next)}`);
+    const panel = page.locator('#admin-login');
+    await panel.getByLabel(/رقم هاتف|رقم الهاتف|phone number/i).fill(acc.phone);
+    await panel.getByLabel(/كلمة المرور|Password/).fill(devPassword());
     const loginResponse = page.waitForResponse((r) => r.url().includes('/api/v1/auth/login'));
-    await page.getByRole('button', { name: /^(دخول|Sign in)$/ }).click();
+    await panel.locator('button[type="submit"]').click();
     const res = await loginResponse;
     expect(res.status()).toBe(200);
     await page.waitForURL((u) => u.pathname === acc.next, { timeout: 30000 });

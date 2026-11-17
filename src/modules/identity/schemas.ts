@@ -22,9 +22,14 @@ export const otpVerifySchema = z.object({
   code: codeSchema,
 });
 
+/** Which sign-in panel the request came from. Omitted = legacy behaviour (no portal restriction). */
+export const LOGIN_PORTALS = ['customer', 'admin'] as const;
+export type LoginPortal = (typeof LOGIN_PORTALS)[number];
+
 export const loginSchema = z.object({
   phone: phoneSchema,
   password: z.string().min(1).max(128),
+  portal: z.enum(LOGIN_PORTALS).optional(),
 });
 
 export const recoveryRequestSchema = z.object({ phone: phoneSchema });

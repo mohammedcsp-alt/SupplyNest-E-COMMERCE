@@ -23,11 +23,12 @@ export function langOf(project: string): Lang {
 
 export async function uiLogin(page: Page, phone: string, password: string, lang: Lang, next = '/account') {
   await page.goto(`/login?next=${encodeURIComponent(next)}`);
+  const panel = page.locator('#customer-login');
   const phoneLabel = lang === 'ar' ? 'رقم الهاتف' : 'Phone number';
   const passLabel = lang === 'ar' ? 'كلمة المرور' : 'Password';
-  await page.getByLabel(new RegExp(phoneLabel)).fill(phone);
-  await page.getByLabel(new RegExp(passLabel)).fill(password);
-  await page.getByRole('button', { name: lang === 'ar' ? 'دخول' : 'Sign in' }).click();
+  await panel.getByLabel(new RegExp(phoneLabel)).fill(phone);
+  await panel.getByLabel(new RegExp(passLabel)).fill(password);
+  await panel.locator('button[type="submit"]').click();
   await page.waitForURL((u) => u.pathname === next, { timeout: 20000 });
 }
 

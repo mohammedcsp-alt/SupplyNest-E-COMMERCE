@@ -1,36 +1,31 @@
-# Starts the local B2B-STORE stack on Windows 11.
-# - Starts ONLY the B2B PostgreSQL container (b2b-store-postgres). Never touches WMS containers.
-# - Applies pending migrations (non-destructive) and starts the app on 127.0.0.1:3200.
+# Starts the local B2B-STORE stack on Windows 11 (manual start; the supervisor also does this at sign-in).
+# - Clears the paused flag, then starts the supervisor, which starts Docker Desktop, the B2B PostgreSQL container
+#   (b2b-store-postgres only) and the application on 127.0.0.1:3200.
+# - Applies pending migrations first (non-destructive: prisma migrate deploy).
 # Usage (from the B2B-STORE folder):  powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
+$LogDir = Join-Path $root 'storage\logs'
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
-$container = 'b2b-store-postgres'
-$exists = docker ps -a --filter "name=^/$container$" --format '{{.Names}}'
-if (-not $exists) {
-  Write-Host "Container $container not found. Create it first (see README.md section 'Database')." -ForegroundColor Red
-  exit 1
-}
-docker start $container | Out-Null
-
-# wait for PostgreSQL to accept connections on the B2B port only
-for ($i = 0; $i -lt 30; $i++) {
-  docker exec $container pg_isready -U b2b_app -d b2b_store_dev *> $null
-  if ($LASTEXITCODE -eq 0) { break }
-  Start-Sleep -Seconds 1
-}
+Remove-Item -Path (Join-Path $LogDir 'supervisor.paused') -ErrorAction SilentlyContinue
 
 if (-not (Test-Path (Join-Path $root 'node_modules'))) { npm install }
+
+# Wait for Docker and the database, then apply migrations (non-destructive).
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'b2b-supervisor.ps1') -Once
 npx prisma migrate deploy
 npx prisma generate | Out-Null
 
-$port = 3200
-$busy = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue
-if ($busy) {
-  Write-Host "Port $port is already in use. Stop the other process first." -ForegroundColor Yellow
-  exit 1
+# Hand over to the supervisor (it keeps the stack up from now on). Use the scheduled task if installed.
+$task = Get-ScheduledTask -TaskName 'B2B-STORE-Supervisor' -ErrorAction SilentlyContinue
+if ($task) {
+  Start-ScheduledTask -TaskName 'B2B-STORE-Supervisor'
+  Write-Host 'Supervisor task started.' -ForegroundColor Green
+} else {
+  Start-Process -FilePath 'powershell.exe' -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', (Join-Path $PSScriptRoot 'b2b-supervisor.ps1') -WindowStyle Hidden
+  Write-Host 'Supervisor started (scheduled task not installed; run install-autostart.ps1 for sign-in startup).' -ForegroundColor Yellow
 }
-Write-Host "Starting B2B-STORE on http://127.0.0.1:$port (Ctrl+C to stop)" -ForegroundColor Green
-npm run dev
+Write-Host 'Give it about 30-60 seconds, then open http://127.0.0.1:3200 (status: powershell -File .\scripts\status-local.ps1).' -ForegroundColor Green

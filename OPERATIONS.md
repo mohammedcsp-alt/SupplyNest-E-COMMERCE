@@ -85,3 +85,62 @@ are not measured guarantees in this workspace.
 
 See `KNOWN_LIMITATIONS.md`. Notably: no SMS provider, no email, no PDF generation for Arabic text on the server, no
 automatic scheduler inside the application process.
+
+## 8. Startup, recovery and status (Windows, per user)
+
+**Why the site went down (verified 2026-11-17):** Docker Desktop was not running, so PostgreSQL on 127.0.0.1:5440 was
+unreachable and every data page failed with a Prisma `Can't reach database server` error. Three things combined:
+- Docker Desktop's "start when you sign in" setting was off (`AutoStart: false` in `%APPDATA%\Docker\settings-store.json`).
+- Its engine was stopped abruptly several times (Docker backend log: `exit status 0x40010004`), so the B2B container
+  exited without a clean shutdown (exit 255).
+- The container had restart policy `no`, so nothing brought it back when the engine returned.
+PostgreSQL recovered on start by replaying its write-ahead log. Row counts were checked before and after: users 23,
+orders 3, audit_logs 124, schema migrations 5 (unchanged). No data, volume or credential was changed.
+
+**What runs automatically:** the scheduled task `B2B-STORE-Supervisor` runs `scripts\b2b-supervisor.ps1`. It starts at
+each sign-in and every 5 minutes as a watchdog. The supervisor starts Docker Desktop if needed, then starts the
+`b2b-store-postgres` container (only that one; WMS containers are never touched), checks `pg_isready`, and starts the
+website on 127.0.0.1:3200. It restarts the website if it stops, or if `/api/health` fails three times in a row. It
+does not run migrations and does not recreate containers or volumes.
+
+| Action | Command (from the `B2B-STORE` folder) |
+|---|---|
+| Install / update the autostart task | `powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1` |
+| Remove the autostart task (keeps DB and app as they are) | `powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1 -Uninstall` |
+| Status report (read-only) | `powershell -ExecutionPolicy Bypass -File .\scripts\status-local.ps1` |
+| Start everything now | `powershell -ExecutionPolicy Bypass -File .\scripts\start-local.ps1` |
+| Stop everything (stays stopped until start-local) | `powershell -ExecutionPolicy Bypass -File .\scripts\stop-local.ps1` |
+| Health endpoint | `curl http://127.0.0.1:3200/api/health` → `200` ok, `503` database down |
+| Logs | `storage\logs\supervisor.log`, `storage\logs\app.out.log`, `storage\logs\app.err.log` |
+
+Notes:
+- **Sign-in required.** The task starts when you sign in to Windows, not at boot. If the PC restarts, the site is
+  unavailable until you sign in. Windows Home has no service-style start without sign-in, so this is the limit of the
+  per-user design.
+- **Stopped means stopped.** `stop-local.ps1` writes `storage\logs\supervisor.paused`. While that file exists, the
+  supervisor and the watchdog do nothing, even after a restart. `start-local.ps1` removes the file.
+- **Dev mode is the default.** The site runs `server.mjs --dev`. Production mode (`-Mode prod`) refuses to start while
+  `OTP_PROVIDER=mock`, which is the local development setting. Enable production only after a real SMS OTP provider is
+  configured.
+- **Error page.** When the database is down, visitors get the "temporarily unavailable" page (`src\app\global-error.tsx`
+  and `src\app\error.tsx`). Prisma text is logged on the server only. In dev mode, Next.js still forwards server log
+  lines into the page source and shows its own developer overlay, so the stack-trace suppression is complete only in
+  production mode.
+- **Migrations** are not applied by the supervisor. Run `npx prisma migrate deploy` manually after pulling new
+  migrations (see section 5).
+
+**Tested here (2026-11-17), without a Windows reboot:** database outage → friendly page and health 503 → recovery by the
+supervisor with data intact; cold start from Docker Desktop closed through the scheduled task (website back in 16 s);
+app killed → restarted in 42 s; supervisor killed → restarted by the 5-minute watchdog in 137 s.
+**Not tested:** a real Windows restart and sign-in. Verify it once by restarting the PC, then running `status-local.ps1`.
+
+## 9. Sign-in portals (customers and administration)
+
+- Customer sign-in: `http://127.0.0.1:3200/login` (customer panel). Staff accounts are refused here.
+- Administration sign-in: `http://127.0.0.1:3200/admin/login`, which redirects to `/login?portal=admin`. Customer accounts
+  are refused here. The footer "Admin Portal" link goes to the same panel.
+- Both panels use `POST /api/v1/auth/login` with a `portal` field. The server enforces the portal after the password is
+  checked, so a refused attempt creates no session and writes an `auth.portal_denied` audit row.
+- Every administration API still enforces its own permission. Anonymous requests get 401, and signed-in users without the
+  permission get 403.
+- Administrator accounts are never self-registered. They are created by the system owner (see the owner note in section 8).

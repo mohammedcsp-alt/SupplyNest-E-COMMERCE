@@ -9,6 +9,7 @@ import { writeAudit } from '@/lib/audit';
 import { logger } from '@/lib/logger';
 import { revokeAllSessions } from '@/lib/session';
 import { normalizeIraqPhone } from './phone';
+import type { LoginPortal } from './schemas';
 import { deliverOtp, OTP_RULES, type OtpDelivery } from './otp';
 import { recordStatusChange } from './status';
 import type { OtpPurpose } from '@prisma/client';
@@ -158,7 +159,7 @@ export async function confirmRegistrationPhone(input: { phone: string; code: str
 type AccountStatusLike = 'REGISTERED' | 'APPROVAL_PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
 
 /** Password login. Generic error for unknown users and wrong passwords (no enumeration). */
-export async function authenticate(input: { phone: string; password: string; ip: string }) {
+export async function authenticate(input: { phone: string; password: string; ip: string; portal?: LoginPortal }) {
   const phone = normalizeIraqPhone(input.phone) ?? input.phone;
   await consumeRateLimit({ action: 'login_ip', subject: input.ip, limit: 10, windowSeconds: 900 });
   await consumeRateLimit({ action: 'login_account', subject: phone, limit: 5, windowSeconds: 900 });
@@ -169,6 +170,18 @@ export async function authenticate(input: { phone: string; password: string; ip:
   if (user.status === 'REJECTED') throw errors.forbidden('This account was not approved');
   if (user.userType === 'CUSTOMER' && user.status === 'REGISTERED') {
     throw errors.forbidden('Verify your phone number to continue');
+  }
+  // Portal separation: checked after the password is verified and before any session or lastLoginAt is written.
+  // Staff and customers cannot be signed in through the other panel, and a denied attempt leaves no session behind.
+  if (input.portal === 'admin') {
+    if (user.userType !== 'STAFF' || user.status !== 'ACTIVE') {
+      await writeAudit(db, { actorId: user.id, action: 'auth.portal_denied', entityType: 'user', entityId: user.id, ip: input.ip, after: { portal: 'admin' } });
+      throw errors.forbidden('Administration sign-in is only for authorized staff accounts.');
+    }
+  }
+  if (input.portal === 'customer' && user.userType === 'STAFF') {
+    await writeAudit(db, { actorId: user.id, action: 'auth.portal_denied', entityType: 'user', entityId: user.id, ip: input.ip, after: { portal: 'customer' } });
+    throw errors.forbidden('Staff accounts sign in through Admin Login.');
   }
   await db.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
   return user;
