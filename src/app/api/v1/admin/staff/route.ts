@@ -3,6 +3,7 @@ import { apiRoute, clientIp, ok, readJson } from '@/lib/api';
 import { getCurrentUser, requirePermission } from '@/lib/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { createStaffUser } from '@/modules/admin/roles';
+import { isOwnerAccount } from '@/modules/admin/owner';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,5 +18,6 @@ const schema = z.object({
 export const POST = apiRoute(async (req, _ctx, requestId) => {
   const actor = requirePermission(await getCurrentUser(), PERMISSIONS.ROLE_MANAGE);
   const body = await readJson(req, schema);
-  return ok(requestId, await createStaffUser(actor.id, body, clientIp(req)), { status: 201 });
+  const isOwner = await isOwnerAccount(actor.id);
+  return ok(requestId, await createStaffUser(actor.id, body, clientIp(req), { permissions: actor.permissions, isOwner }), { status: 201 });
 });

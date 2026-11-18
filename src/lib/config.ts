@@ -31,6 +31,11 @@ const schema = z.object({
   SMS_PROVIDER_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(10000),
   /** Base URL the PDF exporter uses to load the print view. Defaults to this process on loopback. */
   PDF_RENDER_BASE_URL: z.preprocess(emptyToUndefined, z.string().url().optional()),
+  /**
+   * Comma-separated origins (scheme://host[:port]) allowed to send state-changing requests in addition to the request's
+   * own host. Used for the private UAT HTTPS address (Tailscale Serve). Empty = same-origin only.
+   */
+  APP_TRUSTED_ORIGINS: z.preprocess(emptyToUndefined, z.string().optional()),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -46,7 +51,26 @@ export const config = Object.freeze({
   DEV_OTP_OUTBOX: parsed.data.DEV_OTP_OUTBOX === undefined ? parsed.data.NODE_ENV === 'development' : parsed.data.DEV_OTP_OUTBOX === 'true',
   /** Mock OTP is only ever allowed outside production. */
   otpMockEnabled: parsed.data.OTP_PROVIDER === 'mock',
+  /** Normalised origins from APP_TRUSTED_ORIGINS. Each entry is validated: only http(s) origins without a path. */
+  trustedOrigins: parseTrustedOrigins(parsed.data.APP_TRUSTED_ORIGINS),
 });
+
+function parseTrustedOrigins(value: string | undefined): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const raw of (value ?? '').split(',').map((s) => s.trim()).filter(Boolean)) {
+    let u: URL;
+    try {
+      u = new URL(raw);
+    } catch {
+      throw new Error(`Invalid APP_TRUSTED_ORIGINS entry: "${raw}"`);
+    }
+    if (!['http:', 'https:'].includes(u.protocol) || (u.pathname !== '/' && u.pathname !== '') || u.search || u.hash) {
+      throw new Error(`APP_TRUSTED_ORIGINS entries must be bare http(s) origins: "${raw}"`);
+    }
+    out.add(u.origin);
+  }
+  return out;
+}
 
 /**
  * Production must not start with development adapters (spec 19.1 / OTP rule).

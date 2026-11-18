@@ -3,6 +3,7 @@ import { apiRoute, clientIp, ok, readJson, type RouteContext } from '@/lib/api';
 import { getCurrentUser, requirePermission } from '@/lib/session';
 import { PERMISSIONS } from '@/lib/rbac';
 import { setRolePermissions } from '@/modules/admin/roles';
+import { isOwnerAccount } from '@/modules/admin/owner';
 import { requireUuid } from '@/modules/admin/ids';
 
 export const dynamic = 'force-dynamic';
@@ -16,5 +17,6 @@ export const PUT = apiRoute<{ id: string }>(async (req, ctx: RouteContext<{ id: 
   const actor = requirePermission(await getCurrentUser(), PERMISSIONS.ROLE_MANAGE);
   const id = requireUuid((await ctx.params).id);
   const body = await readJson(req, schema);
-  return ok(requestId, await setRolePermissions(actor.id, id, body.permissions, clientIp(req)));
+  const isOwner = await isOwnerAccount(actor.id);
+  return ok(requestId, await setRolePermissions(actor.id, id, body.permissions, clientIp(req), { permissions: actor.permissions, isOwner }));
 });

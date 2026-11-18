@@ -5,6 +5,7 @@ import { writeAudit } from '@/lib/audit';
 import { hashPassword } from '@/lib/passwords';
 import { normalizeIraqPhone } from '@/modules/identity/phone';
 import { assertPasswordPolicy } from '@/modules/identity/auth-service';
+import { roleAssignmentDenial, rolePermissionChangeDenial } from './grant-ceiling';
 
 export async function listRoles() {
   const roles = await db.role.findMany({
@@ -29,7 +30,13 @@ export async function listPermissions() {
  * Replaces a role's permission set. Codes must exist. The system MANAGER role may gain but never lose permissions.
  * Every real change is audited in the same transaction.
  */
-export async function setRolePermissions(actorId: string, roleId: string, codes: string[], ip: string | null) {
+export async function setRolePermissions(
+  actorId: string,
+  roleId: string,
+  codes: string[],
+  ip: string | null,
+  actor: { permissions: ReadonlySet<string>; isOwner: boolean },
+) {
   const wanted = [...new Set(codes)];
   const known = await db.permission.findMany({ where: { code: { in: wanted } }, select: { id: true, code: true } });
   const unknown = wanted.filter((c) => !known.some((k) => k.code === c));
@@ -42,6 +49,17 @@ export async function setRolePermissions(actorId: string, roleId: string, codes:
     const next = new Set(wanted);
     const removed = [...current].filter((c) => !next.has(c));
     const added = [...next].filter((c) => !current.has(c));
+    // SEC-004: no privilege escalation. The actor can add only permissions they already hold; MANAGER is owner-only.
+    const denial = rolePermissionChangeDenial({
+      roleName: role.name,
+      addedCodes: added,
+      actorPermissions: actor.permissions,
+      actorIsOwner: actor.isOwner,
+    });
+    if (denial) {
+      await writeAudit(db, { actorId, action: 'security.escalation_denied', entityType: 'role', entityId: role.id, after: { attempted: added }, reason: denial, ip });
+      throw errors.forbidden(denial);
+    }
     if (role.name === 'MANAGER' && removed.length > 0) {
       throw errors.conflict('The MANAGER role cannot lose permissions', { removed });
     }
@@ -76,15 +94,30 @@ export async function createStaffUser(
   actorId: string,
   input: { phone: string; fullNameEn: string; password: string; roleNames: string[] },
   ip: string | null,
+  actor: { permissions: ReadonlySet<string>; isOwner: boolean },
 ) {
   const phone = normalizeIraqPhone(input.phone);
   if (!phone) throw errors.validation('Enter a valid Iraqi mobile number (07XXXXXXXXX)', { fieldErrors: { phone: ['Invalid Iraqi mobile number'] } });
   assertPasswordPolicy(input.password);
   const roleNames = [...new Set(input.roleNames)];
-  const roles = await db.role.findMany({ where: { name: { in: roleNames } } });
+  const roles = await db.role.findMany({
+    where: { name: { in: roleNames } },
+    include: { permissions: { include: { permission: true } } },
+  });
   if (roles.length !== roleNames.length) {
     const missing = roleNames.filter((n) => !roles.some((r) => r.name === n));
     throw errors.validation(`Unknown role(s): ${missing.join(', ')}`, { fieldErrors: { roleNames: [`Unknown: ${missing.join(', ')}`] } });
+  }
+  // SEC-004: an administrator cannot create an account that holds permissions they do not hold. MANAGER is owner-only.
+  const denial = roleAssignmentDenial({
+    roleNames,
+    roles: roles.map((r) => ({ name: r.name, permissionCodes: r.permissions.map((rp) => rp.permission.code) })),
+    actorPermissions: actor.permissions,
+    actorIsOwner: actor.isOwner,
+  });
+  if (denial) {
+    await writeAudit(db, { actorId, action: 'security.escalation_denied', entityType: 'user', entityId: null, after: { attemptedRoles: roleNames, phone }, reason: denial, ip });
+    throw errors.forbidden(denial);
   }
   if (await db.user.findUnique({ where: { phone }, select: { id: true } })) throw errors.conflict('A user with this phone already exists');
   const passwordHash = await hashPassword(input.password);

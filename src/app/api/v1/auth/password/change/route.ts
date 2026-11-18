@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
-import { apiRoute, clientIp, ok, readJson } from '@/lib/api';
+import { apiRoute, clientIp, ok, readJson, requestScheme } from '@/lib/api';
 import { errors } from '@/lib/errors';
-import { getCurrentUser, SESSION_COOKIE } from '@/lib/session';
+import { getCurrentUser, SESSION_COOKIE, sessionCookieClearOptions } from '@/lib/session';
 import { changeOwnPassword } from '@/modules/identity/auth-service';
 import { changePasswordSchema } from '@/modules/identity/schemas';
 
@@ -13,6 +13,6 @@ export const POST = apiRoute(async (req, _ctx, requestId) => {
   if (!user) throw errors.unauthorized();
   const body = await readJson(req, changePasswordSchema);
   await changeOwnPassword({ userId: user.id, currentPassword: body.currentPassword, newPassword: body.newPassword, ip: clientIp(req) });
-  (await cookies()).delete(SESSION_COOKIE);
+  (await cookies()).set(SESSION_COOKIE, '', sessionCookieClearOptions(requestScheme(req)));
   return ok(requestId, { changed: true, signedOut: true });
 });

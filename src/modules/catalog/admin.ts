@@ -48,22 +48,30 @@ export async function createSku(actorId: string, input: SkuInput, ip?: string | 
   return db.$transaction(async (tx) => {
     if (await tx.sku.findUnique({ where: { sku: code } })) throw errors.conflict('SKU already exists');
     await assertCategoryExists(tx, input.categoryId);
-    const created = await tx.sku.create({
-      data: {
-        sku: code,
-        categoryId: input.categoryId,
-        brandId: input.brandId ?? null,
-        modelId: input.modelId ?? null,
-        qualityId: input.qualityId ?? null,
-        nameAr: input.nameAr.trim(),
-        nameEn: input.nameEn.trim(),
-        descriptionAr: input.descriptionAr ?? null,
-        descriptionEn: input.descriptionEn ?? null,
-        unit: input.unit ?? 'PCS',
-        published: input.published ?? false,
-        active: input.active ?? true,
-      },
-    });
+    // Two administrators can pass the findUnique check at the same moment. The unique index decides the winner; the
+    // loser gets the same typed conflict as the normal duplicate path, not a raw database error.
+    let created;
+    try {
+      created = await tx.sku.create({
+        data: {
+          sku: code,
+          categoryId: input.categoryId,
+          brandId: input.brandId ?? null,
+          modelId: input.modelId ?? null,
+          qualityId: input.qualityId ?? null,
+          nameAr: input.nameAr.trim(),
+          nameEn: input.nameEn.trim(),
+          descriptionAr: input.descriptionAr ?? null,
+          descriptionEn: input.descriptionEn ?? null,
+          unit: input.unit ?? 'PCS',
+          published: input.published ?? false,
+          active: input.active ?? true,
+        },
+      });
+    } catch (err) {
+      if ((err as { code?: string }).code === 'P2002') throw errors.conflict('SKU already exists');
+      throw err;
+    }
     await tx.inventoryBalance.create({ data: { skuId: created.id } });
     await writeAudit(tx, { actorId, action: 'sku.create', entityType: 'sku', entityId: created.id, after: { sku: code }, ip: ip ?? null });
     return created;

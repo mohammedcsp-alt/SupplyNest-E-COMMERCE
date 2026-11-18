@@ -8,7 +8,7 @@ import { GET as searchGET } from '@/app/api/v1/catalog/search/route';
 import { GET as productGET } from '@/app/api/v1/products/[sku]/route';
 import { GET as recentGET, POST as recentPOST } from '@/app/api/v1/me/recent/route';
 import { GET as exportGET } from '@/app/api/v1/admin/reports/[type]/export/route';
-import { createActiveCustomer, DEV_PASSWORD, STAFF, uniquePhone } from '../helpers/fixtures';
+import { actorFor, createActiveCustomer, DEV_PASSWORD, STAFF, uniquePhone } from '../helpers/fixtures';
 import { makeSku, uniq } from './req-helpers';
 
 // The route handlers read the session cookie through next/headers. The test controls which session is "current".
@@ -104,7 +104,7 @@ describe('report export requires report.export (T032, ADMIN-003)', () => {
       data: { name: roleName, permissions: { create: [{ permissionId: viewPerm.id }, { permissionId: adminPerm.id }] } },
     });
     const phone = uniquePhone();
-    await createStaffUser(manager, { phone, fullNameEn: 'Req View Only', password: DEV_PASSWORD, roleNames: [roleName] }, null);
+    await createStaffUser(manager, { phone, fullNameEn: 'Req View Only', password: DEV_PASSWORD, roleNames: [roleName] }, null, { permissions: (await actorFor(STAFF.manager)).permissions, isOwner: true });
     const viewOnly = await db.user.findUniqueOrThrow({ where: { phone } });
 
     const ctx = { params: Promise.resolve({ type: 'orders' }) };

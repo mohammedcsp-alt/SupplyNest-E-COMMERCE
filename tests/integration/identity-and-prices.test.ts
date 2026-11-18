@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { db } from '@/lib/db';
 import { errors } from '@/lib/errors';
 import { viewerOf, canSeePrices } from '@/lib/session';
-import { registerCustomer, confirmRegistrationPhone, authenticate, verifyOtp, requestRecovery, completeRecovery } from '@/modules/identity/auth-service';
+import { registerCustomer, confirmRegistrationPhone, authenticate, verifyOtp, requestRecovery, completeRecovery, issueOtp } from '@/modules/identity/auth-service';
 import { approveCustomer, suspendCustomer, reactivateCustomer, changePriceLevel } from '@/modules/identity/customer-service';
 import { listCatalog, getPublicSku, suggestCatalog } from '@/modules/catalog/public';
 import { createActiveCustomer, createSkuFixture, actorFor, STAFF, uniquePhone, freshIp } from '../helpers/fixtures';
@@ -90,9 +90,10 @@ describe('identity lifecycle (T002–T005)', () => {
   it('password recovery revokes existing sessions (AUTH-04)', async () => {
     const customer = await createActiveCustomer('LEVEL_B');
     const session = await db.session.create({ data: { userId: customer.userId, tokenHash: `h-${customer.userId}`, expiresAt: new Date(Date.now() + 3600_000) } });
-    const delivery = await requestRecovery({ phone: customer.phone, ip: freshIp() });
-    expect('devCode' in delivery && delivery.devCode).toBeTruthy();
-    await completeRecovery({ phone: customer.phone, code: (delivery as { devCode: string }).devCode, newPassword: 'New-Pass-98765' });
+    // The recovery code is issued by the service (the HTTP response never carries it: see authn-authz-remediation). One request only,
+    // because the resend cooldown applies to a second request.
+    const issued = await issueOtp(customer.userId, customer.phone, 'ACCESS_RECOVERY');
+    await completeRecovery({ phone: customer.phone, code: issued.devCode!, newPassword: 'New-Pass-98765' });
     const revoked = await db.session.findUniqueOrThrow({ where: { id: session.id } });
     expect(revoked.revokedAt).not.toBeNull();
     await expect(authenticate({ phone: customer.phone, password: 'New-Pass-98765', ip: freshIp() })).resolves.toBeTruthy();

@@ -7,6 +7,8 @@ process.env.DATABASE_URL = url;
 (process.env as Record<string, string>).NODE_ENV = 'test';
 process.env.APP_SECRET = process.env.APP_SECRET ?? 'test-secret-test-secret-test-secret-0123456789';
 process.env.OTP_PROVIDER = 'mock';
+// Explicit trusted origin used by the origin-check tests (sec-remediation). Test-only value.
+process.env.APP_TRUSTED_ORIGINS = process.env.APP_TRUSTED_ORIGINS ?? 'https://uat-trusted.example.ts.net';
 process.env.FEATURE_FLAG_WMS_INTEGRATION = 'false';
 process.env.UPLOAD_DIR = process.env.UPLOAD_DIR ?? './storage/test-uploads';
 process.env.LOG_LEVEL = process.env.LOG_LEVEL ?? 'error';

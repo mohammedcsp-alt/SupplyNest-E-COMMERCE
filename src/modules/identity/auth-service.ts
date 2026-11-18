@@ -193,7 +193,10 @@ export async function requestRecovery(input: { phone: string; ip: string }): Pro
   await consumeRateLimit({ action: 'recovery_ip', subject: input.ip, limit: 10, windowSeconds: 3600 });
   const user = await db.user.findUnique({ where: { phone } });
   if (!user || !user.phoneVerifiedAt) return { delivered: false }; // no enumeration: same response shape
-  return issueOtp(user.id, phone, RECOVERY_PURPOSE);
+  const issued = await issueOtp(user.id, phone, RECOVERY_PURPOSE);
+  // SECURITY: the mock provider code is never returned from password recovery. Returning it would let any client that can
+  // reach the app reset a verified account (including the owner) without the phone. The code is still issued and stored.
+  return { delivered: issued.delivered, provider: issued.provider };
 }
 
 export async function completeRecovery(input: { phone: string; code: string; newPassword: string }): Promise<void> {

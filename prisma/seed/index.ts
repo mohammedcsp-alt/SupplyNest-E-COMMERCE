@@ -16,6 +16,7 @@ if (process.env.NODE_ENV === 'production') {
 const db = new PrismaClient();
 
 import { devPassword, DEV_SECRET_FILE } from './dev-secret';
+import { shouldWriteCredentialSheet } from './credential-sheet';
 
 /** Read from storage/dev-seed-secret.txt (gitignored). Never a literal in source. */
 export const DEV_PASSWORD = devPassword();
@@ -354,8 +355,12 @@ async function main() {
     ...[...STAFF, ...CUSTOMERS].map((a) => '| ' + a.name + ' | ' + a.phone + ' |'),
     '',
   ].join('\n');
-  require('node:fs').writeFileSync('DEV-CREDENTIALS.local.md', sheet, { encoding: 'utf8' });
-  console.log('[seed] wrote DEV-CREDENTIALS.local.md (gitignored)');
+  if (shouldWriteCredentialSheet(process.env.DATABASE_URL)) {
+    require('node:fs').writeFileSync('DEV-CREDENTIALS.local.md', sheet, { encoding: 'utf8' });
+    console.log('[seed] wrote DEV-CREDENTIALS.local.md (gitignored)');
+  } else {
+    console.log('[seed] credential sheet not written (target is not the development database)');
+  }
   void PERMISSIONS;
 }
 

@@ -63,6 +63,14 @@ export function requireAdminArea(user: CurrentUser | null): CurrentUser {
 /** Loads the session cookie → user with resolved permissions. Returns null when anonymous or expired. */
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return currentUserForToken(token);
+}
+
+/**
+ * Resolves a raw session token to its live user. Null for a missing, malformed, unknown, revoked or expired session.
+ * Exposed so session isolation and expiry can be tested without a request cookie store.
+ */
+export async function currentUserForToken(token: string | undefined): Promise<CurrentUser | null> {
   if (!token || token.length < 20 || token.length > 200) return null;
 
   const session = await db.session.findUnique({ where: { tokenHash: sha256(token) } });
@@ -113,15 +121,28 @@ export async function revokeAllSessions(userId: string): Promise<number> {
   return res.count;
 }
 
-export function sessionCookieOptions(expiresAt: Date) {
+/**
+ * Session cookie attributes. `Secure` is set in production, and whenever the request reached the app over HTTPS through
+ * a trusted proxy (Tailscale Serve). Plain local HTTP (http://127.0.0.1:3200) keeps working without Secure.
+ * HttpOnly and SameSite=Lax are always set.
+ */
+export function sessionCookieOptions(expiresAt: Date, scheme: 'http' | 'https' = 'http') {
   return {
     name: SESSION_COOKIE,
     httpOnly: true,
     sameSite: 'lax' as const,
-    secure: config.isProduction,
+    secure: config.isProduction || scheme === 'https',
     path: '/',
     expires: expiresAt,
   };
+}
+
+/**
+ * Attributes for clearing the session cookie. They match sessionCookieOptions exactly (including Secure for HTTPS), so the
+ * browser replaces the same cookie. cookies().delete() cannot carry these attributes, which is why it is not used.
+ */
+export function sessionCookieClearOptions(scheme: 'http' | 'https' = 'http') {
+  return { ...sessionCookieOptions(new Date(0), scheme), value: '', maxAge: 0, expires: new Date(0) };
 }
 
 /** Read-model viewer for catalog projections. Null for anonymous visitors. */

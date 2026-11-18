@@ -62,8 +62,8 @@ describe('MANAGER role cannot lose permissions; unknown codes are refused (ADMIN
     expect(mgr).toBeDefined();
     expect(mgr!.permissions).toContain('customer.approve');
 
-    await expect(setRolePermissions(manager.id, mgr!.id, mgr!.permissions.filter((p) => p !== 'customer.approve'), null)).rejects.toMatchObject({ code: 'CONFLICT' });
-    await expect(setRolePermissions(manager.id, mgr!.id, [...mgr!.permissions, 'no.such.permission'], null)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect(setRolePermissions(manager.id, mgr!.id, mgr!.permissions.filter((p) => p !== 'customer.approve'), null, { permissions: manager.permissions, isOwner: true })).rejects.toMatchObject({ code: 'CONFLICT' });
+    await expect(setRolePermissions(manager.id, mgr!.id, [...mgr!.permissions, 'no.such.permission'], null, { permissions: manager.permissions, isOwner: true })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
 
     // nothing was changed by the refused calls
     const after = (await listRoles()).find((r) => r.name === 'MANAGER')!;

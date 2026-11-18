@@ -4,6 +4,7 @@ import { ZodError, type ZodTypeAny, type z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { AppError, errors } from './errors';
 import { logger } from './logger';
+import { config } from './config';
 
 /**
  * Shared HTTP helpers for /api/v1 route handlers.
@@ -95,14 +96,20 @@ export function apiRoute<P = Record<string, string>>(handler: Handler<P>) {
 export function assertSameOrigin(req: NextRequest): void {
   const origin = req.headers.get('origin');
   if (origin) {
+    // x-forwarded-host is only present when server.mjs trusted the peer (it strips it otherwise).
     const host = req.headers.get('x-forwarded-host') ?? req.headers.get('host');
     let originHost: string | null = null;
+    let originFull: string | null = null;
     try {
-      originHost = new URL(origin).host;
+      const parsed = new URL(origin);
+      originHost = parsed.host;
+      originFull = parsed.origin;
     } catch {
       originHost = null;
     }
-    if (!host || originHost !== host) throw errors.forbidden('Cross-origin request rejected');
+    const sameHost = !!host && originHost === host;
+    const explicitlyTrusted = originFull !== null && config.trustedOrigins.has(originFull);
+    if (!sameHost && !explicitlyTrusted) throw errors.forbidden('Cross-origin request rejected');
   }
   const contentType = req.headers.get('content-type') ?? '';
   const hasBody = req.headers.get('content-length') !== '0' && req.method !== 'DELETE';
@@ -141,7 +148,17 @@ export function idempotencyKeyOf(req: NextRequest): string {
   return key;
 }
 
+/**
+ * Client IP for rate limits and audit. Read ONLY from x-b2b-client-ip, which server.mjs sets from the TCP peer and
+ * the trusted-proxy rules (lib-server/client-trust.mjs). Client-supplied X-Forwarded-For / X-Real-IP are never read.
+ * If the header is absent (app running without server.mjs), the shared bucket 'unknown' is used: strict, not spoofable.
+ */
 export function clientIp(req: NextRequest): string {
-  const fwd = req.headers.get('x-forwarded-for');
-  return (fwd?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'local').slice(0, 64);
+  const value = req.headers.get('x-b2b-client-ip')?.trim();
+  return value && value.length <= 64 ? value : 'unknown';
+}
+
+/** Scheme the browser used, as established by the trusted proxy. 'https' only when a trusted proxy said so. */
+export function requestScheme(req: NextRequest): 'http' | 'https' {
+  return req.headers.get('x-b2b-scheme') === 'https' ? 'https' : 'http';
 }
